@@ -115,11 +115,14 @@ class BackupHelper {
       final file = File('${tempDir.path}/$fileName');
       await file.writeAsString(fileContent);
 
-      // 4. Condivisione (Share) - Risolve i problemi di permessi Android 11+
-      final result = await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: 'Backup BioChef AI',
-        text: 'Il mio backup BioChef AI. Ricordati la password scelta!',
+      // 4. Condivisione (SharePlus) - Risolve i problemi di permessi Android 11+
+      // 4. Condivisione (SharePlus) - Risolve i problemi di permessi Android 11+
+      final result = await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          subject: 'Backup BioChef AI',
+          text: 'Il mio backup BioChef AI. Ricordati la password scelta!',
+        ),
       );
 
       if (result.status == ShareResultStatus.success) {
@@ -150,7 +153,8 @@ class BackupHelper {
   static Future<void> importaBackup(BuildContext context) async {
     try {
       // 1. Selezione file
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      // 1. Selezione file
+      FilePickerResult? result = await FilePicker.pickFiles(
         type:
             FileType.any, // .bck non è standard, usiamo any e controlliamo dopo
       );
