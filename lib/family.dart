@@ -6,6 +6,7 @@ import 'recipe_hub.dart';
 import 'recipes_view.dart';
 import 'settings_view.dart';
 import 'logic.dart';
+import 'update_manager.dart';
 
 // ─────────────────────────────────────────────
 // FAMILY & COMMAND HUB
@@ -32,8 +33,11 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
   }
 
   void _checkStartupFlow() async {
-    // Ora gestiamo solo il check della versione per mostrare le novità
+    // 1. Controllo versionamento interno (Changelog)
     _checkVersion();
+    
+    // 2. Controllo aggiornamenti online (GitHub) - Triggerato una volta per sessione
+    BCUpdateManager.checkUpdate(context, silent: true);
   }
 
   void _checkVersion() async {

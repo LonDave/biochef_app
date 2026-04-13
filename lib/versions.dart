@@ -6,7 +6,7 @@ import 'theme.dart';
 // ─────────────────────────────────────────────
 
 /// Versione stabile corrente dell'applicazione.
-const String kAppVersion = '0.2.4';
+const String kAppVersion = '0.2.5';
 
 /// VersionsLog è il componente che visualizza la cronologia degli aggiornamenti.
 /// Permette di distinguere tra le varie serie evolutive di BioChef AI.
@@ -31,6 +31,20 @@ class VersionsLog extends StatelessWidget {
           _buildHero(),
           const SizedBox(height: 24),
           _buildEraGroup(context, 'Evolution Series (v0.2.x)', 'Ingegneria Moderna', true, [
+            _buildVersionCard(context, '0.2.5', "Stability & UX Fix", [
+              _item(
+                context,
+                '📐',
+                'Header Fix',
+                'Risolto sovrapposizione titoli nel modulo Chef AI.',
+              ),
+              _item(
+                context,
+                '🔄',
+                'Update Smart',
+                'Notifica aggiornamenti ottimizzata per comparire solo all\'avvio sessione.',
+              ),
+            ], true),
             _buildVersionCard(context, '0.2.4', "UX Refinement", [
               _item(
                 context,
@@ -310,21 +324,21 @@ class VersionsLog extends StatelessWidget {
               children: [
                 _buildNewsItem(
                   context,
-                  '⚡',
-                  'Chef AI Inline',
-                  'Interfaccia più fluida senza pop-up per le richieste rapide.',
+                  '📐',
+                  'Header Modulo Chef AI',
+                  'Risolto il problema di sovrapposizione titoli per una pulizia visiva totale.',
                 ),
                 _buildNewsItem(
                   context,
-                  '📖',
-                  'Libro Ricette Coerente',
-                  'Navigazione unificata e pulsante Creazione centralizzato.',
+                  '🔄',
+                  'Update Intelligente',
+                  'La notifica di aggiornamento ora compare solo all\'avvio, senza disturbare.',
                 ),
                 _buildNewsItem(
                   context,
-                  '🎓',
-                  'Academy Professionale',
-                  'Guida FAQ potenziata con protocolli d\'élite e consigli SEO.',
+                  '🛡️',
+                  'BioChef 0.2.5 Baseline',
+                  'Migliorate le performance generali e la stabilità del sistema.',
                 ),
               ],
             ),

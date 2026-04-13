@@ -28,10 +28,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _groqController.text = BCSecurity.getGroqKey() ?? '';
-    // Controllo automatico silenzioso all'avvio delle impostazioni
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      BCUpdateManager.checkUpdate(context, silent: true);
-    });
   }
 
   @override

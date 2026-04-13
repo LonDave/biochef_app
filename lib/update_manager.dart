@@ -11,10 +11,18 @@ class BCUpdateManager {
   static const String githubUser = "LonDave";
   static const String githubRepo = "biochef_app";
   static const String apiUrl = "https://api.github.com/repos/$githubUser/$githubRepo/releases/latest";
+  
+  /// Flag per evitare controlli multipli nella stessa sessione app.
+  static bool _hasCheckedThisSession = false;
 
   /// Controlla se è disponibile una nuova versione su GitHub.
   /// Se disponibile, mostra un dialogo all'utente.
   static Future<void> checkUpdate(BuildContext context, {bool silent = false}) async {
+    // Se è un check silenzioso (automatico) e abbiamo già controllato, usciamo.
+    if (silent && _hasCheckedThisSession) return;
+    
+    if (silent) _hasCheckedThisSession = true;
+
     try {
       final PackageInfo packageInfo = await PackageInfo.fromPlatform();
       final String currentVersion = packageInfo.version; // Es. "0.2.4"

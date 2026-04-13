@@ -260,15 +260,7 @@ class _RecipeHubState extends State<RecipeHub> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(
-          "Chef AI Professionale",
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            letterSpacing: 0.5,
-            fontSize: Res.fs(context, 18),
-            color: Colors.white,
-          ),
-        ),
+        // Rimosso il titolo per evitare overlap con il contenuto del body (v0.2.5)
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
@@ -371,9 +363,11 @@ class _RecipeHubState extends State<RecipeHub> {
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: Res.pad(context, 24),
-                  vertical: Res.pad(context, 10),
+                padding: EdgeInsets.fromLTRB(
+                  Res.pad(context, 24),
+                  Res.pad(context, 12), // Più spazio per pulizia visiva
+                  Res.pad(context, 24),
+                  Res.pad(context, 10),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -528,8 +522,9 @@ class _RecipeHubState extends State<RecipeHub> {
         vertical: Res.pad(context, 8),
       ),
       decoration: BoxDecoration(
-        color: Colors.white24,
+        color: Colors.white.withAlpha(40),
         borderRadius: BorderRadius.circular(Res.pad(context, 12)),
+        border: Border.all(color: Colors.white24, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

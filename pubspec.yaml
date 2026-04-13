@@ -3,7 +3,7 @@ description: "BioChef AI - Il tuo chef intelligente di famiglia."
 publish_to: 'none'
 
 # Aggiornato a 0.2.4 per permettere l'update sul telefono
-version: 0.2.3+22
+version: 0.2.5+1
 
 environment:
   sdk: ^3.11.4
