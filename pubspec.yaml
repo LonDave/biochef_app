@@ -2,8 +2,8 @@ name: biochef_app
 description: "BioChef AI - Il tuo chef intelligente di famiglia."
 publish_to: 'none'
 
-# Aggiornato a 0.2.0 per permettere l'update sul telefono
-version: 0.2.4+22
+# Aggiornato a 0.2.4 per permettere l'update sul telefono
+version: 0.2.3+22
 
 environment:
   sdk: ^3.11.4
