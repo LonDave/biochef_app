@@ -45,6 +45,13 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
   Future<void> _checkVersion() async {
     final box = Hive.box('adminBox');
     final String lastSeen = box.get('lastSeenVersion', defaultValue: '0.0.0');
+    
+    // Se è la prima installazione (0.0.0), salviamo la versione silenziosamente
+    if (lastSeen == '0.0.0') {
+      await box.put('lastSeenVersion', BCVersion.current);
+      return;
+    }
+
     if (lastSeen != BCVersion.current) {
       if (!mounted) return;
       await showDialog(context: context, builder: (_) => const VersionsLog(showOnlyCurrent: true));

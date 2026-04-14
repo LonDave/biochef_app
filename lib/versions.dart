@@ -62,7 +62,7 @@ class VersionsLog extends StatelessWidget {
                 'Aggiunta notifica visiva nelle impostazioni quando disponibile.',
               ),
             ], true),
-            _buildVersionCard(context, '0.2.6', "Dietary Security Baseline", [
+            _buildVersionCard(context, '0.2.6', "Stability Focus", [
               _item(
                 context,
                 '🥬',
@@ -74,6 +74,48 @@ class VersionsLog extends StatelessWidget {
                 '📜',
                 'Log Pulito',
                 'Semplificata la cronologia versioni per focalizzarsi sul presente.',
+              ),
+            ], false),
+            _buildVersionCard(context, '0.2.5', "UI & Layout Polish", [
+               _item(
+                context,
+                '🎨',
+                'Overlap Fix',
+                'Rimosso l\'overlap tra AppBar e contenuto nella Hub AI Chef.',
+              ),
+              _item(
+                context,
+                '📏',
+                'Responsive',
+                'Migliorata la resa su schermi di diverse dimensioni.',
+              ),
+            ], false),
+            _buildVersionCard(context, '0.2.4', "Modular Expansion", [
+               _item(
+                context,
+                '📦',
+                'Code Split',
+                'Divisione del codice in moduli per maggiore manutenibilità.',
+              ),
+              _item(
+                context,
+                '🚀',
+                'Performance',
+                'Aumento velocità di caricamento delle ricette salvate.',
+              ),
+            ], false),
+            _buildVersionCard(context, '0.2.0', "Evolution Baseline", [
+               _item(
+                context,
+                '📐',
+                'Responsive Engine',
+                'Introduzione del sistema di ridimensionamento dinamico (Res).',
+              ),
+              _item(
+                context,
+                '🛡️',
+                'Legal Hardening',
+                'Implementazione onboarding legale e termini di servizio.',
               ),
             ], false),
           ]),
