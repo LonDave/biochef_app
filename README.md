@@ -2,15 +2,28 @@
 ### Intelligent Organic Nutrition Engine — Powered by Llama 3.3
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Model-Llama%203.3-39FF14?style=for-the-badge&logo=meta&logoColor=white&labelColor=0A0A0A"/>
-  <img src="https://img.shields.io/badge/Environment-Antigravity%20AI-39FF14?style=for-the-badge&logoColor=white&labelColor=0A0A0A"/>
-  <img src="https://img.shields.io/badge/Lang-Python%20%2F%20TypeScript-39FF14?style=for-the-badge&logo=typescript&logoColor=white&labelColor=0A0A0A"/>
-  <img src="https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge&labelColor=0A0A0A"/>
+  <a href="https://llama.meta.com/llama3/"><img src="https://img.shields.io/badge/Model-Llama%203.3-39FF14?style=for-the-badge&logo=meta&logoColor=white&labelColor=0A0A0A"/></a>
+  <a href="https://antigravity.ai"><img src="https://img.shields.io/badge/Environment-Antigravity%20AI-39FF14?style=for-the-badge&logoColor=white&labelColor=0A0A0A"/></a>
+  <a href="https://www.python.org"><img src="https://img.shields.io/badge/Lang-Python%20%2F%20TypeScript-39FF14?style=for-the-badge&logo=typescript&logoColor=white&labelColor=0A0A0A"/></a>
+  <a href="./LICENSE.md"><img src="https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge&labelColor=0A0A0A"/></a>
 </p>
 
 <p align="center">
   <em>Inserisci ingredienti. Ricevi eccellenza culinaria.</em>
 </p>
+
+---
+
+## Indice
+
+- [Cos'è BioChef?](#cosè-biochef)
+- [Come funziona — Il Protocollo B.I.O.](#come-funziona--il-protocollo-bio)
+- [Funzionalità principali](#funzionalità-principali)
+- [Stack Tecnologico](#stack-tecnologico)
+- [Struttura del Progetto](#struttura-del-progetto)
+- [Setup & Avvio](#setup--avvio)
+- [Avvertenze & Responsabilità](#avvertenze--responsabilità)
+- [Licenza](#licenza)
 
 ---
 
