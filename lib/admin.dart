@@ -224,10 +224,10 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
           const SizedBox(height: 20),
           TextField(
             controller: _nameController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Nome Chef',
               hintText: 'es. Davide',
-              prefixIcon: Icon(Icons.person_outline),
+              prefixIcon: Icon(Icons.person_outline_rounded, color: BC.getPrimary(context)),
             ),
           ),
           const SizedBox(height: 14),
@@ -235,10 +235,10 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
             controller: _passController,
             obscureText: true,
             onChanged: _valutaPassword,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Password',
               hintText: 'Inserisci la tua password',
-              prefixIcon: Icon(Icons.lock_outline),
+              prefixIcon: Icon(Icons.lock_outline_rounded, color: BC.getPrimary(context)),
             ),
           ),
           if (!_isAlreadyRegistered && _passController.text.isNotEmpty) ...[

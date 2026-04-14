@@ -42,6 +42,34 @@ class VersionsLog extends StatelessWidget {
           _buildHero(),
           const SizedBox(height: 24),
           _buildEraGroup(context, 'Support & Community Series (v0.3.x)', 'Canale Aperto', true, [
+            _buildVersionCard(context, '0.3.8', "Visual Minimalism", [
+              _item(
+                context,
+                '✨',
+                'Icon Overhaul',
+                'Tutte le icone dell\'app sono ora in stile minimal-rounded reattivo.',
+              ),
+              _item(
+                context,
+                '🎨',
+                'Zen Aesthetics',
+                'Unificazione dello stile visuale per una coerenza totale.',
+              ),
+            ], true),
+            _buildVersionCard(context, '0.3.7', "Settings Harmony", [
+              _item(
+                context,
+                '🎨',
+                'UI Overhaul',
+                'Nuovo design a dashboard categorizzata per le impostazioni.',
+              ),
+              _item(
+                context,
+                '✉️',
+                'Feedback Fix',
+                'Riparato il pulsante di invio feedback per una comunicazione fluida.',
+              ),
+            ], true),
             _buildVersionCard(context, '0.3.6', "Governance & Recovery", [
               _item(
                 context,

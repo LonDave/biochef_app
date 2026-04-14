@@ -162,7 +162,7 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.people_outline, size: 80, color: BC.accent.withAlpha(100)),
+          Icon(Icons.people_outline_rounded, size: 80, color: BC.getPrimary(context).withAlpha(100)),
           const Text('Nessun familiare registrato', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           ElevatedButton(onPressed: _aggiungiMembro, child: const Text('Aggiungi ora')),
@@ -174,7 +174,7 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
   Widget _buildAddMemberButton() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: ElevatedButton.icon(onPressed: _aggiungiMembro, icon: const Icon(Icons.person_add), label: const Text('Aggiungi Familiare')),
+      child: ElevatedButton.icon(onPressed: _aggiungiMembro, icon: const Icon(Icons.person_add_rounded), label: const Text('Aggiungi Familiare')),
     );
   }
 
@@ -332,7 +332,7 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
       padding: const EdgeInsets.only(bottom: 14),
       child: ElevatedButton.icon(
         onPressed: _aggiungiRicettaManuale, 
-        icon: const Icon(Icons.note_add), 
+        icon: const Icon(Icons.note_add_rounded), 
         label: const Text('Crea Nuova Ricetta'),
         style: ElevatedButton.styleFrom(
           backgroundColor: BC.accent,
@@ -387,7 +387,7 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
           children: [
             if (isDangerous) Text('⚠️ NON SICURO', style: TextStyle(color: Colors.red, fontSize: Res.fs(context, 9), fontWeight: FontWeight.w900, letterSpacing: 0.5)),
             SizedBox(width: Res.pad(context, 8)),
-            Icon(Icons.arrow_forward_ios, size: Res.fs(context, 12), color: BC.getTextSub(context)),
+            Icon(Icons.arrow_forward_ios_rounded, size: Res.fs(context, 12), color: BC.getTextSub(context)),
           ],
         ),
         onTap: () => _mostraDettaglio(r, boxName == 'customRecipesBox', i),

@@ -74,7 +74,7 @@ class GuideScreen extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.school_outlined, color: Colors.blueAccent),
+            Icon(Icons.school_rounded, color: BC.getPrimary(context)),
             const SizedBox(width: 12),
             Text(
               'DOMANDE FREQUENTI (FAQ)',
@@ -161,7 +161,7 @@ class GuideScreen extends StatelessWidget {
       ),
       child: const Column(
         children: [
-          Icon(Icons.auto_awesome, color: Colors.white, size: 42),
+          Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 42),
           SizedBox(height: 16),
           Text(
             'Eccellenza in Cucina',
@@ -233,7 +233,7 @@ class GuideScreen extends StatelessWidget {
       children: [
         const Text('BioChef AI — v0.2.4', style: TextStyle(fontSize: 10, color: Colors.grey, letterSpacing: 0.5)),
         const SizedBox(height: 10),
-        Icon(Icons.verified_user_outlined, size: 20, color: BC.getPrimary(context).withAlpha(80)),
+        Icon(Icons.verified_user_rounded, size: 20, color: BC.getPrimary(context).withAlpha(80)),
       ],
     );
   }
