@@ -24,7 +24,7 @@ BioChef opera attraverso un'architettura a tre strati denominata **B.I.O.** (*Bi
 
 ---
 
-## 🛠 Stack Tecnologico (2026 Standard)
+## 🛠 Stack Tecnologico
 
 * **Model Core:** Meta Llama 3.3 (Fine-tuned on Culinary Bio-Chemistry).
 * **IDE Context:** Antigravity AI Development Environment.
