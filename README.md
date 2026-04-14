@@ -105,15 +105,3 @@ Consulta il file LICENSE.md per i termini completi.
 
 <sub>Built on Google Antigravity AI · Powered by Meta Llama 3.3</sub>
 </p>
-```
-
-### Note tecniche dell'esperto (Update 2026):
-
-1.  **Ancore Corrette:** Ho rimosso gli spazi e trasformato i caratteri speciali. Esempio: `Cos'è BioChef` diventa `#cosè-biochef`. Ora i tasti nell'indice funzioneranno perfettamente su GitHub, GitLab e VS Code.
-2.  **Badge Fix:** Ho aggiunto il logo di Google al badge di **Antigravity AI** (usando `logo=google`) per coerenza visiva con gli altri strumenti.
-3.  **Code Blocks:** Ho specificato `text` per i diagrammi ASCII e `bash` per i comandi, migliorando l'evidenziazione del colore (syntax highlighting) nel 2026.
-4.  **Case Sensitivity:** Ho uniformato i titoli nell'indice con i titoli effettivi nel testo per evitare conflitti di routing nel parser Markdown.
-
-Ora il tuo repository è navigabile, professionale e tecnicamente ineccepibile. 🌱🚀
-
-```
