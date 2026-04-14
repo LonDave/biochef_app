@@ -1,83 +1,115 @@
-# BioChef 🌿🧠
-### The Intelligent Organic Nutrition Engine | Powered by Llama 3.3
+# 🌿 BioChef
+### Intelligent Organic Nutrition Engine — Powered by Llama 3.3
 
-**BioChef** è un'applicazione di ingegneria culinaria deterministica progettata per ridefinire il rapporto tra tecnologia neurale e materia prima organica. Sviluppato sull'ambiente **Antigravity AI**, BioChef non si limita a suggerire ricette, ma funge da **Motore di Ottimizzazione Biologica**, trasformando gli ingredienti disponibili in soluzioni nutrizionali gourmet ad alta precisione.
+<p align="center">
+  <img src="https://img.shields.io/badge/Model-Llama%203.3-39FF14?style=for-the-badge&logo=meta&logoColor=white&labelColor=0A0A0A"/>
+  <img src="https://img.shields.io/badge/Environment-Antigravity%20AI-39FF14?style=for-the-badge&logoColor=white&labelColor=0A0A0A"/>
+  <img src="https://img.shields.io/badge/Lang-Python%20%2F%20TypeScript-39FF14?style=for-the-badge&logo=typescript&logoColor=white&labelColor=0A0A0A"/>
+  <img src="https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge&labelColor=0A0A0A"/>
+</p>
 
----
-
-## 🧬 Core Architecture: Il Protocollo B.I.O.
-
-BioChef opera attraverso un'architettura a tre strati denominata **B.I.O.** (*Biological Inventory Optimization*):
-
-1. **Biological Inventory (Materia):** Scansione quantitativa degli ingredienti. Il sistema analizza il profilo biochimico della materia prima organica per valutarne la resa (Yield) potenziale.
-2. **Intelligent Optimization (Logica):** Elaborazione tramite Llama 3.3. L'IA non attinge da un database statico, ma sintetizza dinamicamente le preparazioni basandosi su affinità molecolari e tecniche di cottura a basso impatto.
-3. **Output Execution (Vita):** Generazione di istruzioni millimetriche per la trasformazione della materia in nutrimento d'eccellenza.
-
----
-
-## ✨ Caratteristiche Tecniche d'Elite
-
-* **Neural Recipe Synthesis:** Generazione real-time di protocolli culinari basati sull'inventario dinamico.
-* **Zero-Waste Engine:** Algoritmo proprietario finalizzato alla massimizzazione della materia prima (riduzione scarti del 95%).
-* **Molecular Pairing:** Integrazione logica basata sulla compatibilità chimica degli ingredienti bio.
-* **Minimalist High-Tech UI:** Interfaccia scura ad alto contrasto (#0A0A0A / #39FF14) per la massima efficienza visiva durante le operazioni.
+<p align="center">
+  <em>Inserisci ingredienti. Ricevi eccellenza culinaria.</em>
+</p>
 
 ---
 
-## 🛠 Stack Tecnologico
+## Cos'è BioChef?
 
-* **Model Core:** Meta Llama 3.3 (Fine-tuned on Culinary Bio-Chemistry).
-* **IDE Context:** Antigravity AI Development Environment.
-* **Language:** Python / TypeScript (Core Logic).
-* **Logic Type:** Hybrid (Deterministic Quantities + Generative Instructions).
+**BioChef** è un motore di ricette intelligente che trasforma gli ingredienti che hai già in casa in preparazioni gourmet ottimizzate — riducendo gli sprechi e massimizzando il valore nutrizionale.
 
----
-
-## 📂 Struttura del Progetto
-
-* `/core`: Integrazione Llama 3.3 e prompt engineering avanzato.
-* `/bio_logic`: Database dei profili biochimici e algoritmi di resa.
-* `/ui_antigravity`: Componenti interfaccia ottimizzati per fluidità e leggerezza.
+A differenza dei classici ricettari digitali, BioChef **non attinge da un database statico**: ragiona sugli ingredienti disponibili in tempo reale, suggerisce abbinamenti, calibra le quantità e genera istruzioni passo-passo su misura per ciò che hai a disposizione.
 
 ---
 
-## 🚀 Setup & Deployment
+## Come funziona — Il Protocollo B.I.O.
 
-1. **Ambiente:** Verificare la connessione all'istanza Llama 3.3 su Antigravity AI.
-2. **Installazione:**
-   ```bash
-   npm install biochef-core
-   npm run boot-engine
+```
+[Ingredienti]  →  [Llama 3.3]  →  [Ricetta Ottimizzata]
+   Materia          Logica              Output
+```
+
+BioChef opera in tre fasi:
+
+| Fase | Nome | Descrizione |
+|------|------|-------------|
+| 1 | **Biological Inventory** | L'utente inserisce gli ingredienti disponibili. Il sistema valuta quantità, freschezza e resa potenziale. |
+| 2 | **Intelligent Optimization** | Llama 3.3 elabora gli ingredienti considerando abbinamenti, tecniche di cottura a basso impatto e profilo nutrizionale. |
+| 3 | **Output Execution** | Generazione di una ricetta completa: ingredienti calibrati, istruzioni chiare, note sugli sprechi evitati. |
+
+---
+
+## Funzionalità principali
+
+- **Sintesi ricette in real-time** — nessun database, ogni ricetta viene generata dinamicamente
+- **Zero-Waste Engine** — algoritmo che massimizza l'utilizzo della materia prima disponibile
+- **Molecular Pairing** — abbinamenti basati su compatibilità degli ingredienti biologici
+- **UI minimalista ad alto contrasto** — interfaccia dark (`#0A0A0A` / `#39FF14`) pensata per la massima leggibilità
+- **Logica ibrida** — quantità deterministiche + istruzioni generative
 
 ---
 
-### 2. LICENSE.md
-*Inserisci questo file per proteggere legalmente il tuo lavoro, specialmente le logiche di prompt e l'uso del brand.*
+## Stack Tecnologico
 
-```markdown
-# PROPRIETARY LICENSE - BIOCHEF INTELLIGENCE
-**Version 1.0 | April 2026**
-
-### 1. TITOLARITÀ E COPYRIGHT
-Il presente software ("BioChef"), inclusi ma non limitati a: codice sorgente, logiche di Prompt Engineering, architetture dei dati biochimici, modelli di integrazione neurale e identità visiva, è proprietà esclusiva dello Sviluppatore Originale. Il software è protetto dalle leggi internazionali sul diritto d'autore e sulla proprietà intellettuale.
-
-### 2. CONCESSIONE DI LICENZA
-Questa è una licenza ad uso chiuso e proprietario. È severamente vietata la riproduzione, distribuzione, modifica, reverse-engineering o decompilazione del software o di parte di esso senza esplicito consenso scritto del titolare.
-
-### 3. RESTRIZIONI SPECIFICHE
-All'utente o a terze parti è fatto divieto di:
-* Estrarre o isolare i "System Prompts" utilizzati per l'interazione con Llama 3.3.
-* Utilizzare il marchio "BioChef" o i loghi associati per prodotti concorrenti o derivati.
-* Rimuovere i riferimenti tecnici ad "Antigravity AI" o i watermark digitali presenti nell'interfaccia.
-
-### 4. DISCLAIMER AI & RESPONSABILITÀ
-BioChef utilizza modelli linguistici di grandi dimensioni (Llama 3.3). Sebbene il sistema sia ottimizzato per la massima precisione:
-* Il titolare non risponde di "allucinazioni" dell'IA o di errori nelle quantità suggerite.
-* L'utente è l'unico responsabile della verifica di allergeni e della corretta conservazione della materia prima.
-* I consigli nutrizionali non sostituiscono pareri medici professionali.
-
-### 5. GIURISDIZIONE
-Qualsiasi violazione dei termini comporterà l'immediata revoca della licenza d'uso e il perseguimento legale nelle sedi competenti per danni alla proprietà intellettuale.
+| Componente | Tecnologia |
+|------------|------------|
+| Modello AI | Meta Llama 3.3 |
+| Ambiente di sviluppo | Antigravity AI |
+| Backend / Logica | Python |
+| Frontend / UI | TypeScript |
+| Architettura | Deterministic Quantities + Generative Instructions |
 
 ---
-**Copyright © 2026 BioChef Intelligence. All Rights Reserved.**
+
+## Struttura del Progetto
+
+```
+biochef/
+├── core/              # Integrazione Llama 3.3 e prompt engineering
+├── bio_logic/         # Profili ingredienti e algoritmi di ottimizzazione
+├── ui_antigravity/    # Componenti UI ottimizzati per Antigravity AI
+├── README.md
+└── LICENSE.md
+```
+
+---
+
+## Setup & Avvio
+
+> **Prerequisito:** connessione attiva all'istanza Llama 3.3 su Antigravity AI.
+
+```bash
+# 1. Clona il repository
+git clone https://github.com/tuo-username/biochef.git
+cd biochef
+
+# 2. Installa le dipendenze
+npm install biochef-core
+
+# 3. Avvia il motore
+npm run boot-engine
+```
+
+---
+
+## Avvertenze & Responsabilità
+
+- BioChef utilizza un modello linguistico (LLM): le quantità e le preparazioni suggerite sono orientative.
+- **Verifica sempre la presenza di allergeni** prima di consumare qualsiasi preparazione.
+- I contenuti generati **non sostituiscono** il parere di un medico o nutrizionista.
+- Il titolare non è responsabile di errori generati dal modello AI.
+
+---
+
+## Licenza
+
+Questo progetto è distribuito sotto **licenza proprietaria chiusa**.  
+È vietata la riproduzione, modifica o distribuzione senza consenso scritto dell'autore.  
+Consulta il file [`LICENSE.md`](./LICENSE.md) per i dettagli completi.
+
+---
+
+<p align="center">
+  <strong>Copyright © 2026 BioChef Intelligence. All Rights Reserved.</strong><br/>
+  <sub>Built on Antigravity AI · Powered by Meta Llama 3.3</sub>
+</p>
