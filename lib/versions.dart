@@ -232,79 +232,79 @@ class VersionsLog extends StatelessWidget {
   Widget _buildCurrentDialog(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header con Gradiente
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [BC.accent, BC.primary]),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(24),
-                topRight: Radius.circular(24),
-              ),
-            ),
-            child: const Column(
-              children: [
-                Text('✨', style: TextStyle(fontSize: 40)),
-                SizedBox(height: 12),
-                Flexible(
-                  child: Text(
-                    'Nuovi Orizzonti Culinari',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header con Gradiente
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [BC.accent, BC.primary]),
+                ),
+                child: Column(
+                  children: [
+                    const Text('✨', style: TextStyle(fontSize: 40)),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Nuovi Orizzonti Culinari',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                     ),
+                    Text(
+                      'Versione v$kAppVersion',
+                      style: const TextStyle(color: Colors.white70, fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+              // Lista Novità strutturata
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    _buildNewsItem(
+                      context,
+                      '🥬',
+                      'Regimi Alimentari',
+                      'Filtri intelligenti per Vegani, Vegetariani e altro per una sicurezza totale.',
+                    ),
+                    _buildNewsItem(
+                      context,
+                      '🔄',
+                      'Update System Fix',
+                      'Risolto il meccanismo di aggiornamento automatico e manuale.',
+                    ),
+                    _buildNewsItem(
+                      context,
+                      '🛡️',
+                      'Baseline v$kAppVersion',
+                      'Ottimizzazioni strutturali e stabilità migliorata.',
+                    ),
+                  ],
+                ),
+              ),
+              // Azione
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('ESPLORA LE NOVITÀ'),
                   ),
                 ),
-                Text(
-                  'Versione v$kAppVersion',
-                  style: TextStyle(color: Colors.white70, fontSize: 11),
-                ),
-              ],
-            ),
-          ),
-          // Lista Novità strutturata
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                _buildNewsItem(
-                  context,
-                  '🥬',
-                  'Regimi Alimentari',
-                  'Filtri intelligenti per Vegani, Vegetariani e altro per una sicurezza totale.',
-                ),
-                _buildNewsItem(
-                  context,
-                  '🔄',
-                  'Update System Fix',
-                  'Risolto il meccanismo di aggiornamento automatico e manuale.',
-                ),
-                _buildNewsItem(
-                  context,
-                  '🛡️',
-                  'BioChef 0.2.6 Baseline',
-                  'Ottimizzazioni strutturali e stabilità migliorata.',
-                ),
-              ],
-            ),
-          ),
-          // Azione
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('ESPLORA LE NOVITÀ'),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

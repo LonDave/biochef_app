@@ -23,11 +23,18 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _groqController = TextEditingController();
+  bool _updateAvailable = false;
 
   @override
   void initState() {
     super.initState();
     _groqController.text = BCSecurity.getGroqKey() ?? '';
+    _checkUpdateStatus();
+  }
+
+  void _checkUpdateStatus() async {
+    final available = await BCUpdateManager.isUpdateAvailable();
+    if (mounted) setState(() => _updateAvailable = available);
   }
 
   @override
@@ -150,9 +157,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         ListTile(
           leading: const Icon(Icons.cloud_download_outlined, color: Colors.blueAccent),
-          title: const Text('Controlla Aggiornamenti'),
-          subtitle: const Text('Cerca nuove versioni su GitHub'),
-          onTap: () => BCUpdateManager.checkUpdate(context, silent: false),
+          title: Row(
+            children: [
+              const Text('Controlla Aggiornamenti'),
+              if (_updateAvailable) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(10)),
+                  child: const Text('NEW', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ],
+          ),
+          subtitle: Text(_updateAvailable ? 'Nuova versione disponibile!' : 'Cerca nuove versioni su GitHub'),
+          onTap: () async {
+            await BCUpdateManager.checkUpdate(context, silent: false);
+            _checkUpdateStatus();
+          },
         ),
         ListTile(
           leading: const Icon(Icons.gavel_outlined),

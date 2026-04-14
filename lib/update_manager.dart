@@ -30,52 +30,40 @@ class BCUpdateManager {
     if (silent) _hasCheckedThisSession = true;
 
     try {
-      final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      final String currentVersion = packageInfo.version; 
-      
-      final response = await http.get(Uri.parse(apiUrl)).timeout(const Duration(seconds: 15));
-      
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        final String latestTagName = data['tag_name'] ?? ""; 
-        final String latestVersion = latestTagName.toLowerCase().replaceAll('v', '').trim();
-        
-        if (_isNewer(currentVersion, latestVersion)) {
-          // Check se questa versione è stata già ignorata in questa sessione (solo per check automatici)
-          if (silent && _sessionIgnoredVersion == latestVersion) {
-            debugPrint("UpdateManager: Versione $latestVersion già ignorata in questa sessione.");
-            return;
-          }
-
-          final List assets = data['assets'] ?? [];
-          final apkAsset = assets.firstWhere(
-            (a) {
-              final String name = a['name'].toString().toLowerCase();
-              return name.endsWith('.apk') && !name.contains('output-metadata');
-            },
-            orElse: () => null,
-          );
-
-          if (apkAsset != null) {
-            final String downloadUrl = apkAsset['browser_download_url'];
-            if (context.mounted) {
-               _mostraDialogAggiornamento(context, latestVersion, downloadUrl);
-            }
-          } else if (!silent && context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Aggiornamento trovato, ma APK non disponibile.')),
-            );
-          }
-        } else if (!silent && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+      final updateInfo = await getUpdateInfo();
+      if (updateInfo == null) {
+        if (!silent && context.mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Sei già alla versione più recente ($currentVersion).'),
-              backgroundColor: BC.primary,
+              content: const Text('Impossibile recuperare informazioni sugli aggiornamenti.'),
+              backgroundColor: Colors.orange,
             ),
           );
         }
-      } else {
-        throw "Status ${response.statusCode}";
+        return;
+      }
+
+      final String currentVersion = updateInfo['current']!;
+      final String latestVersion = updateInfo['latest']!;
+      final String downloadUrl = updateInfo['url']!;
+      
+      if (_isNewer(currentVersion, latestVersion)) {
+        // Check se questa versione è stata già ignorata in questa sessione (solo per check automatici)
+        if (silent && _sessionIgnoredVersion == latestVersion) {
+          debugPrint("UpdateManager: Versione $latestVersion già ignorata in questa sessione.");
+          return;
+        }
+
+        if (context.mounted) {
+           _mostraDialogAggiornamento(context, latestVersion, downloadUrl);
+        }
+      } else if (!silent && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sei già alla versione più recente ($currentVersion).'),
+            backgroundColor: BC.primary,
+          ),
+        );
       }
     } catch (e) {
       if (!silent && context.mounted) {
@@ -84,6 +72,49 @@ class BCUpdateManager {
         );
       }
     }
+  }
+
+  /// Restituisce informazioni sulla versione corrente, l'ultima su GitHub e l'URL APK.
+  /// Ritorna null in caso di errore o se non trova asset APK.
+  static Future<Map<String, String>?> getUpdateInfo() async {
+    try {
+      final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      final String currentVersion = packageInfo.version + (packageInfo.buildNumber.isNotEmpty ? "+${packageInfo.buildNumber}" : ""); 
+      
+      final response = await http.get(Uri.parse(apiUrl)).timeout(const Duration(seconds: 15));
+      if (response.statusCode != 200) return null;
+
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      final String latestTagName = data['tag_name'] ?? ""; 
+      final String latestVersion = latestTagName.toLowerCase().replaceAll('v', '').trim();
+      
+      final List assets = data['assets'] ?? [];
+      final apkAsset = assets.firstWhere(
+        (a) {
+          final String name = a['name'].toString().toLowerCase();
+          return name.endsWith('.apk') && !name.contains('output-metadata');
+        },
+        orElse: () => null,
+      );
+
+      if (apkAsset == null) return null;
+
+      return {
+        'current': currentVersion,
+        'latest': latestVersion,
+        'url': apkAsset['browser_download_url'],
+      };
+    } catch (e) {
+      debugPrint("UpdateManager Error: $e");
+      return null;
+    }
+  }
+
+  /// Verifica se è disponibile un aggiornamento (Logica per UI settings).
+  static Future<bool> isUpdateAvailable() async {
+    final info = await getUpdateInfo();
+    if (info == null) return false;
+    return _isNewer(info['current']!, info['latest']!);
   }
 
   /// Confronta due versioni stringa (semver). Ritorna true se 'latest' è più recente di 'current'.
@@ -128,20 +159,15 @@ class BCUpdateManager {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: Flexible(
-          child: Row(
-            children: [
-              Icon(Icons.system_update_alt_rounded, color: BC.getPrimary(context)),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: Text(
-                  'Nuova Versione',
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
+        title: Row(
+          children: [
+            Icon(Icons.system_update_alt_rounded, color: BC.getPrimary(ctx)),
+            const SizedBox(width: 12),
+            const Text(
+              'Nuova Versione',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
         content: SingleChildScrollView(
           child: Column(

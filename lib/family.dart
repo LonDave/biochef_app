@@ -34,18 +34,20 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
 
   void _checkStartupFlow() async {
     // 1. Controllo versionamento interno (Changelog)
-    _checkVersion();
+    await _checkVersion();
     
     // 2. Controllo aggiornamenti online (GitHub) - Triggerato una volta per sessione
-    BCUpdateManager.checkUpdate(context, silent: true);
+    if (mounted) {
+      BCUpdateManager.checkUpdate(context, silent: true);
+    }
   }
 
-  void _checkVersion() async {
+  Future<void> _checkVersion() async {
     final box = Hive.box('adminBox');
     final String lastSeen = box.get('lastSeenVersion', defaultValue: '0.0.0');
     if (lastSeen != kAppVersion) {
       if (!mounted) return;
-      showDialog(context: context, builder: (_) => const VersionsLog(showOnlyCurrent: true));
+      await showDialog(context: context, builder: (_) => const VersionsLog(showOnlyCurrent: true));
       await box.put('lastSeenVersion', kAppVersion);
     }
   }
