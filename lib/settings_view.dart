@@ -7,6 +7,7 @@ import 'onboarding.dart';
 import 'guide_view.dart';
 import 'backup_logic.dart';
 import 'update_manager.dart';
+import 'package:url_launcher/url_launcher.dart' as launcher;
 
 // ─────────────────────────────────────────────
 // SETTINGS MODULE
@@ -181,6 +182,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           title: const Text('Termini Legali'),
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LegalScreen())),
         ),
+        ListTile(
+          leading: const Icon(Icons.feedback_outlined, color: Colors.teal),
+          title: const Text('Invia Feedback & Suggerimenti'),
+          subtitle: const Text('Aiutaci a migliorare BioChef AI'),
+          onTap: () => _mostraDialogFeedback(context),
+        ),
         const SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
@@ -233,5 +240,74 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  void _mostraDialogFeedback(BuildContext context) {
+    final feedbackC = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Row(
+          children: [
+            Icon(Icons.chat_bubble_outline, color: Colors.teal),
+            SizedBox(width: 12),
+            Text('Feedback Chef', style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Scrivi qui i tuoi suggerimenti o segnala un problema. Verrai reindirizzato su GitHub per pubblicare il tuo messaggio in sicurezza.',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: feedbackC,
+              maxLines: 4,
+              decoration: InputDecoration(
+                hintText: 'Cosa potremmo migliorare?',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('ANNULLA')),
+          ElevatedButton(
+            onPressed: () async {
+              if (feedbackC.text.trim().isNotEmpty) {
+                final String msg = feedbackC.text.trim();
+                Navigator.pop(ctx);
+                
+                final String title = Uri.encodeComponent("Feedback BioChef AI v0.3.0");
+                final String body = Uri.encodeComponent("Ciao Chef!\nEcco il mio feedback:\n\n$msg\n\n--- Inviato da BioChef Mobile ---");
+                // Usiamo Issues perché supportano il pre-fill, garantendo sicurezza e privacy
+                final String url = "https://github.com/LonDave/biochef_app/issues/new?title=$title&body=$body";
+                
+                final uri = Uri.parse(url);
+                if (await mapCanLaunch(uri)) {
+                  await launcher.launchUrl(uri, mode: launcher.LaunchMode.externalApplication);
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('PROSEGUI SU GITHUB'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper per url_launcher (silenzioso)
+  Future<bool> mapCanLaunch(Uri uri) async {
+    try { return await launcher.canLaunchUrl(uri); } catch (_) { return false; }
   }
 }

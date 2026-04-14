@@ -41,7 +41,30 @@ class VersionsLog extends StatelessWidget {
         children: [
           _buildHero(),
           const SizedBox(height: 24),
-          _buildEraGroup(context, 'Evolution Series (v0.2.x)', 'Ingegneria Moderna', true, [
+          _buildEraGroup(context, 'Support & Community Series (v0.3.x)', 'Canale Aperto', true, [
+            _buildVersionCard(context, '0.3.0', "BioChef Feedback Loop", [
+              _item(
+                context,
+                '💬',
+                'Feedback Integrato',
+                'Invia suggerimenti e feedback direttamente dall\'app tramite GitHub.',
+              ),
+              _item(
+                context,
+                '🛡️',
+                'OTA Stability',
+                'Risolti i crash nell\'installazione su Android 11+ (Scoped Storage Fix).',
+              ),
+              _item(
+                context,
+                '✨',
+                'UX Polish',
+                'Nomi versione puliti e layout AI Chef dinamico.',
+              ),
+            ], true),
+          ]),
+          const SizedBox(height: 24),
+          _buildEraGroup(context, 'Evolution Series (v0.2.x)', 'Ingegneria Moderna', false, [
             _buildVersionCard(context, '0.2.9', "UX & Layout Polish", [
               _item(
                 context,
@@ -61,7 +84,7 @@ class VersionsLog extends StatelessWidget {
                 'Stabilità Core',
                 'Affinamento della logica di controllo aggiornamenti e startup.',
               ),
-            ], true),
+            ], false),
             _buildVersionCard(context, '0.2.8', "Ironclad Update System", [
               _item(
                 context,
@@ -379,15 +402,21 @@ class VersionsLog extends StatelessWidget {
                   children: [
                     _buildNewsItem(
                       context,
-                      '📏',
-                      'Layout Dinamico',
-                      'L\'header dell\'AI Chef ora si auto-adatta senza più errori grafici.',
+                      '💬',
+                      'Feedback Loop',
+                      'Ora puoi inviare suggerimenti direttamente dall\'app via GitHub!',
                     ),
                     _buildNewsItem(
                       context,
-                      '✨',
-                      'UI Raffinata',
-                      'Badge versione puliti e senza più numeri di build superflui.',
+                      '🛡️',
+                      'Update Stabili',
+                      'Fix definitivi per i crash durante l\'installazione degli aggiornamenti.',
+                    ),
+                    _buildNewsItem(
+                      context,
+                      '🚀',
+                      'BioChef 0.3.0',
+                      'Benvenuto nella nuova serie focalizzata sulla community.',
                     ),
                     _buildNewsItem(
                       context,
