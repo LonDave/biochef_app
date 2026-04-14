@@ -6,7 +6,7 @@ import 'theme.dart';
 // ─────────────────────────────────────────────
 
 /// Versione stabile corrente dell'applicazione.
-const String kAppVersion = '0.2.5';
+const String kAppVersion = '0.2.6';
 
 /// VersionsLog è il componente che visualizza la cronologia degli aggiornamenti.
 /// Permette di distinguere tra le varie serie evolutive di BioChef AI.
@@ -31,78 +31,26 @@ class VersionsLog extends StatelessWidget {
           _buildHero(),
           const SizedBox(height: 24),
           _buildEraGroup(context, 'Evolution Series (v0.2.x)', 'Ingegneria Moderna', true, [
-            _buildVersionCard(context, '0.2.5', "Stability & UX Fix", [
+            _buildVersionCard(context, '0.2.6', "Dietary Security & Update Fix", [
               _item(
                 context,
-                '📐',
-                'Header Fix',
-                'Risolto sovrapposizione titoli nel modulo Chef AI.',
+                '🥬',
+                'Regimi Alimentari',
+                'Implementati filtri specifici per Vegani, Vegetariani e altro.',
               ),
               _item(
                 context,
                 '🔄',
-                'Update Smart',
-                'Notifica aggiornamenti ottimizzata per comparire solo all\'avvio sessione.',
+                'Fix Update',
+                'Risolto il problema del pulsante di aggiornamento e del popup notifiche.',
+              ),
+              _item(
+                context,
+                '📜',
+                'Log Pulito',
+                'Semplificata la cronologia versioni per focalizzarsi sul presente.',
               ),
             ], true),
-            _buildVersionCard(context, '0.2.4', "UX Refinement", [
-              _item(
-                context,
-                '⚡',
-                'Chef AI Inline',
-                'Le configurazioni Al Volo e Festa ora si espandono nella lista senza pop-up.',
-              ),
-              _item(
-                context,
-                '📖',
-                'Coherent Recipes',
-                'Pulsante creazione ricette uniformato e integrato nel Tab Creati.',
-              ),
-              _item(
-                context,
-                '🖼️',
-                'Coherent Recipes',
-                'Nuova interfaccia nativa integrata nel Tab Creati.',
-              ),
-            ], true),
-            _buildVersionCard(context, '0.2.3', "Functional Stability", [
-              _item(
-                context,
-                '🤖',
-                'AI Interactions',
-                'Primi menu interattivi per la generazione contestuale delle ricette.',
-              ),
-              _item(
-                context,
-                '👨‍👩‍👧',
-                'Edit Mode',
-                'Ripristino della possibilità di modificare ed eliminare i familiari.',
-              ),
-            ], false),
-            _buildVersionCard(context, '0.2.2', "Legal Hardening", [
-              _item(
-                context,
-                '⚖️',
-                'Compliance',
-                'Ripristino totale dell\'informativa legale (Artt. 1229, 1341-1342 c.c.).',
-              ),
-            ], false),
-            _buildVersionCard(context, '0.2.1', "Module Migration", [
-              _item(
-                context,
-                '⚙️',
-                'Screens',
-                'Passaggio dai BottomSheet a schermate dedicate per Impostazioni e Guida.',
-              ),
-            ], false),
-            _buildVersionCard(context, '0.2.0', "Aesthetic Zenith", [
-              _item(
-                context,
-                '🎨',
-                'Design System',
-                'Nuova architettura modulare e rifinitura globale del tema Forest Sage.',
-              ),
-            ], false),
           ]),
 
           _buildEraGroup(
@@ -301,13 +249,15 @@ class VersionsLog extends StatelessWidget {
               children: [
                 Text('✨', style: TextStyle(fontSize: 40)),
                 SizedBox(height: 12),
-                Text(
-                  'Nuovi Orizzonti Culinari',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                Flexible(
+                  child: Text(
+                    'Nuovi Orizzonti Culinari',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
                   ),
                 ),
                 Text(
@@ -324,21 +274,21 @@ class VersionsLog extends StatelessWidget {
               children: [
                 _buildNewsItem(
                   context,
-                  '📐',
-                  'Header Modulo Chef AI',
-                  'Risolto il problema di sovrapposizione titoli per una pulizia visiva totale.',
+                  '🥬',
+                  'Regimi Alimentari',
+                  'Filtri intelligenti per Vegani, Vegetariani e altro per una sicurezza totale.',
                 ),
                 _buildNewsItem(
                   context,
                   '🔄',
-                  'Update Intelligente',
-                  'La notifica di aggiornamento ora compare solo all\'avvio, senza disturbare.',
+                  'Update System Fix',
+                  'Risolto il meccanismo di aggiornamento automatico e manuale.',
                 ),
                 _buildNewsItem(
                   context,
                   '🛡️',
-                  'BioChef 0.2.5 Baseline',
-                  'Migliorate le performance generali e la stabilità del sistema.',
+                  'BioChef 0.2.6 Baseline',
+                  'Ottimizzazioni strutturali e stabilità migliorata.',
                 ),
               ],
             ),

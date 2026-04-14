@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:ota_update/ota_update.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'theme.dart';
 
 /// BCUpdateManager gestisce il controllo degli aggiornamenti tramite GitHub Releases.
@@ -15,30 +17,42 @@ class BCUpdateManager {
   /// Flag per evitare controlli multipli nella stessa sessione app.
   static bool _hasCheckedThisSession = false;
 
+  /// Versione ignorata solo in questa sessione (fino al prossimo avvio).
+  static String? _sessionIgnoredVersion;
+
   /// Controlla se è disponibile una nuova versione su GitHub.
   /// Se disponibile, mostra un dialogo all'utente.
   static Future<void> checkUpdate(BuildContext context, {bool silent = false}) async {
-    // Se è un check silenzioso (automatico) e abbiamo già controllato, usciamo.
+    // Se è un check silenzioso (automatico) e abbiamo già controllato in questa sessione, usciamo.
     if (silent && _hasCheckedThisSession) return;
     
+    // Solo per i check automatici impostiamo il flag di sessione.
     if (silent) _hasCheckedThisSession = true;
 
     try {
       final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      final String currentVersion = packageInfo.version; // Es. "0.2.4"
+      final String currentVersion = packageInfo.version; 
       
       final response = await http.get(Uri.parse(apiUrl)).timeout(const Duration(seconds: 15));
       
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
-        final String latestTagName = data['tag_name'] ?? ""; // Es. "v0.2.5"
-        final String latestVersion = latestTagName.replaceAll('v', '').trim();
+        final String latestTagName = data['tag_name'] ?? ""; 
+        final String latestVersion = latestTagName.toLowerCase().replaceAll('v', '').trim();
         
         if (_isNewer(currentVersion, latestVersion)) {
-          // Trova l'URL dell'APK negli assets
+          // Check se questa versione è stata già ignorata in questa sessione (solo per check automatici)
+          if (silent && _sessionIgnoredVersion == latestVersion) {
+            debugPrint("UpdateManager: Versione $latestVersion già ignorata in questa sessione.");
+            return;
+          }
+
           final List assets = data['assets'] ?? [];
           final apkAsset = assets.firstWhere(
-            (a) => a['name'].toString().toLowerCase().endsWith('.apk'),
+            (a) {
+              final String name = a['name'].toString().toLowerCase();
+              return name.endsWith('.apk') && !name.contains('output-metadata');
+            },
             orElse: () => null,
           );
 
@@ -47,20 +61,26 @@ class BCUpdateManager {
             if (context.mounted) {
                _mostraDialogAggiornamento(context, latestVersion, downloadUrl);
             }
-          }
-        } else {
-          if (!silent && context.mounted) {
+          } else if (!silent && context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('L\'app è già aggiornata all\'ultima versione.')),
+              const SnackBar(content: Text('Aggiornamento trovato, ma APK non disponibile.')),
             );
           }
+        } else if (!silent && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Sei già alla versione più recente ($currentVersion).'),
+              backgroundColor: BC.primary,
+            ),
+          );
         }
+      } else {
+        throw "Status ${response.statusCode}";
       }
     } catch (e) {
-      debugPrint("Errore controllo update: $e");
       if (!silent && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Impossibile controllare gli aggiornamenti: $e')),
+          SnackBar(content: Text('Errore update: $e'), backgroundColor: Colors.redAccent),
         );
       }
     }
@@ -68,21 +88,37 @@ class BCUpdateManager {
 
   /// Confronta due versioni stringa (semver). Ritorna true se 'latest' è più recente di 'current'.
   static bool _isNewer(String current, String latest) {
-    List<int> currentParts = current.split('.').map((e) => int.tryParse(e) ?? 0).toList();
-    List<int> latestParts = latest.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    // Gestione versioni con build number (es. 0.2.6+1 -> 0.2.6)
+    String cleanCurrent = current.split('+')[0];
+    String cleanLatest = latest.split('+')[0];
+
+    List<int> currentParts = cleanCurrent.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    List<int> latestParts = cleanLatest.split('.').map((e) => int.tryParse(e) ?? 0).toList();
     
-    // Assicuriamoci che abbiano la stessa lunghezza (es. 1.0 vs 1.0.0)
-    while (currentParts.length < 3) {
+    // Pareggiamento lunghezze
+    int maxLen = currentParts.length > latestParts.length ? currentParts.length : latestParts.length;
+    while (currentParts.length < maxLen) {
       currentParts.add(0);
     }
-    while (latestParts.length < 3) {
+    while (latestParts.length < maxLen) {
       latestParts.add(0);
     }
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < maxLen; i++) {
       if (latestParts[i] > currentParts[i]) return true;
       if (latestParts[i] < currentParts[i]) return false;
     }
+
+    // Se le versioni base sono uguali, controlliamo il build number se presente
+    if (current.contains('+') && latest.contains('+')) {
+      int curBuild = int.tryParse(current.split('+')[1]) ?? 0;
+      int latBuild = int.tryParse(latest.split('+')[1]) ?? 0;
+      return latBuild > curBuild;
+    } else if (!current.contains('+') && latest.contains('+')) {
+      // Se current non ha build e latest sì, latest è più recente (es. 0.2.6 vs 0.2.6+1)
+      return true;
+    }
+
     return false;
   }
 
@@ -92,35 +128,49 @@ class BCUpdateManager {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.system_update_alt_rounded, color: BC.getPrimary(context)),
-            const SizedBox(width: 10),
-            const Text('Aggiornamento Disponibile'),
-          ],
+        title: Flexible(
+          child: Row(
+            children: [
+              Icon(Icons.system_update_alt_rounded, color: BC.getPrimary(context)),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'Nuova Versione',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('È disponibile una nuova versione dello Chef: v$version'),
-            const SizedBox(height: 12),
-            const Text(
-              'L\'aggiornamento verrà scaricato ed eseguito automaticamente. '
-              'I tuoi dati e le tue ricette rimarranno al sicuro.',
-              style: TextStyle(fontSize: 13, color: Colors.grey),
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('È disponibile BioChef AI v$version', style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              const Text(
+                'L\'aggiornamento verrà scaricato ed eseguito automaticamente. '
+                'I tuoi dati e le tue ricette rimarranno al sicuro.',
+                style: TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () {
+              // Memorizza che questa versione è stata ignorata solo per questa sessione
+              _sessionIgnoredVersion = version;
+              Navigator.pop(ctx);
+            },
             child: const Text('Più tardi'),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
-              _avviaUpdate(context, url);
+              _mostraDialogProgresso(context, url);
             },
             child: const Text('Aggiorna Ora'),
           ),
@@ -129,30 +179,134 @@ class BCUpdateManager {
     );
   }
 
-  /// Avvia il processo di download e installazione OTA.
-  static void _avviaUpdate(BuildContext context, String url) {
+  /// Mostra il dialogo con la barra di progresso reale.
+  static void _mostraDialogProgresso(BuildContext context, String url) {
+    if (!context.mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      useRootNavigator: true, // Fondamentale per non corrompere lo stack della UI
+      builder: (ctx) => _UpdateProgressDialog(downloadUrl: url),
+    );
+  }
+
+  /// Avvia il processo di download e installazione OTA (Logica interna).
+  static Stream<OtaEvent> _getUpdateStream(String url) {
+    return OtaUpdate().execute(
+      url,
+      destinationFilename: 'biochef_update.apk',
+    );
+  }
+}
+
+/// Dialogo interno per gestire il progresso dello scaricamento.
+class _UpdateProgressDialog extends StatefulWidget {
+  final String downloadUrl;
+  const _UpdateProgressDialog({required this.downloadUrl});
+
+  @override
+  State<_UpdateProgressDialog> createState() => _UpdateProgressDialogState();
+}
+
+class _UpdateProgressDialogState extends State<_UpdateProgressDialog> {
+  double _progress = 0;
+  String _status = "Inizializzazione...";
+  bool _hasError = false;
+  String _errorMsg = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _startDownload();
+  }
+
+  Future<void> _startDownload() async {
     try {
-      // OtaUpdate gestisce internamente DownloadManager e Intent di installazione.
-      OtaUpdate().execute(
-        url,
-        destinationFilename: 'biochef_update.apk',
-      ).listen(
+      // Controllo permessi raffinato
+      if (Platform.isAndroid) {
+         if (await Permission.requestInstallPackages.isDenied) {
+           await Permission.requestInstallPackages.request();
+         }
+      }
+
+      BCUpdateManager._getUpdateStream(widget.downloadUrl).listen(
         (OtaEvent event) {
-          debugPrint('Stato Update: ${event.status} : ${event.value}%');
-          // Possiamo mostrare una notifica o un progresso se vogliamo, 
-          // ma Android DownloadManager gestisce già la barra di stato.
+          if (!mounted) return;
+          setState(() {
+            switch (event.status) {
+              case OtaStatus.DOWNLOADING:
+                _status = "Scaricamento in corso...";
+                _progress = double.tryParse(event.value ?? '0') ?? 0;
+                break;
+              case OtaStatus.INSTALLING:
+                _status = "Preparazione installazione...";
+                _progress = 100;
+                break;
+              case OtaStatus.ALREADY_RUNNING_ERROR:
+                _hasError = true;
+                _errorMsg = "Un aggiornamento è già in corso.";
+                break;
+              case OtaStatus.PERMISSION_NOT_GRANTED_ERROR:
+                _hasError = true;
+                _errorMsg = "Permessi non concessi.";
+                break;
+              default:
+                if (event.status.toString().contains('ERROR')) {
+                  _hasError = true;
+                  _errorMsg = "Errore: ${event.status}";
+                }
+            }
+          });
         },
         onError: (e) {
-          debugPrint('Errore durante l\'update: $e');
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Errore durante il download: $e')),
-            );
-          }
+          if (mounted) setState(() { _hasError = true; _errorMsg = e.toString(); });
         },
       );
     } catch (e) {
-      debugPrint('Fallimento avvio update: $e');
+       if (mounted) setState(() { _hasError = true; _errorMsg = e.toString(); });
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      title: const Text('Aggiornamento Remoto', style: TextStyle(fontWeight: FontWeight.bold)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!_hasError) ...[
+            Text(_status, style: const TextStyle(fontSize: 14)),
+            const SizedBox(height: 20),
+            LinearProgressIndicator(
+              value: _progress / 100,
+              backgroundColor: Colors.grey.withAlpha(50),
+              minHeight: 10,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            const SizedBox(height: 10),
+            Text('${_progress.toInt()}%', style: const TextStyle(fontWeight: FontWeight.bold)),
+          ] else ...[
+            const Icon(Icons.error_outline_rounded, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
+            Text('Aggiornamento Fallito', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text(_errorMsg, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12)),
+          ]
+        ],
+      ),
+      actions: [
+        if (_hasError)
+          TextButton(
+            onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+            child: const Text('CHIUDI'),
+          )
+        else if (_progress < 100)
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text('Attendi il completamento...', style: TextStyle(color: Colors.grey, fontSize: 12)),
+          ),
+      ],
+    );
   }
 }

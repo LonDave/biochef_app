@@ -41,7 +41,15 @@ class BCDietary {
     'cipolla': 'cipolla, cipolla rossa, cipolla bianca, scalogno, cipollotto, porro',
     'aglio': 'aglio, aglio in polvere',
     'piccante': 'peperoncino, pepe di cayenna, curry piccante, salsa piccante, jalapeno',
-    'insaccati': 'prosciutto, salame, mortadella, pancetta, wurstel, salsiccia, coppa, bresaola, speck, bresaola',
+    'insaccati': 'prosciutto, salame, mortadella, pancetta, wurstel, salsiccia, coppa, bresaola',
+  };
+
+  /// Mappatura dei regimi alimentari verso i divieti.
+  static const Map<String, String> regimi = {
+    'Vegano': 'carne, pesce, latticini, uova',
+    'Vegetariano': 'carne, pesce',
+    'Chetogenico': 'cereali, pane, pasta, riso, zucchero, patate, legumi',
+    'Paleo': 'cereali, legumi, latticini, zucchero, pasta, pane',
   };
   /// Espande i divieti comuni con sinonimi o categorie correlate per aiutare l'AI.
   static String espandiDivieti(String input) {
@@ -90,34 +98,54 @@ class BCDietary {
     List<String> critical = [];
     List<String> warnings = [];
 
-    for (var m in members) {
-      final name = m['nome'] ?? 'Membro';
-      // Controllo intolleranze (CRITICO)
-      final intol = (m['intolleranze'] ?? '').toString().toLowerCase();
-      if (intol.isNotEmpty) {
-        final list = _getExpandedList(intol);
-        for (var forbidden in list) {
-          if (forbidden.isEmpty) continue;
-          final reg = RegExp(r'\b' + RegExp.escape(forbidden) + r'\b', caseSensitive: false);
-          if (reg.hasMatch(textToScan)) {
-            critical.add("$name è intollerante a $forbidden");
-            break;
+    try {
+      for (var m in members) {
+        final name = m['nome'] ?? 'Membro';
+        
+        // Controllo Regime Alimentare (CRITICO)
+        final regime = (m['regime'] ?? '').toString();
+        if (regime.isNotEmpty && regimi.containsKey(regime)) {
+          final list = _getExpandedList(regimi[regime]!);
+          for (var forbidden in list) {
+            if (forbidden.isEmpty) continue;
+            final reg = RegExp(r'\b' + RegExp.escape(forbidden) + r'\b', caseSensitive: false);
+            if (reg.hasMatch(textToScan)) {
+              critical.add("$name segue regime $regime (Trovato: $forbidden)");
+              break;
+            }
+          }
+        }
+
+        // Controllo intolleranze (CRITICO)
+        final intol = (m['intolleranze'] ?? '').toString().toLowerCase();
+        if (intol.isNotEmpty) {
+          final list = _getExpandedList(intol);
+          for (var forbidden in list) {
+            if (forbidden.isEmpty) continue;
+            final reg = RegExp(r'\b' + RegExp.escape(forbidden) + r'\b', caseSensitive: false);
+            if (reg.hasMatch(textToScan)) {
+              critical.add("$name è intollerante a $forbidden");
+              break;
+            }
+          }
+        }
+        // Controllo gusti personali (AVVISO)
+        final nonGraditi = (m['nonGraditi'] ?? m['odiati'] ?? '').toString().toLowerCase();
+        if (nonGraditi.isNotEmpty) {
+          final list = _getExpandedList(nonGraditi);
+          for (var forbidden in list) {
+            if (forbidden.isEmpty) continue;
+            final reg = RegExp(r'\b' + RegExp.escape(forbidden) + r'\b', caseSensitive: false);
+            if (reg.hasMatch(textToScan)) {
+              warnings.add("$name non gradisce $forbidden");
+              break;
+            }
           }
         }
       }
-      // Controllo gusti personali (AVVISO)
-      final nonGraditi = (m['nonGraditi'] ?? m['odiati'] ?? '').toString().toLowerCase();
-      if (nonGraditi.isNotEmpty) {
-        final list = _getExpandedList(nonGraditi);
-        for (var forbidden in list) {
-          if (forbidden.isEmpty) continue;
-          final reg = RegExp(r'\b' + RegExp.escape(forbidden) + r'\b', caseSensitive: false);
-          if (reg.hasMatch(textToScan)) {
-            warnings.add("$name non gradisce $forbidden");
-            break;
-          }
-        }
-      }
+    } catch (e) {
+      debugPrint("DIETARY-ANALYSIS-ERROR: $e");
+      warnings.add("Errore analisi dietetica: parziale.");
     }
 
     int score = 100;

@@ -174,6 +174,7 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
     final bool presente = m['presente'] ?? true;
     final String intol = m['intolleranze'] ?? '';
     final String dislikes = m['nonGraditi'] ?? '';
+    final String regime = m['regime'] ?? '';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -218,7 +219,7 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
               ],
             ),
           ),
-          if (intol.isNotEmpty || dislikes.isNotEmpty)
+          if (intol.isNotEmpty || dislikes.isNotEmpty || regime.isNotEmpty)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
@@ -226,6 +227,7 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
                 spacing: 8,
                 runSpacing: 8,
                 children: [
+                  if (regime.isNotEmpty) _buildTag(Icons.eco_rounded, 'Regime: $regime', Colors.green),
                   if (intol.isNotEmpty) _buildTag(Icons.warning_amber_rounded, 'Allergia: $intol', Colors.red),
                   if (dislikes.isNotEmpty) _buildTag(Icons.heart_broken_rounded, 'No: $dislikes', Colors.orange),
                 ],
@@ -450,6 +452,7 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
     final intolC = TextEditingController();
     final odiatiC = TextEditingController();
     bool haAllergie = false;
+    String selectedRegime = 'Onnivoro';
 
     showDialog(
       context: context,
@@ -465,7 +468,9 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
                   onChanged: (v) => setDim(() {}),
                   decoration: const InputDecoration(labelText: 'Nome *', hintText: 'es. Mario'),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
+                _buildRegimeSelector(selectedRegime, (v) => setDim(() => selectedRegime = v!)),
+                const SizedBox(height: 12),
                 TextField(controller: odiatiC, decoration: const InputDecoration(labelText: 'Cibo Sgradito (Opzionale)', hintText: 'es. Cipolla, Pepe')),
                 const SizedBox(height: 16),
                 _buildAllergyToggle(haAllergie, (v) => setDim(() => haAllergie = v)),
@@ -483,6 +488,7 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
                 'nome': nomeC.text,
                 'intolleranze': haAllergie ? intolC.text : '',
                 'nonGraditi': odiatiC.text,
+                'regime': selectedRegime == 'Onnivoro' ? '' : selectedRegime,
                 'presente': true,
               });
               Navigator.pop(ctx);
@@ -502,6 +508,7 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
     final intolC = TextEditingController(text: m['intolleranze']);
     final odiatiC = TextEditingController(text: m['nonGraditi']);
     bool haAllergie = (m['intolleranze'] ?? '').toString().isNotEmpty;
+    String selectedRegime = m['regime'] == null || m['regime'] == '' ? 'Onnivoro' : m['regime'];
 
     showDialog(
       context: context,
@@ -517,7 +524,9 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
                   onChanged: (v) => setDim(() {}),
                   decoration: const InputDecoration(labelText: 'Nome *', hintText: 'es. Mario'),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
+                _buildRegimeSelector(selectedRegime, (v) => setDim(() => selectedRegime = v!)),
+                const SizedBox(height: 12),
                 TextField(controller: odiatiC, decoration: const InputDecoration(labelText: 'Cibo Sgradito (Opzionale)', hintText: 'es. Cipolla, Pepe')),
                 const SizedBox(height: 16),
                 _buildAllergyToggle(haAllergie, (v) => setDim(() => haAllergie = v)),
@@ -535,6 +544,7 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
                 'nome': nomeC.text,
                 'intolleranze': haAllergie ? intolC.text : '',
                 'nonGraditi': odiatiC.text,
+                'regime': selectedRegime == 'Onnivoro' ? '' : selectedRegime,
                 'presente': m['presente'] ?? true,
               });
               Navigator.pop(ctx);
@@ -542,6 +552,22 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildRegimeSelector(String current, Function(String?) onChanged) {
+    final List<String> options = ['Onnivoro', 'Vegetariano', 'Vegano', 'Chetogenico', 'Paleo'];
+    return DropdownButtonFormField<String>(
+      initialValue: current,
+      decoration: InputDecoration(
+        labelText: 'Regime Alimentare',
+        prefixIcon: Icon(Icons.restaurant_rounded, color: BC.getPrimary(context)),
+        filled: true,
+        fillColor: BC.getPrimary(context).withAlpha(15),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      ),
+      items: options.map((o) => DropdownMenuItem(value: o, child: Text(o))).toList(),
+      onChanged: onChanged,
     );
   }
 
