@@ -90,8 +90,8 @@ class GuideScreen extends StatelessWidget {
         const SizedBox(height: 16),
         _faqItem(
           context,
-          'Le ricette generate sono sempre sicure?',
-          'Sì, BioChef utilizza il Protocollo di Ricerca Scientifica (v0.3.2). Prima di generare la ricetta, l\'AI effettua una scansione biologica degli ingredienti per escludere tossine o materiali non alimentari.'
+          'Come viene gestita la sicurezza delle ricette?',
+          'BioChef utilizza il Protocollo di Ricerca Scientifica (v0.3.2) per tentare di filtrare ingredienti non edibili. Tuttavia, l\'AI può produrre errori o allucinazioni. L\'utente ha l\'obbligo inderogabile di verificare personalmente ogni ingrediente e tecnica suggerita prima del consumo.'
         ),
         _faqItem(
           context,

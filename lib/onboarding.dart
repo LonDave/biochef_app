@@ -110,16 +110,16 @@ class _OnboardingLegalScreenState extends State<OnboardingLegalScreen> {
                         ),
                       ),
                       
-                      // Checkbox 2: Clausole Vessatorie (Art. 1341 c.c.)
+                      // Checkbox 2: Clausole Vessatorie (Artt. 1341-1342 c.c.)
                       CheckboxListTile(
                         value: _accettoSpecificamente,
                         onChanged: (v) => setState(() => _accettoSpecificamente = v ?? false),
                         dense: true,
                         activeColor: Colors.orange,
                         title: Text(
-                          'Accetto specificamente le clausole limitative e il disclaimer AI/salute (Artt. 1341-1342 c.c.)',
+                          'ACCETTAZIONE SPECIFICA: Approvo specificamente ai sensi degli artt. 1341 e 1342 c.c. le clausole di cui ai punti: 2 (Limitazione Responsabilità), 3 (Rischi AI e Allucinazioni), 4 (Manleva e Esonero), 6 (Foro Competente).',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: FontWeight.w900,
                             color: Colors.orange.shade900,
                           ),
@@ -208,7 +208,7 @@ class LegalText extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'TERMINI DI SERVIZIO E CONDIZIONI D’USO',
+          'CONTRATTO DI LICENZA E TERMINI LEGALI',
           style: TextStyle(
             fontWeight: FontWeight.w900,
             fontSize: 14,
@@ -217,16 +217,19 @@ class LegalText extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        _p(context, 'BioChef AI — Versione Definitiva v0.2.0'),
-        _p(context, 'Autore: Davide Longo'),
+        _p(context, 'Revisione Legale: 14 Aprile 2026 - v0.3.5'),
+        _p(context, 'Fornitore del Servizio: Davide Longo (Autore)'),
         const Divider(),
-        _h(context, '1. PROPRIETÀ INTELLETTUALE'),
-        _p(context, 'L’App BioChef AI è un\'opera dell\'ingegno protetta dalle leggi sul copyright. La licenza concessa è personale, non esclusiva e non trasferibile.'),
-        _h(context, '2. ESCLUSIONE DI RESPONSABILITÀ (ART. 1229 C.C.)'),
-        _p(context, 'L\'autore declina ogni responsabilità per danni diretti o indiretti derivanti dall\'uso dell\'App. L\'utente riconosce che i suggerimenti AI non costituiscono consulenza medica o dietetica. Ai sensi dell\'art. 1229 c.c., la responsabilità è limitata ai soli casi di dolo o colpa grave.'),
-        _h(context, '3. INTELLIGENZA ARTIFICIALE E FONTI'),
-        _p(context, 'Le ricette sono generate algoritmicamente tramite Groq/Llama. L\'AI può produrre risultati incompleti o tecnicamente errati. L\'utente ha l\'obbligo inderogabile di verificare la commestibilità e la sicurezza di ogni ingrediente.'),
-        _h(context, '4. ⚠️ CLAUSOLA DI MANLEVA (ARTT. 1341-1342 C.C.)'),
+        _h(context, '1. OGGETTO E NATURA DEL SERVIZIO'),
+        _p(context, 'BioChef AI è uno strumento sperimentale di supporto culinario basato su Intelligenza Artificiale. L\'uso è inteso esclusivamente per scopi di intrattenimento e organizzazione domestica.'),
+        
+        _h(context, '2. LIMITAZIONE DI RESPONSABILITÀ (ART. 1229 C.C.)'),
+        _p(context, 'Ai sensi dell\'art. 1229 c.c., l\'Autore è esonerato da ogni responsabilità per danni a persone o cose derivanti dall\'uso dell\'App, salvo il caso di dolo o colpa grave. L\'Autore non garantisce l\'accuratezza delle ricette né l\'assenza di errori tecnici.'),
+        
+        _h(context, '3. AVVERTENZE TECNICHE AI E ALLUCINAZIONI'),
+        _p(context, 'L\'utente prende atto che i modelli di linguaggio (LLM) sono statisticamente suscettibili a "allucinazioni", ovvero alla generazione di informazioni false, illogiche o pericolose. È onere esclusivo dell\'utente verificare ogni istruzione fornita dall\'AI.'),
+        
+        _h(context, '4. CLAUSOLA DI MANLEVA E DIVIETO USO MEDICO'),
         Container(
           margin: const EdgeInsets.only(top: 8, bottom: 8),
           padding: const EdgeInsets.all(12),
@@ -238,16 +241,16 @@ class LegalText extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _p(context, 'L’utente dichiara di manlevare e tenere indenne l’autore da qualsiasi pretesa, danno o sanzione derivante da reazioni allergiche, intolleranze o tossicità degli ingredienti suggeriti.'),
-              const SizedBox(height: 8),
-              _p(context, 'ATTENZIONE: BioChef non è un dispositivo medico.'),
+              _p(context, 'È TASSATIVAMENTE VIETATO l\'uso di BioChef AI per la gestione di allergie gravi, patologie cliniche o decisioni mediche. L\'utente dichiara di manlevare l\'Autore da ogni pretesa derivante da intossicazioni o reazioni avverse.'),
             ],
           ),
         ),
-        _h(context, '5. TRATTAMENTO DATI E PRIVACY (GDPR)'),
-        _p(context, 'Modello LOCAL-FIRST: i dati identificativi, le allergie e le preferenze sono memorizzati ESCLUSIVAMENTE nella memoria locale (Hive) del tuo dispositivo. Nessun dato personale viene trasmesso a server centrali. I prompt AI inviati a Groq sono anonimizzati e non collegabili alla tua identità.'),
-        _h(context, '6. GIURISDIZIONE E FORO COMPETENTE'),
-        _p(context, 'Il presente accordo è regolato dalla legge italiana. Per qualsiasi controversia è competente in via esclusiva il Foro di residenza dell\'autore.'),
+        
+        _h(context, '5. PROTEZIONE DATI (GDPR)'),
+        _p(context, 'Modello LOCAL-FIRST: Nessun dato personale identificativo viene trasmesso a server esterni. I dati risiedono nella memoria cifrata del dispositivo locale.'),
+        
+        _h(context, '6. GIURISDIZIONE E FORO (ART. 1341 C.C.)'),
+        _p(context, 'Il presente contratto è regolato dalla Legge Italiana. Per ogni controversia è stabilita la competenza esclusiva ed inderogabile del Foro di residenza del Sviluppatore/Autore.'),
       ],
     );
   }
@@ -273,13 +276,13 @@ class _FeatureDiscoveryScreenState extends State<FeatureDiscoveryScreen> {
     },
     {
       'icon': '🔬',
-      'title': 'Ricerca Scientifica',
-      'desc': 'Il protocollo v0.3.2 analizza biologicamente ogni ingrediente. Se non è sicuro o commestibile, lo Chef lo identificherà prima di cucinare.',
+      'title': 'Supporto alla Ricerca',
+      'desc': 'Il protocollo v0.3.2 analizza i termini forniti per segnalare potenziali elementi non edibili. Nota: la verifica finale spetta sempre a te.',
     },
     {
       'icon': '🌳',
-      'title': 'Logica Categoriale',
-      'desc': 'Massima sicurezza per le allergie. Se vieti una categoria (es. Frutta), lo Chef bloccherà automaticamente ogni ingrediente correlato.',
+      'title': 'Supporto Allergie',
+      'desc': 'Ausilio per le allergie: se vieti una categoria (es. Frutta), lo Chef tenterà di bloccare ogni ingrediente correlato in modo gerarchico.',
     },
     {
       'icon': '🛡️',

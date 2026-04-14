@@ -9,7 +9,7 @@ import 'security.dart';
 
 /// BCDietary gestisce l'intelligenza dietetica dell'applicazione.
 /// Si occupa di analizzare gli ingredienti, espandere le categorie sgradite
-/// e garantire che ogni ricetta sia sicura per i membri della famiglia.
+/// e supportare la generazione di ricette conformi ai profili della famiglia.
 class BCDietary {
   /// Valida se un testo contiene termini non commestibili o pericolosi.
   /// Restituisce un messaggio d'errore se trova corrispondenze, altrimenti null.

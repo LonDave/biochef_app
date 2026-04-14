@@ -81,7 +81,7 @@ class VersionsLog extends StatelessWidget {
                 context,
                 '🛡️',
                 'Safety Hardening',
-                'Rafforzata la logica di esclusione per garantire il 100% della sicurezza.',
+                'Rafforzata la logica di esclusione per potenziare il supporto alla sicurezza.',
               ),
             ], false),
             _buildVersionCard(context, '0.3.2', "Scientific Research Mode", [
