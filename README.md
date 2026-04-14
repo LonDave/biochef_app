@@ -22,7 +22,7 @@
 - [Stack Tecnologico](#stack-tecnologico)
 - [Struttura del Progetto](#struttura-del-progetto)
 - [Setup & Avvio](#setup--avvio)
-- [Avvertenze & Responsabilità](#avvertenze--responsabilità)
+- [Avvertenze e Responsabilità](#avvertenze-e-responsabilità)
 - [Licenza](#licenza)
 
 ---
@@ -105,7 +105,7 @@ npm run boot-engine
 
 ---
 
-## Avvertenze & Responsabilità
+## Avvertenze e Responsabilità
 
 - BioChef utilizza un modello linguistico (LLM): le quantità e le preparazioni suggerite sono orientative.
 - **Verifica sempre la presenza di allergeni** prima di consumare qualsiasi preparazione.
