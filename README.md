@@ -21,7 +21,7 @@
 - [Funzionalità principali](#funzionalità-principali)
 - [Stack Tecnologico](#stack-tecnologico)
 - [Struttura del Progetto](#struttura-del-progetto)
-- [Setup & Avvio](#setup--avvio)
+- [Setup e Avvio](#setup-e-avvio)
 - [Avvertenze e Responsabilità](#avvertenze-e-responsabilità)
 - [Licenza](#licenza)
 
@@ -87,7 +87,7 @@ biochef/
 
 ---
 
-## Setup & Avvio
+## Setup e Avvio
 
 > **Prerequisito:** connessione attiva all'istanza Llama 3.3 su Antigravity AI.
 
@@ -97,7 +97,7 @@ git clone https://github.com/tuo-username/biochef.git
 cd biochef
 
 # 2. Installa le dipendenze
-npm install biochef-core
+npm install
 
 # 3. Avvia il motore
 npm run boot-engine
