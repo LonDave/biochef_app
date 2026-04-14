@@ -40,9 +40,22 @@ class VersionsLog extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         children: [
           _buildHero(),
-          // Lo spazio tra Hero e il primo blocco è ora gestito internamente dai blocchi stessi
-          
+          const SizedBox(height: 24),
           _buildEraGroup(context, 'Harmony & Stability Series (v0.4.x)', 'Integrazione Minimalista', true, [
+            _buildVersionCard(context, '0.4.11', "Zen Spacing & Hotfix", [
+              _item(
+                context,
+                Icons.straighten_rounded,
+                'Zen Spacing',
+                'Calibrazione millimetrica delle distanze tra le Ere per un ritmo visivo perfetto.',
+              ),
+              _item(
+                context,
+                Icons.bug_report_rounded,
+                'Syntax Hardening',
+                'Risolti glitch sintattici nei widget tree delle versioni precedenti.',
+              ),
+            ], true),
             _buildVersionCard(context, '0.4.1', "Complete Icon Harmony", [
               _item(
                 context,
@@ -56,7 +69,7 @@ class VersionsLog extends StatelessWidget {
                 'Visual Sync',
                 'Sincronizzazione degli header dell\'Hub AI e delle sezioni dettagli ricette.',
               ),
-            ], true),
+            ], false),
             _buildVersionCard(context, '0.4.0', "Onboarding & Menu Alignment", [
               _item(
                 context,
@@ -78,7 +91,6 @@ class VersionsLog extends StatelessWidget {
               ),
             ], false),
           ]),
-
           _buildEraGroup(context, 'Support & Community Series (v0.3.x)', 'Canale Aperto', false, [
             _buildVersionCard(context, '0.3.9', "Visual Polish & Sync", [
               _item(
@@ -227,8 +239,6 @@ class VersionsLog extends StatelessWidget {
               ),
             ], false),
           ]),
-          const SizedBox(height: 24),
-
           _buildEraGroup(context, 'Evolution Series (v0.2.x)', 'Ingegneria Moderna', false, [
             _buildVersionCard(context, '0.2.9', "UX & Layout Polish", [
               _item(
@@ -371,7 +381,6 @@ class VersionsLog extends StatelessWidget {
               ),
             ], false),
           ]),
-
           _buildEraGroup(
             context,
             'Genesis Era (v0.1.x)',
@@ -703,10 +712,7 @@ class VersionsLog extends StatelessWidget {
     List<Widget> children,
   ) {
     return Container(
-      margin: EdgeInsets.only(
-        top: initiallyExpanded ? 12 : 20, // Il blocco attivo sale più sopra
-        bottom: 12, // Spazio uguale tra i blocchi
-      ),
+      margin: const EdgeInsets.only(bottom: 16), // Spazio fisso e uguale per tutti
       decoration: BoxDecoration(
         color: BC.getPrimary(context).withAlpha(10),
         borderRadius: BorderRadius.circular(16),
@@ -732,7 +738,7 @@ class VersionsLog extends StatelessWidget {
           ),
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8), // Ridotto padding bottom per compensare il margine
               child: Column(children: children),
             ),
           ],
