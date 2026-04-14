@@ -267,29 +267,39 @@ class _FeatureDiscoveryScreenState extends State<FeatureDiscoveryScreen> {
 
   final List<Map<String, String>> _slides = [
     {
-      'icon': '👨‍👩‍👧‍👦',
-      'title': 'Famiglia Intelligente',
-      'desc': 'Crea profili personalizzati per ogni membro. BioChef memorizza allergie, intolleranze e gusti per garantire la massima sicurezza a tavola.',
+      'icon': '🎓',
+      'title': 'Tutor Culinario d\'Élite',
+      'desc': 'Più di un ricettario: BioChef è il tuo mentore digitale. Progettato per imparare dalle tue abitudini e proteggere la tua famiglia.',
     },
     {
-      'icon': '🤖',
-      'title': 'Potenza Chef AI',
-      'desc': 'Usa l\'opzione "Al Volo" per cucinare con quello che hai in frigo, o pianifica "Eventi" speciali gestendo ospiti extra con intelligenza.',
+      'icon': '🔬',
+      'title': 'Ricerca Scientifica',
+      'desc': 'Il protocollo v0.3.2 analizza biologicamente ogni ingrediente. Se non è sicuro o commestibile, lo Chef lo identificherà prima di cucinare.',
+    },
+    {
+      'icon': '🌳',
+      'title': 'Logica Categoriale',
+      'desc': 'Massima sicurezza per le allergie. Se vieti una categoria (es. Frutta), lo Chef bloccherà automaticamente ogni ingrediente correlato.',
     },
     {
       'icon': '🛡️',
-      'title': 'Privacy Assoluta',
-      'desc': 'Siamo Local-First. I tuoi dati sensibili risiedono solo sul tuo telefono. Nessuna profilazione, solo pura assistenza culinaria.',
+      'title': 'Privacy Local-First',
+      'desc': 'La tua vita privata resta privata. Tutte le preferenze e i profili risiedono solo sul tuo dispositivo. Nessun dato lascia il telefono.',
     },
     {
-      'icon': '🔑',
-      'title': 'Motore AI (Groq)',
-      'desc': 'BioChef necessita di una chiave API Groq per "pensare". Ottienila gratuitamente e inseriscila nelle Impostazioni per attivare lo Chef AI.',
+      'icon': '🧬',
+      'title': 'Precisione Groq',
+      'desc': 'Alimentato dai modelli Llama 3.3 70B di Groq. Inserisci la tua API Key nelle impostazioni per sbloccare la Super-Intelligenza culinaria.',
+    },
+    {
+      'icon': '💎',
+      'title': 'Lifestyle Premium',
+      'desc': 'Configura regimi Vegani, Keto o Paleo con selettori iconografici. BioChef adatta la sua conoscenza al tuo stile di vita unico.',
     },
     {
       'icon': '📦',
-      'title': 'Sempre con Te',
-      'desc': 'Esegui backup cifrati e ripristina i tuoi dati su qualsiasi dispositivo. La tua cucina intelligente ti segue ovunque.',
+      'title': 'Backup Corazzato',
+      'desc': 'Esporta i tuoi dati in file cifrati. Porta il tuo nucleo familiare e il tuo ricettario su qualsiasi nuovo dispositivo in un istante.',
     },
   ];
 

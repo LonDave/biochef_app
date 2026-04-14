@@ -63,8 +63,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildGroqSection(),
           const Divider(height: 32),
           _buildSectionHeader(context, '⚙️ Sistema e Supporto'),
+          _buildTutorCenter(context),
           _buildSystemActions(context),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTutorCenter(BuildContext context) {
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 16),
+      color: BC.getPrimary(context).withAlpha(15),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: BC.getPrimary(context).withAlpha(40)),
+      ),
+      child: ListTile(
+        leading: Icon(Icons.school_rounded, color: BC.getPrimary(context)),
+        title: const Text('Centro Tutor & FAQ', style: TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: const Text('Padroneggia BioChef con la guida d\'élite'),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GuideScreen())),
       ),
     );
   }
@@ -136,11 +156,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSystemActions(BuildContext context) {
     return Column(
       children: [
-        ListTile(
-          leading: const Icon(Icons.help_outline),
-          title: const Text('Guida FAQ'),
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GuideScreen())),
-        ),
         ListTile(
           leading: const Icon(Icons.backup_outlined),
           title: const Text('Esporta Backup'),

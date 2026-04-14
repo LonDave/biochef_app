@@ -567,11 +567,14 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
   Widget _buildRegimeSelector(String current, Function(String?) onChanged) {
     final List<Map<String, String>> options = [
       {'val': 'Onnivoro', 'icon': '🍽️', 'desc': 'Alimentazione completa'},
-      {'val': 'Vegetariano', 'icon': '🥚', 'desc': 'No carne/pesce'},
-      {'val': 'Vegano', 'icon': '🍃', 'desc': 'Solo vegetale'},
+      {'val': 'Vegetariano', 'icon': '🥚', 'desc': 'No carne e pesce'},
+      {'val': 'Vegano', 'icon': '🍃', 'desc': 'Esclude derivati animali'},
       {'val': 'Chetogenico', 'icon': '🥑', 'desc': 'Bassi carboidrati'},
-      {'val': 'Paleo', 'icon': '🦴', 'desc': 'Cibi ancestrali'},
+      {'val': 'Paleo', 'icon': '🦴', 'desc': 'Alimentazione ancestrale'},
     ];
+
+    // Se current è vuoto, mostriamo Onnivoro
+    final String safeValue = current == '' ? 'Onnivoro' : current;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -586,49 +589,41 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
           ),
         ),
         const SizedBox(height: 10),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: options.map((o) {
-            final bool isSelected = current == o['val'] || (current == '' && o['val'] == 'Onnivoro');
-            return GestureDetector(
-              onTap: () => onChanged(o['val']),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: (MediaQuery.of(context).size.width / 2) - 45,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isSelected ? BC.getPrimary(context).withAlpha(40) : BC.getCard(context).withAlpha(100),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isSelected ? BC.getPrimary(context) : BC.getPrimary(context).withAlpha(40),
-                    width: isSelected ? 2 : 1,
-                  ),
-                  boxShadow: isSelected ? [BoxShadow(color: BC.getPrimary(context).withAlpha(40), blurRadius: 8, spreadRadius: 0)] : null,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          decoration: BoxDecoration(
+            color: BC.getCard(context).withAlpha(150),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: BC.getPrimary(context).withAlpha(50)),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: safeValue,
+              isExpanded: true,
+              dropdownColor: BC.getCard(context),
+              icon: Icon(Icons.keyboard_arrow_down_rounded, color: BC.getPrimary(context)),
+              items: options.map((o) => DropdownMenuItem(
+                value: o['val'],
+                child: Row(
                   children: [
-                    Text(o['icon']!, style: const TextStyle(fontSize: 24)),
-                    const SizedBox(height: 6),
-                    Text(
-                      o['val']!,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                        color: isSelected ? BC.getPrimary(context) : BC.getText(context),
+                    Text(o['icon']!, style: const TextStyle(fontSize: 18)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(o['val']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                          Text(o['desc']!, style: TextStyle(fontSize: 9, color: BC.getTextSub(context))),
+                        ],
                       ),
-                    ),
-                    Text(
-                      o['desc']!,
-                      style: TextStyle(fontSize: 9, color: BC.getTextSub(context)),
-                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
-              ),
-            );
-          }).toList(),
+              )).toList(),
+              onChanged: onChanged,
+            ),
+          ),
         ),
       ],
     );

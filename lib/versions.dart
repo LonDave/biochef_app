@@ -42,6 +42,20 @@ class VersionsLog extends StatelessWidget {
           _buildHero(),
           const SizedBox(height: 24),
           _buildEraGroup(context, 'Support & Community Series (v0.3.x)', 'Canale Aperto', true, [
+            _buildVersionCard(context, '0.3.5', "The Tutor's Legacy", [
+              _item(
+                context,
+                '🎓',
+                'Educational Expansion',
+                'Nuovo Centro Tutor con FAQ esperte e onboarding approfondito.',
+              ),
+              _item(
+                context,
+                '📚',
+                'Guida d\'Élite',
+                'Riorganizzazione delle risorse di supporto per una padronanza totale.',
+              ),
+            ], true),
             _buildVersionCard(context, '0.3.4', "Polished Lifestyle", [
               _item(
                 context,
@@ -55,7 +69,7 @@ class VersionsLog extends StatelessWidget {
                 'UI Coherence',
                 'Design dei dialoghi rifinito per una migliore esperienza utente.',
               ),
-            ], true),
+            ], false),
             _buildVersionCard(context, '0.3.3', "Categorical Intelligence", [
               _item(
                 context,
@@ -482,21 +496,21 @@ class VersionsLog extends StatelessWidget {
                   children: [
                     _buildNewsItem(
                       context,
-                      '💎',
-                      'Polished Selection',
-                      'Il menu dei regimi alimentari è ora più coerente e visivo.',
+                      '🎓',
+                      'Tutor Center',
+                      'Nuova guida FAQ esperta disponibile nelle impostazioni.',
                     ),
                     _buildNewsItem(
                       context,
-                      '✨',
-                      'Premium Design',
-                      'Rifinitura estetica dei dialoghi di gestione della famiglia.',
+                      '📚',
+                      'Elite Onboarding',
+                      'Tutorial iniziale ampliato per spiegare le nuove logiche AI.',
                     ),
                     _buildNewsItem(
                       context,
                       '🚀',
-                      'BioChef 0.3.4',
-                      'Un upgrade di stile per il tuo stile di vita.',
+                      'BioChef 0.3.5',
+                      'Diventa un esperto con la versione dell\'insegnamento.',
                     ),
                     _buildNewsItem(
                       context,

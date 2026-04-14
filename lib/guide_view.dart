@@ -58,9 +58,89 @@ class GuideScreen extends StatelessWidget {
             _item(context, '🧠', 'Modelli Consigliati', 'Per risultati d\'élite, configura il modello "llama-3.3-70b-specdec" o "llama-3.1-8b-instant".'),
           ]),
 
+          const Divider(height: 40),
+          _buildFAQSection(context),
+
           const SizedBox(height: 30),
           _buildFooter(context),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFAQSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.school_outlined, color: Colors.blueAccent),
+            const SizedBox(width: 12),
+            Text(
+              'DOMANDE FREQUENTI (FAQ)',
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 12,
+                color: BC.getPrimary(context),
+                letterSpacing: 1,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _faqItem(
+          context,
+          'Le ricette generate sono sempre sicure?',
+          'Sì, BioChef utilizza il Protocollo di Ricerca Scientifica (v0.3.2). Prima di generare la ricetta, l\'AI effettua una scansione biologica degli ingredienti per escludere tossine o materiali non alimentari.'
+        ),
+        _faqItem(
+          context,
+          'Cosa succede se vieto la "Frutta"?',
+          'BioChef v0.3.3 applica la Logica Categoriale. Se vieti l\'intera categoria, l\'AI bloccherà automaticamente anche mele, banane, bacche e ogni sottogruppo correlato.'
+        ),
+        _faqItem(
+          context,
+          'I miei dati vengono condivisi con l\'AI?',
+          'Assolutamente no. I tuoi profili familiari vivono solo sul tuo telefono (Local-First). All\'AI di Groq viene inviato solo un elenco anonimo di ingredienti da usare o evitare.'
+        ),
+        _faqItem(
+          context,
+          'Posso usare l\'app senza internet?',
+          'Puoi consultare le ricette salvate e il tuo ricettario offline. Tuttavia, per la generazione di nuove idee tramite lo Chef AI, è necessaria una connessione dati.'
+        ),
+        _faqItem(
+          context,
+          'Perché serve una API Key di Groq?',
+          'BioChef è un software gratuito. Fornendo la tua chiave, hai il pieno controllo sui costi e sulla privacy delle tue chiamate AI, appoggiandoti a modelli d\'élite come Llama 3.3.'
+        ),
+      ],
+    );
+  }
+
+  Widget _faqItem(BuildContext context, String q, String a) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: BC.getCard(context).withAlpha(150),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: BC.getPrimary(context).withAlpha(30)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              q,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              a,
+              style: TextStyle(fontSize: 11, color: BC.getTextSub(context), height: 1.5),
+            ),
+          ],
+        ),
       ),
     );
   }
