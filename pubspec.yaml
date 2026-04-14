@@ -3,7 +3,7 @@ description: "BioChef AI - Il tuo chef intelligente di famiglia."
 publish_to: 'none'
 
 
-version: 0.3.0+1
+version: 0.3.1+1
 
 environment:
   sdk: ^3.11.4

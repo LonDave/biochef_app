@@ -297,11 +297,15 @@ class _UpdateProgressDialogState extends State<_UpdateProgressDialog> {
 
   Future<void> _startDownload() async {
     try {
-      // Controllo permessi raffinato
       if (Platform.isAndroid) {
-         if (await Permission.requestInstallPackages.isDenied) {
-           await Permission.requestInstallPackages.request();
-         }
+        final status = await Permission.requestInstallPackages.status;
+        if (status.isDenied || status.isPermanentlyDenied) {
+          final result = await Permission.requestInstallPackages.request();
+          if (result.isDenied || result.isPermanentlyDenied) {
+             if (mounted) setState(() { _hasError = true; _errorMsg = "Permesso di installazione necessario per procedere."; });
+             return;
+          }
+        }
       }
 
       BCUpdateManager._getUpdateStream(widget.downloadUrl).listen(

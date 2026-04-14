@@ -42,6 +42,20 @@ class VersionsLog extends StatelessWidget {
           _buildHero(),
           const SizedBox(height: 24),
           _buildEraGroup(context, 'Support & Community Series (v0.3.x)', 'Canale Aperto', true, [
+            _buildVersionCard(context, '0.3.1', "Archive Integrity Release", [
+              _item(
+                context,
+                '🏛️',
+                'Cronologia Completa',
+                'Ripristinata la storia completa da v0.2.1 per integrità di sistema.',
+              ),
+              _item(
+                context,
+                '🛡️',
+                'Stabilità Nativa',
+                'Validazione finale dei percorsi Android per installazioni corazzate.',
+              ),
+            ], true),
             _buildVersionCard(context, '0.3.0', "BioChef Feedback Loop", [
               _item(
                 context,
@@ -61,7 +75,7 @@ class VersionsLog extends StatelessWidget {
                 'UX Polish',
                 'Nomi versione puliti e layout AI Chef dinamico.',
               ),
-            ], true),
+            ], false),
           ]),
           const SizedBox(height: 24),
           _buildEraGroup(context, 'Evolution Series (v0.2.x)', 'Ingegneria Moderna', false, [
@@ -165,6 +179,30 @@ class VersionsLog extends StatelessWidget {
                 '🚀',
                 'Performance',
                 'Aumento velocità di caricamento delle ricette salvate.',
+              ),
+            ], false),
+            _buildVersionCard(context, '0.2.3', "Security Patch", [
+               _item(
+                context,
+                '🔐',
+                'Obfuscation',
+                'Migliorata la sicurezza delle chiavi API nel codice sorgente.',
+              ),
+            ], false),
+            _buildVersionCard(context, '0.2.2', "AI Prompt Tuning", [
+               _item(
+                context,
+                '🤖',
+                'Prompting',
+                'Affinamento delle istruzioni di sistema per ricette più accurate.',
+              ),
+            ], false),
+            _buildVersionCard(context, '0.2.1', "Mobile Beta Launch", [
+               _item(
+                context,
+                '📱',
+                'Beta Release',
+                'Prima distribuzione stabile della serie Evolution per Android.',
               ),
             ], false),
             _buildVersionCard(context, '0.2.0', "Evolution Baseline", [
@@ -402,21 +440,21 @@ class VersionsLog extends StatelessWidget {
                   children: [
                     _buildNewsItem(
                       context,
-                      '💬',
-                      'Feedback Loop',
-                      'Ora puoi inviare suggerimenti direttamente dall\'app via GitHub!',
+                      '🏛️',
+                      'History Restored',
+                      'La cronologia è ora completa senza lacune (0.2.1 - 0.3.1).',
                     ),
                     _buildNewsItem(
                       context,
                       '🛡️',
-                      'Update Stabili',
-                      'Fix definitivi per i crash durante l\'installazione degli aggiornamenti.',
+                      'Stabilità Totale',
+                      'Abbiamo blindato il codice per evitare crash negli aggiornamenti.',
                     ),
                     _buildNewsItem(
                       context,
                       '🚀',
-                      'BioChef 0.3.0',
-                      'Benvenuto nella nuova serie focalizzata sulla community.',
+                      'BioChef 0.3.1',
+                      'Versione definitiva per la stabilità e la community.',
                     ),
                     _buildNewsItem(
                       context,
