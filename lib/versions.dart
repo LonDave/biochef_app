@@ -42,6 +42,26 @@ class VersionsLog extends StatelessWidget {
           _buildHero(),
           const SizedBox(height: 24),
           _buildEraGroup(context, 'Evolution Series (v0.2.x)', 'Ingegneria Moderna', true, [
+            _buildVersionCard(context, '0.2.8', "Ironclad Update System", [
+              _item(
+                context,
+                '🛡️',
+                'Protocollo Senior',
+                'Implementata logica di update persistente e skipping intelligente.',
+              ),
+              _item(
+                context,
+                '🏷️',
+                'Versioning Auto',
+                'Sincronizzazione automatica con pubspec.yaml via PackageInfo.',
+              ),
+              _item(
+                context,
+                '💎',
+                'Premium UI',
+                'Nuovi dialoghi di feedback dinamici e professionali.',
+              ),
+            ], true),
             _buildVersionCard(context, '0.2.7', "Dialog Fix & Update System", [
               _item(
                 context,
@@ -61,7 +81,7 @@ class VersionsLog extends StatelessWidget {
                 'Badge Aggiornamenti',
                 'Aggiunta notifica visiva nelle impostazioni quando disponibile.',
               ),
-            ], true),
+            ], false),
             _buildVersionCard(context, '0.2.6', "Stability Focus", [
               _item(
                 context,
@@ -340,20 +360,20 @@ class VersionsLog extends StatelessWidget {
                     _buildNewsItem(
                       context,
                       '🛡️',
-                      'Stabilità Dialoghi',
-                      'Risolti i crash nei popup e migliorata la sequenza di comparsa.',
+                      'Protocollo Senior',
+                      'Logica di update persistente che rispetta le tue scelte (Skip).',
                     ),
                     _buildNewsItem(
                       context,
                       '🏷️',
-                      'Integrazione Settings',
-                      'Notifica visiva degli aggiornamenti direttamente nelle impostazioni.',
+                      'Auto-Versioning',
+                      'L\'app è ora sempre sincronizzata con la configurazione di progetto.',
                     ),
                     _buildNewsItem(
                       context,
-                      '🚀',
-                      'BioChef 0.2.7',
-                      'Ottimizzazioni strutturali e stabilità del sistema di update.',
+                      '💎',
+                      'Premium Feedback',
+                      'Dialoghi di successo e caricamento ridisegnati per un look d\'élite.',
                     ),
                   ],
                 ),
