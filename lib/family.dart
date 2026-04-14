@@ -565,18 +565,72 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
   }
 
   Widget _buildRegimeSelector(String current, Function(String?) onChanged) {
-    final List<String> options = ['Onnivoro', 'Vegetariano', 'Vegano', 'Chetogenico', 'Paleo'];
-    return DropdownButtonFormField<String>(
-      initialValue: current,
-      decoration: InputDecoration(
-        labelText: 'Regime Alimentare',
-        prefixIcon: Icon(Icons.restaurant_rounded, color: BC.getPrimary(context)),
-        filled: true,
-        fillColor: BC.getPrimary(context).withAlpha(15),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-      ),
-      items: options.map((o) => DropdownMenuItem(value: o, child: Text(o))).toList(),
-      onChanged: onChanged,
+    final List<Map<String, String>> options = [
+      {'val': 'Onnivoro', 'icon': '🍽️', 'desc': 'Alimentazione completa'},
+      {'val': 'Vegetariano', 'icon': '🥚', 'desc': 'No carne/pesce'},
+      {'val': 'Vegano', 'icon': '🍃', 'desc': 'Solo vegetale'},
+      {'val': 'Chetogenico', 'icon': '🥑', 'desc': 'Bassi carboidrati'},
+      {'val': 'Paleo', 'icon': '🦴', 'desc': 'Cibi ancestrali'},
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'REGIME ALIMENTARE',
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            color: BC.getPrimary(context),
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: options.map((o) {
+            final bool isSelected = current == o['val'] || (current == '' && o['val'] == 'Onnivoro');
+            return GestureDetector(
+              onTap: () => onChanged(o['val']),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: (MediaQuery.of(context).size.width / 2) - 45,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isSelected ? BC.getPrimary(context).withAlpha(40) : BC.getCard(context).withAlpha(100),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSelected ? BC.getPrimary(context) : BC.getPrimary(context).withAlpha(40),
+                    width: isSelected ? 2 : 1,
+                  ),
+                  boxShadow: isSelected ? [BoxShadow(color: BC.getPrimary(context).withAlpha(40), blurRadius: 8, spreadRadius: 0)] : null,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(o['icon']!, style: const TextStyle(fontSize: 24)),
+                    const SizedBox(height: 6),
+                    Text(
+                      o['val']!,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: isSelected ? BC.getPrimary(context) : BC.getText(context),
+                      ),
+                    ),
+                    Text(
+                      o['desc']!,
+                      style: TextStyle(fontSize: 9, color: BC.getTextSub(context)),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 

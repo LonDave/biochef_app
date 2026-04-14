@@ -6,7 +6,8 @@ import 'dart:async';
 import 'logic.dart';
 import 'theme.dart';
 import 'security.dart';
-import 'recipes_view.dart'; // Per i componenti condivisi
+import 'recipes_view.dart';
+import 'ai_protocol.dart';
 
 /// RecipeHub è il motore dell'AI Chef. Gestisce la generazione di menù
 /// tramite l'API di Groq e il filtraggio dietetico in tempo reale.
@@ -94,6 +95,14 @@ class _RecipeHubState extends State<RecipeHub> {
     });
 
     try {
+      if (BCAIProtocol.isNonFoodItem(prompt)) {
+        if (mounted) {
+           _mostraErroreAPI("Chef Incredulo", "BioChef rileva elementi non commestibili o pericolosi. Per favore, inserisci ingredienti alimentari reali.");
+           setState(() => _loading = false);
+           return;
+        }
+      }
+
       final fBox = Hive.box('familyBox');
       final family = fBox.values.where((m) => m['presente'] ?? true).toList();
       int numPersone = 1;
@@ -123,27 +132,17 @@ class _RecipeHubState extends State<RecipeHub> {
               "messages": [
                 {
                   "role": "system",
-                  "content":
-                      "Sei BioChef AI, il Tutor Culinario professionale definitivo.\n"
-                      "REGOLE DI SICUREZZA:\n"
-                      "1. Se l'utente inserisce ingredienti non edibili, disgustosi o pericolosi, RIFIUTA TOTALMENTE e non generare alcuna ricetta. Spiega il motivo professionale.\n"
-                      "2. Usa solo ricette reali, verificate e commestibili.\n"
-                      "3. PORZIONI: Calcola le dosi degli ingredienti esattamente per $numPersone persone.\n\n"
-                      "REQUISITO MANDATORIO: Genera SEMPRE esattamente 3 opzioni diverse, ciascuna separata dal tag <<RICETTA>>.\n"
-                      "OBIETTIVO: Fornire varietà e scelta professionale.\n"
-                      "ALLERGIE/GUSTI FAMIGLIA:\n$divieti\n"
-                      "FEEDBACK STORICO (GUSTI):\n$feedback\n"
-                      "CRONOLOGIA PASTI RECENTI:\n$history\n"
-                      "FORMATO RIGIDO OBBLIGATORIO PER OGNI RICETTA (Inizia direttamente col tag):\n"
-                      "[TITOLO] Nome della ricetta reale\n"
-                      "[SICUREZZA] Note nutrizionali e benefici. GIUSTIFICA esplicitamente le scelte in base alle allergie/gusti citando i NOMI dei familiari (es. 'Senza lattosio per Luca').\n"
-                      "[INGREDIENTI] Lista con dosi precise per $numPersone persone\n"
-                      "[PREPARAZIONE] Passaggi estremamente dettagliati e tecnici per principianti ed esperti\n"
-                      "IMPORTANTE: Non saltare mai nessuna delle 3 ricette. Se la richiesta è valida, DEVI usare questo schema. Separa con '<<RICETTA>>'.",
+                  "content": BCAIProtocol.generateSystemPrompt(
+                    numPeople: numPersone,
+                    divieti: divieti.toString(),
+                    feedback: feedback,
+                    history: history,
+                  ),
                 },
                 {"role": "user", "content": prompt},
               ],
-              "temperature": 0.4,
+              "temperature": 0.2, // Minima temperatura per massima aderenza ai vincoli
+              "top_p": 0.9,
             }),
           )
           .timeout(const Duration(seconds: 30));

@@ -15,12 +15,29 @@ class BCDietary {
   /// Restituisce un messaggio d'errore se trova corrispondenze, altrimenti null.
   static String? validaCommestibile(String testo) {
     if (testo.trim().isEmpty) return null;
-    final parole = testo.toLowerCase().split(RegExp(r'[^a-z]+'));
+    final low = testo.toLowerCase();
+    
+    // Lista senior di categorie di rischio
+    final dangerous = [
+      'pietra', 'sasso', 'fango', 'metallo', 'plastica', 'vetro', 'legno',
+      'benzina', 'petrolio', 'sapone', 'detersivo', 'veleno', 'acido',
+      'carta', 'stoffa', 'ferro', 'acciaio', 'alluminio', 'rame', 'computer',
+      'pneumatico', 'lampadina', 'cemento', 'mattoni', 'sabbia', 'bulloni'
+    ];
+
+    for (final p in dangerous) {
+      if (low.contains(p)) {
+        return "🚨 Elemento non commestibile o pericoloso rilevato ($p)!";
+      }
+    }
+
+    // Controllo radici di sicurezza originali
+    final parole = low.split(RegExp(r'[^a-z]+'));
     for (final p in parole) {
       if (p.length < 3) continue;
       for (final radice in BCSecurity.safeFoodRoots) {
         if (p.contains(radice)) {
-          return "🚨 Elemento non commestibile o pericoloso rilevato!";
+          return "🚨 Contenuto non appropriato o pericoloso rilevato!";
         }
       }
     }
@@ -59,7 +76,7 @@ class BCDietary {
     categorie.forEach((categoria, ingredienti) {
       final regSemplice = RegExp(r'\b' + categoria + r'\b', caseSensitive: false);
       if (regSemplice.hasMatch(risultato)) {
-        risultato = risultato.replaceAll(regSemplice, '$categoria [Vietati: $ingredienti]');
+        risultato = risultato.replaceAll(regSemplice, 'CATEGORIA $categoria (DIVIETO TOTALE per: $ingredienti)');
       }
     });
 

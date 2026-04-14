@@ -42,6 +42,48 @@ class VersionsLog extends StatelessWidget {
           _buildHero(),
           const SizedBox(height: 24),
           _buildEraGroup(context, 'Support & Community Series (v0.3.x)', 'Canale Aperto', true, [
+            _buildVersionCard(context, '0.3.4', "Polished Lifestyle", [
+              _item(
+                context,
+                '💎',
+                'Lifestyle Selection',
+                'Nuovo selettore premium per i regimi alimentari (Vegano, Keto, ecc).',
+              ),
+              _item(
+                context,
+                '✨',
+                'UI Coherence',
+                'Design dei dialoghi rifinito per una migliore esperienza utente.',
+              ),
+            ], true),
+            _buildVersionCard(context, '0.3.3', "Categorical Intelligence", [
+              _item(
+                context,
+                '🍎',
+                'Intelligence Categoriale',
+                'L\'AI ora comprende che vietare "Frutta" o "Carne" implica il divieto di ogni sottocategoria.',
+              ),
+              _item(
+                context,
+                '🛡️',
+                'Safety Hardening',
+                'Rafforzata la logica di esclusione per garantire il 100% della sicurezza.',
+              ),
+            ], false),
+            _buildVersionCard(context, '0.3.2', "Scientific Research Mode", [
+              _item(
+                context,
+                '🧪',
+                'Protocollo di Ricerca',
+                'L\'AI ora effettua una scansione scientifica di ogni ingrediente prima di cucinare.',
+              ),
+              _item(
+                context,
+                '🔬',
+                'Identificazione Bio',
+                'Riconoscimento accurato di regimi alimentari e classificazione biologica.',
+              ),
+            ], false),
             _buildVersionCard(context, '0.3.1', "Archive Integrity Release", [
               _item(
                 context,
@@ -55,7 +97,7 @@ class VersionsLog extends StatelessWidget {
                 'Stabilità Nativa',
                 'Validazione finale dei percorsi Android per installazioni corazzate.',
               ),
-            ], true),
+            ], false),
             _buildVersionCard(context, '0.3.0', "BioChef Feedback Loop", [
               _item(
                 context,
@@ -440,21 +482,21 @@ class VersionsLog extends StatelessWidget {
                   children: [
                     _buildNewsItem(
                       context,
-                      '🏛️',
-                      'History Restored',
-                      'La cronologia è ora completa senza lacune (0.2.1 - 0.3.1).',
+                      '💎',
+                      'Polished Selection',
+                      'Il menu dei regimi alimentari è ora più coerente e visivo.',
                     ),
                     _buildNewsItem(
                       context,
-                      '🛡️',
-                      'Stabilità Totale',
-                      'Abbiamo blindato il codice per evitare crash negli aggiornamenti.',
+                      '✨',
+                      'Premium Design',
+                      'Rifinitura estetica dei dialoghi di gestione della famiglia.',
                     ),
                     _buildNewsItem(
                       context,
                       '🚀',
-                      'BioChef 0.3.1',
-                      'Versione definitiva per la stabilità e la community.',
+                      'BioChef 0.3.4',
+                      'Un upgrade di stile per il tuo stile di vita.',
                     ),
                     _buildNewsItem(
                       context,
