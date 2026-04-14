@@ -56,8 +56,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             
             _buildDashboardSection(
               context, 
-              '🤖 Cervello AI', 
+              'Cervello AI', 
               'Configurazione Groq e modelli',
+              Icons.psychology_rounded,
               [
                 _buildGroqSection(),
               ],
@@ -65,8 +66,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             
             _buildDashboardSection(
               context, 
-              '🔐 Sicurezza & Legale', 
+              'Sicurezza & Legale', 
               'Accesso e conformità giuridica',
+              Icons.security_rounded,
               [
                 _buildTile(
                   context,
@@ -89,8 +91,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             
             _buildDashboardSection(
               context, 
-              '💾 Gestione Dati & Sync', 
+              'Gestione Dati & Sync', 
               'Backup e manutenzione locale',
+              Icons.storage_rounded,
               [
                 _buildTile(
                   context,
@@ -113,8 +116,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             
             _buildDashboardSection(
               context, 
-              '🚀 Supporto & App', 
+              'Supporto & App', 
               'Aggiornamenti e assistenza',
+              Icons.auto_awesome_rounded,
               [
                 _buildTutorTile(context),
                 _buildTile(
@@ -139,14 +143,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
             
             const SizedBox(height: 32),
             _buildDestructiveActions(context),
+            const SizedBox(height: 48),
+            _buildFooter(context),
             const SizedBox(height: 40),
-            Text(
-              'BioChef AI Harmony v0.3.7',
-              style: TextStyle(fontSize: 10, color: BC.getTextSub(context).withAlpha(100)),
-            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFooter(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          'BioChef AI — v${BCVersion.current}',
+          style: TextStyle(fontSize: 10, color: Colors.grey, letterSpacing: 0.5),
+        ),
+        const SizedBox(height: 10),
+        Icon(
+          Icons.verified_user_rounded,
+          size: 20,
+          color: BC.getPrimary(context).withAlpha(80),
+        ),
+      ],
     );
   }
 
@@ -190,35 +209,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final bool useSystem = box.get('useSystemTheme', defaultValue: true);
     final bool isDark = box.get('isDarkModeManual', defaultValue: false);
 
-    return IconButton(
-      icon: Icon(
-        useSystem ? Icons.brightness_auto : (isDark ? Icons.dark_mode : Icons.light_mode),
-        color: Colors.white,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          if (useSystem) {
+            // Da Auto a Dark
+            box.put('useSystemTheme', false);
+            box.put('isDarkModeManual', true);
+          } else if (isDark) {
+            // Da Dark a Light
+            box.put('useSystemTheme', false);
+            box.put('isDarkModeManual', false);
+          } else {
+            // Da Light a Auto
+            box.put('useSystemTheme', true);
+          }
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          child: Icon(
+            useSystem ? Icons.auto_mode_rounded : (isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded),
+            color: Colors.white,
+            size: 24,
+          ),
+        ),
       ),
-      onPressed: () {
-        if (useSystem) {
-          box.put('useSystemTheme', false);
-          box.put('isDarkModeManual', true);
-        } else if (isDark) {
-          box.put('isDarkModeManual', false);
-        } else {
-          box.put('useSystemTheme', true);
-        }
-      },
     );
   }
 
-  Widget _buildDashboardSection(BuildContext context, String title, String sub, List<Widget> children) {
+  Widget _buildDashboardSection(BuildContext context, String title, String sub, IconData icon, List<Widget> children) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 8, bottom: 8, top: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text(title.toUpperCase(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: BC.getPrimary(context), letterSpacing: 1.2)),
-              Text(sub, style: TextStyle(fontSize: 10, color: BC.getTextSub(context))),
+              Icon(icon, size: 16, color: BC.getPrimary(context)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title.toUpperCase(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: BC.getPrimary(context), letterSpacing: 1.2)),
+                    Text(sub, style: TextStyle(fontSize: 10, color: BC.getTextSub(context))),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -255,11 +294,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       title: const Text('Centro Tutor & FAQ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
       subtitle: const Text('Guida esperta e protocolli AI'),
-      trailing: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: const BoxDecoration(color: Colors.amber, shape: BoxShape.circle),
-        child: const Icon(Icons.bolt, color: Colors.white, size: 10),
-      ),
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GuideScreen())),
     );
   }
@@ -451,7 +485,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 final String msg = feedbackC.text.trim();
                 Navigator.pop(ctx);
                 
-                final String title = Uri.encodeComponent("BioChef v0.3.7 - Feedback");
+                final String title = Uri.encodeComponent("BioChef v${BCVersion.current} - Feedback");
                 final String body = Uri.encodeComponent("Ciao Chef!\n\nFeedback:\n$msg\n\n--- Inviato da App Mobile ---");
                 final String url = "https://github.com/LonDave/biochef_app/issues/new?title=$title&body=$body";
                 

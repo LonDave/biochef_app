@@ -127,7 +127,11 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
       labelColor: Colors.white,
       indicatorColor: BC.accent,
       labelStyle: TextStyle(fontSize: Res.fs(context, 13), fontWeight: FontWeight.bold),
-      tabs: const [Tab(text: '👨‍👩‍👧 Famiglia'), Tab(text: '📖 Ricettario'), Tab(text: '📅 Calendario')],
+      tabs: const [
+        Tab(icon: Icon(Icons.groups_rounded), text: 'Famiglia'), 
+        Tab(icon: Icon(Icons.menu_book_rounded), text: 'Ricettario'), 
+        Tab(icon: Icon(Icons.calendar_month_rounded), text: 'Calendario')
+      ],
     );
   }
 
@@ -300,7 +304,10 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
             labelColor: BC.getPrimary(context),
             unselectedLabelColor: BC.getTextSub(context),
             indicatorColor: BC.getPrimary(context),
-            tabs: const [Tab(text: '🤖 AI Salvati'), Tab(text: '👨‍🍳 Creati')],
+            tabs: const [
+              Tab(icon: Icon(Icons.psychology_rounded, size: 20), text: 'AI Salvati'), 
+              Tab(icon: Icon(Icons.restaurant_menu_rounded, size: 20), text: 'Creati')
+            ],
           ),
           Expanded(child: TabBarView(children: [_buildRecipeList('savedRecipesBox'), _buildRecipeList('customRecipesBox')])),
         ],
@@ -457,199 +464,18 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
   // --- LOGICA DIALOG & SETTINGS ---
 
   void _aggiungiMembro() {
-    final nomeC = TextEditingController();
-    final intolC = TextEditingController();
-    final odiatiC = TextEditingController();
-    bool haAllergie = false;
-    String selectedRegime = 'Onnivoro';
-
     showDialog(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setDim) => AlertDialog(
-          title: const Text('👨‍👩‍👧 Nuovo Familiare'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nomeC, 
-                  onChanged: (v) => setDim(() {}),
-                  decoration: const InputDecoration(labelText: 'Nome *', hintText: 'es. Mario'),
-                ),
-                const SizedBox(height: 12),
-                _buildRegimeSelector(selectedRegime, (v) => setDim(() => selectedRegime = v!)),
-                const SizedBox(height: 12),
-                TextField(controller: odiatiC, decoration: const InputDecoration(labelText: 'Cibo Sgradito (Opzionale)', hintText: 'es. Cipolla, Pepe')),
-                const SizedBox(height: 16),
-                _buildAllergyToggle(haAllergie, (v) => setDim(() => haAllergie = v)),
-                if (haAllergie) ...[
-                  const SizedBox(height: 10),
-                  TextField(controller: intolC, decoration: const InputDecoration(labelText: 'Specifiche Allergie (Opzionale)', hintText: 'es. Glutine, Lattosio')),
-                ],
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annulla')),
-            ElevatedButton(onPressed: haMembroValido(nomeC) ? () {
-              Hive.box('familyBox').add({
-                'nome': nomeC.text,
-                'intolleranze': haAllergie ? intolC.text : '',
-                'nonGraditi': odiatiC.text,
-                'regime': selectedRegime == 'Onnivoro' ? '' : selectedRegime,
-                'presente': true,
-              });
-              Navigator.pop(ctx);
-            } : null, child: const Text('Salva')),
-          ],
-        ),
-      ),
+      builder: (_) => const _MemberDialogContent(),
     );
   }
-
-  bool haMembroValido(TextEditingController c) => c.text.trim().isNotEmpty;
 
   void _modificaMembro(int index) {
     final box = Hive.box('familyBox');
     final m = box.getAt(index);
-    final nomeC = TextEditingController(text: m['nome']);
-    final intolC = TextEditingController(text: m['intolleranze']);
-    final odiatiC = TextEditingController(text: m['nonGraditi']);
-    bool haAllergie = (m['intolleranze'] ?? '').toString().isNotEmpty;
-    String selectedRegime = m['regime'] == null || m['regime'] == '' ? 'Onnivoro' : m['regime'];
-
     showDialog(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setDim) => AlertDialog(
-          title: const Text('📝 Modifica Familiare'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nomeC, 
-                  onChanged: (v) => setDim(() {}),
-                  decoration: const InputDecoration(labelText: 'Nome *', hintText: 'es. Mario'),
-                ),
-                const SizedBox(height: 12),
-                _buildRegimeSelector(selectedRegime, (v) => setDim(() => selectedRegime = v!)),
-                const SizedBox(height: 12),
-                TextField(controller: odiatiC, decoration: const InputDecoration(labelText: 'Cibo Sgradito (Opzionale)', hintText: 'es. Cipolla, Pepe')),
-                const SizedBox(height: 16),
-                _buildAllergyToggle(haAllergie, (v) => setDim(() => haAllergie = v)),
-                if (haAllergie) ...[
-                  const SizedBox(height: 10),
-                  TextField(controller: intolC, decoration: const InputDecoration(labelText: 'Specifiche Allergie (Opzionale)', hintText: 'es. Glutine, Lattosio')),
-                ],
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annulla')),
-            ElevatedButton(onPressed: haMembroValido(nomeC) ? () {
-              box.putAt(index, {
-                'nome': nomeC.text,
-                'intolleranze': haAllergie ? intolC.text : '',
-                'nonGraditi': odiatiC.text,
-                'regime': selectedRegime == 'Onnivoro' ? '' : selectedRegime,
-                'presente': m['presente'] ?? true,
-              });
-              Navigator.pop(ctx);
-            } : null, child: const Text('Aggiorna')),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRegimeSelector(String current, Function(String?) onChanged) {
-    final List<Map<String, String>> options = [
-      {'val': 'Onnivoro', 'icon': '🍽️', 'desc': 'Alimentazione completa'},
-      {'val': 'Vegetariano', 'icon': '🥚', 'desc': 'No carne e pesce'},
-      {'val': 'Vegano', 'icon': '🍃', 'desc': 'Esclude derivati animali'},
-      {'val': 'Chetogenico', 'icon': '🥑', 'desc': 'Bassi carboidrati'},
-      {'val': 'Paleo', 'icon': '🦴', 'desc': 'Alimentazione ancestrale'},
-    ];
-
-    // Se current è vuoto, mostriamo Onnivoro
-    final String safeValue = current == '' ? 'Onnivoro' : current;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'REGIME ALIMENTARE',
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w900,
-            color: BC.getPrimary(context),
-            letterSpacing: 1.2,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          decoration: BoxDecoration(
-            color: BC.getCard(context).withAlpha(150),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: BC.getPrimary(context).withAlpha(50)),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: safeValue,
-              isExpanded: true,
-              dropdownColor: BC.getCard(context),
-              icon: Icon(Icons.keyboard_arrow_down_rounded, color: BC.getPrimary(context)),
-              items: options.map((o) => DropdownMenuItem(
-                value: o['val'],
-                child: Row(
-                  children: [
-                    Text(o['icon']!, style: const TextStyle(fontSize: 18)),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(o['val']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                          Text(o['desc']!, style: TextStyle(fontSize: 9, color: BC.getTextSub(context))),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              )).toList(),
-              onChanged: onChanged,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAllergyToggle(bool active, Function(bool) onChanged) {
-    return InkWell(
-      onTap: () => onChanged(!active),
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: active ? Colors.red.withAlpha(30) : BC.getPrimary(context).withAlpha(15),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: active ? Colors.red.withAlpha(100) : BC.getPrimary(context).withAlpha(40)),
-        ),
-        child: Row(
-          children: [
-            Icon(active ? Icons.warning_amber_rounded : Icons.health_and_safety_outlined, 
-                 color: active ? Colors.red : BC.getPrimary(context)),
-            const SizedBox(width: 12),
-            Expanded(child: Text('Allergie o Intolleranze?', style: TextStyle(fontWeight: FontWeight.bold, color: active ? Colors.red : BC.getText(context)))),
-            Switch(value: active, onChanged: onChanged, activeThumbColor: Colors.red),
-          ],
-        ),
-      ),
+      builder: (_) => _MemberDialogContent(member: m, index: index),
     );
   }
 
@@ -661,7 +487,13 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('👨‍🍳 Nuova Ricetta'),
+        title: Row(
+          children: [
+            Icon(Icons.restaurant_menu_rounded, color: BC.getPrimary(context)),
+            const SizedBox(width: 12),
+            const Text('Nuova Ricetta'),
+          ],
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -696,4 +528,240 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
   void _mostraDettaglio(dynamic r, bool isCustom, int index) {
     Navigator.push(context, MaterialPageRoute(builder: (_) => RecipeDetailScreen(recipe: r, isCustom: isCustom, index: index)));
   }
+} // Chiusura corretta di _FamilyScreenState
+
+// ─────────────────────────────────────────────
+// COMPONENTI DIALOG (Incapsulati per Stabilità v0.4.1)
+// ─────────────────────────────────────────────
+
+class _MemberDialogContent extends StatefulWidget {
+  final dynamic member;
+  final int? index;
+  const _MemberDialogContent({this.member, this.index});
+
+  @override
+  State<_MemberDialogContent> createState() => _MemberDialogContentState();
+}
+
+class _MemberDialogContentState extends State<_MemberDialogContent> {
+  late TextEditingController nomeC;
+  late TextEditingController intolC;
+  late TextEditingController odiatiC;
+  late bool haAllergie;
+  late String selectedRegime;
+
+  @override
+  void initState() {
+    super.initState();
+    final m = widget.member;
+    nomeC = TextEditingController(text: m?['nome'] ?? '');
+    intolC = TextEditingController(text: m?['intolleranze'] ?? '');
+    odiatiC = TextEditingController(text: m?['nonGraditi'] ?? '');
+    haAllergie = (m?['intolleranze'] ?? '').toString().isNotEmpty;
+    selectedRegime = m?['regime'] == null || m?['regime'] == '' ? 'Onnivoro' : m!['regime'];
+  }
+
+  @override
+  void dispose() {
+    nomeC.dispose();
+    intolC.dispose();
+    odiatiC.dispose();
+    super.dispose();
+  }
+
+  bool get haMembroValido => nomeC.text.trim().isNotEmpty;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isEdit = widget.member != null;
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: Row(
+        children: [
+          Icon(isEdit ? Icons.edit_note_rounded : Icons.person_add_rounded, color: BC.getPrimary(context)),
+          const SizedBox(width: 12),
+          Text(isEdit ? 'Modifica' : 'Nuovo Familiare'),
+        ],
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader(context, 'DATI ANAGRAFICI'),
+            TextField(
+              controller: nomeC, 
+              onChanged: (_) => setState(() {}),
+              decoration: _inputDeco(context, 'Nome *', 'es. Mario', Icons.badge_rounded),
+            ),
+            const SizedBox(height: 20),
+            _buildRegimeSelector(context, selectedRegime, (v) => setState(() => selectedRegime = v!)),
+            const SizedBox(height: 24),
+            _buildSectionHeader(context, 'SICUREZZA & GUSTI'),
+            TextField(
+              controller: odiatiC, 
+              decoration: _inputDeco(context, 'Cibi Sgraditi', 'es. Cipolla, Pepe (opzionale)', Icons.heart_broken_rounded),
+            ),
+            const SizedBox(height: 16),
+            _buildAllergyToggle(context, haAllergie, (v) => setState(() => haAllergie = v)),
+            if (haAllergie) ...[
+              const SizedBox(height: 12),
+              TextField(
+                controller: intolC, 
+                decoration: _inputDeco(context, 'Specifiche Allergie', 'es. Glutine, Lattosio', Icons.warning_amber_rounded),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annulla')),
+        ElevatedButton(
+          onPressed: haMembroValido ? () => _salva() : null, 
+          child: Text(isEdit ? 'Aggiorna' : 'Salva Familiare'),
+        ),
+      ],
+    );
+  }
+
+  void _salva() {
+    try {
+      final data = {
+        'nome': nomeC.text.trim(),
+        'intolleranze': haAllergie ? intolC.text.trim() : '',
+        'nonGraditi': odiatiC.text.trim(),
+        'regime': selectedRegime == 'Onnivoro' ? '' : selectedRegime,
+        'presente': widget.member?['presente'] ?? true,
+      };
+      
+      final box = Hive.box('familyBox');
+      if (widget.member != null) {
+        box.putAt(widget.index!, data);
+      } else {
+        box.add(data);
+      }
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Errore nel salvataggio.')));
+    }
+  }
+
+  InputDecoration _inputDeco(BuildContext context, String label, String hint, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      prefixIcon: Icon(icon, color: BC.getPrimary(context).withAlpha(150), size: 20),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+          color: BC.getPrimary(context).withAlpha(180),
+          letterSpacing: 1.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRegimeSelector(BuildContext context, String current, Function(String?) onChanged) {
+    final List<Map<String, String>> options = [
+      {'val': 'Onnivoro', 'icon': '🍽', 'desc': 'Alimentazione completa'},
+      {'val': 'Vegetariano', 'icon': '🥚', 'desc': 'No carne e pesce'},
+      {'val': 'Vegano', 'icon': '🍃', 'desc': 'Esclude derivati animali'},
+      {'val': 'Chetogenico', 'icon': '🥑', 'desc': 'Bassi carboidrati'},
+      {'val': 'Paleo', 'icon': '🦴', 'desc': 'Alimentazione ancestrale'},
+    ];
+
+    final String safeValue = current.isEmpty ? 'Onnivoro' : current;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(context, 'REGIME ALIMENTARE'),
+        DropdownButtonFormField<String>(
+          isExpanded: true,
+          borderRadius: BorderRadius.circular(20),
+          initialValue: safeValue,
+          dropdownColor: BC.getCard(context).withAlpha(250),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: BC.getCard(context).withAlpha(150),
+            prefixIcon: Icon(Icons.restaurant_rounded, color: BC.getPrimary(context), size: 18),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: BorderSide(color: BC.getPrimary(context).withAlpha(40)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: BorderSide(color: BC.getPrimary(context), width: 2),
+            ),
+          ),
+          icon: Icon(Icons.keyboard_arrow_down_rounded, color: BC.getPrimary(context)),
+          selectedItemBuilder: (ctx) => options.map((o) => Row(
+            children: [
+              Text(o['icon']!, style: const TextStyle(fontSize: 16)),
+              const SizedBox(width: 10),
+              Text(o['val']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            ],
+          )).toList(),
+          items: options.map((o) => DropdownMenuItem(
+            value: o['val'],
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(color: BC.getPrimary(context).withAlpha(15), borderRadius: BorderRadius.circular(8)),
+                    child: Text(o['icon']!, style: const TextStyle(fontSize: 16)),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(o['val']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        Text(o['desc']!, style: TextStyle(fontSize: 9, color: BC.getTextSub(context))),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )).toList(),
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAllergyToggle(BuildContext context, bool current, Function(bool) onChanged) {
+    return Row(
+      children: [
+        Icon(current ? Icons.warning_amber_rounded : Icons.health_and_safety_rounded, 
+             color: current ? Colors.red : BC.getPrimary(context).withAlpha(150), size: 20),
+        const SizedBox(width: 12),
+        Expanded(child: Text('Questo membro ha allergie?', style: TextStyle(fontSize: 13, color: BC.getText(context)))),
+        Switch(
+          value: current, 
+          activeThumbColor: Colors.redAccent,
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+
 }

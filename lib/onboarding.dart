@@ -97,34 +97,8 @@ class _OnboardingLegalScreenState extends State<OnboardingLegalScreen> {
                       const SizedBox(height: 30),
                       const Divider(),
                       const SizedBox(height: 20),
-                      
-                      // Checkbox 1: Accettazione Generale
-                      CheckboxListTile(
-                        value: _accettoTermini,
-                        onChanged: (v) => setState(() => _accettoTermini = v ?? false),
-                        dense: true,
-                        activeColor: BC.primary,
-                        title: const Text(
-                          'Dichiaro di aver letto e accettato i Termini di Servizio e l\'Informativa Privacy',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      
-                      // Checkbox 2: Clausole Vessatorie (Artt. 1341-1342 c.c.)
-                      CheckboxListTile(
-                        value: _accettoSpecificamente,
-                        onChanged: (v) => setState(() => _accettoSpecificamente = v ?? false),
-                        dense: true,
-                        activeColor: Colors.orange,
-                        title: Text(
-                          'ACCETTAZIONE SPECIFICA: Approvo specificamente ai sensi degli artt. 1341 e 1342 c.c. le clausole di cui ai punti: 2 (Limitazione Responsabilità), 3 (Rischi AI e Allucinazioni), 4 (Manleva e Esonero), 6 (Foro Competente).',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.orange.shade900,
-                          ),
-                        ),
-                      ),
+                      const SizedBox(height: 20),
+                      _buildConsentBox(context),
                       const SizedBox(height: 40),
                       
                       // Bottone di Proseguimento
@@ -144,6 +118,60 @@ class _OnboardingLegalScreenState extends State<OnboardingLegalScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildConsentBox(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: BC.getPrimary(context).withAlpha(10),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: BC.getPrimary(context).withAlpha(30)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.fact_check_rounded, color: BC.getPrimary(context), size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'MODULO DI CONSENSO',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 12,
+                  color: BC.getPrimary(context),
+                  letterSpacing: 1,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          CheckboxListTile(
+            value: _accettoTermini,
+            onChanged: (v) => setState(() => _accettoTermini = v ?? false),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            activeColor: BC.primary,
+            title: const Text(
+              'Accetto i Termini di Servizio e l\'Informativa Privacy',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            ),
+          ),
+          CheckboxListTile(
+            value: _accettoSpecificamente,
+            onChanged: (v) => setState(() => _accettoSpecificamente = v ?? false),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            activeColor: Colors.orange,
+            title: Text(
+              'APPROVAZIONE SPECIFICA (Artt. 1341-1342 c.c.): Approvo espressamente le clausole limitative di cui ai punti 2 (Responsabilità), 3 (Rischi AI), 4 (Manleva) e 6 (Foro Competente).',
+              style: TextStyle(fontSize: 11, color: Colors.orange.shade900, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -460,23 +488,48 @@ class _LegalScreenState extends State<LegalScreen> {
           children: [
             const LegalText(),
             const SizedBox(height: 30),
-            CheckboxListTile(
-              value: _accettoTermini,
-              onChanged: _accettoTermini ? null : (v) {
-                setState(() => _accettoTermini = v ?? false);
-                _salvaConsenso();
-              },
-              activeColor: BC.primary,
-              title: const Text('Accetto i Termini di Servizio', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-            ),
-            CheckboxListTile(
-              value: _accettoSpecificamente,
-              onChanged: _accettoSpecificamente ? null : (v) {
-                setState(() => _accettoSpecificamente = v ?? false);
-                _salvaConsenso();
-              },
-              activeColor: Colors.orange,
-              title: const Text('Accetto le clausole vessatorie', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: BC.getPrimary(context).withAlpha(10),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: BC.getPrimary(context).withAlpha(30)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.fact_check_rounded, color: BC.getPrimary(context), size: 18),
+                      const SizedBox(width: 8),
+                      Text('RIEPILOGO CONSENSI', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: BC.getPrimary(context))),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  CheckboxListTile(
+                    value: _accettoTermini,
+                    onChanged: _accettoTermini ? null : (v) {
+                      setState(() => _accettoTermini = v ?? false);
+                      _salvaConsenso();
+                    },
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    activeColor: BC.primary,
+                    title: const Text('Termini di Servizio Accettati', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  ),
+                  CheckboxListTile(
+                    value: _accettoSpecificamente,
+                    onChanged: _accettoSpecificamente ? null : (v) {
+                      setState(() => _accettoSpecificamente = v ?? false);
+                      _salvaConsenso();
+                    },
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    activeColor: Colors.orange,
+                    title: const Text('Clausole Vessatorie Accettate', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

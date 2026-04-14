@@ -371,13 +371,19 @@ class _RecipeHubState extends State<RecipeHub> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '👨‍🍳 Benvenuto Chef',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: Res.fs(context, 22),
-                        fontWeight: FontWeight.w900,
-                      ),
+                    Row(
+                      children: [
+                        Icon(Icons.restaurant_menu_rounded, color: Colors.white, size: Res.fs(context, 24)),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Benvenuto Chef',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: Res.fs(context, 22),
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: Res.pad(context, 4)),
                     Text(
@@ -402,7 +408,7 @@ class _RecipeHubState extends State<RecipeHub> {
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               _buildMainCard(
-                '✨',
+                Icons.auto_awesome_rounded,
                 'Sorprendimi',
                 '3 menu casuali bilanciati',
                 [BC.primary, BC.mid],
@@ -413,7 +419,7 @@ class _RecipeHubState extends State<RecipeHub> {
               SizedBox(height: Res.pad(context, 12)),
               _buildExpandingPremiumCard(
                 1,
-                '⚡',
+                Icons.bolt_rounded,
                 'Al Volo',
                 'Usa quello che hai in casa',
                 [const Color(0xFFF39C12), const Color(0xFFE67E22)],
@@ -455,7 +461,7 @@ class _RecipeHubState extends State<RecipeHub> {
               SizedBox(height: Res.pad(context, 12)),
               _buildExpandingPremiumCard(
                 2,
-                '🎉',
+                Icons.celebration_rounded,
                 'Festa',
                 'Grandi eventi e note extra',
                 [const Color(0xFF8E44AD), const Color(0xFF2980B9)],
@@ -548,7 +554,7 @@ class _RecipeHubState extends State<RecipeHub> {
   }
 
   Widget _buildMainCard(
-    String emoji,
+    IconData icon,
     String title,
     String sub,
     List<Color> gradient,
@@ -575,7 +581,7 @@ class _RecipeHubState extends State<RecipeHub> {
             padding: EdgeInsets.all(Res.pad(context, 16)),
             child: Row(
               children: [
-                Text(emoji, style: TextStyle(fontSize: Res.fs(context, 32))),
+                Icon(icon, color: Colors.white, size: Res.fs(context, 32)),
                 SizedBox(width: Res.pad(context, 16)),
                 Expanded(
                   child: Column(
@@ -614,7 +620,7 @@ class _RecipeHubState extends State<RecipeHub> {
 
   Widget _buildExpandingPremiumCard(
     int index,
-    String emoji,
+    IconData icon,
     String title,
     String sub,
     List<Color> colors,
@@ -641,9 +647,10 @@ class _RecipeHubState extends State<RecipeHub> {
               horizontal: Res.pad(context, 16),
               vertical: Res.pad(context, 4),
             ),
-            leading: Text(
-              emoji,
-              style: TextStyle(fontSize: Res.fs(context, 28)),
+            leading: Icon(
+              icon,
+              color: colors[0],
+              size: Res.fs(context, 28),
             ),
             title: Text(
               title,

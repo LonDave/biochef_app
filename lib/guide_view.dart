@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'theme.dart';
+import 'versions.dart';
 
 // ─────────────────────────────────────────────
 // GUIDE & FAQ MODULE
@@ -24,38 +25,37 @@ class GuideScreen extends StatelessWidget {
           _buildHero(),
           const SizedBox(height: 24),
           
-          _buildStep(context, 1, 'Configurazione Famiglia', 'Il cuore del filtraggio intelligente', [
-            _item(context, '👨‍👩‍👧', 'Profili Personali', 'Aggiungi ogni membro della famiglia definendo il loro nome e le preferenze.'),
-            _item(context, '🚫', 'Non Graditi vs Allergie', 'Le allergie bloccano ingredienti pericolosi. I gusti sgraditi avvisano l\'AI per evitarli quando possibile.'),
-            _item(context, '✅', 'Presenza a Tavola', 'Usa il toggle nella card famiglia per includere o escludere un membro dalla prossima generazione.'),
+          _buildStep(context, 1, 'Impostazioni Famiglia', 'Il tuo nucleo, la tua sicurezza', [
+            _item(context, Icons.people_rounded, 'Anagrafica', 'Configura i membri della famiglia, indicando intolleranze, allergie o piatti non graditi.'),
+            _item(context, Icons.check_circle_rounded, 'Presenza a Tavola', 'Usa il toggle nella card famiglia per includere o escludere un membro dalla prossima generazione.'),
           ]),
 
           _buildStep(context, 2, 'Potenza Chef AI', 'Generazione d\'Élite con Llama 3', [
-            _item(context, '🧊', 'Opzione "Al Volo"', 'Perfetta per consumare ciò che hai già in frigorifero. Inserisci gli ingredienti e lascia che lo Chef crei la magia.'),
-            _item(context, '🥳', 'Opzione "Festa/Evento"', 'Configura il numero di ospiti (anche fuori famiglia) e eventuali intolleranze extra per menu di gruppo.'),
-            _item(context, '⚡', 'Velocità di Esecuzione', 'Grazie a Groq, le ricette vengono generate in pochi secondi rispettando tutti i parametri di sicurezza.'),
+            _item(context, Icons.kitchen_rounded, 'Opzione "Al Volo"', 'Perfetta per consumare ciò che hai già in frigorifero. Inserisci gli ingredienti e lascia che lo Chef crei la magia.'),
+            _item(context, Icons.celebration_rounded, 'Opzione "Festa/Evento"', 'Configura il numero di ospiti (anche fuori famiglia) e eventuali intolleranze extra per menu di gruppo.'),
+            _item(context, Icons.bolt_rounded, 'Velocità di Esecuzione', 'Grazie a Groq, le ricette vengono generate in pochi secondi rispettando tutti i parametri di sicurezza.'),
           ]),
 
           _buildStep(context, 3, 'Il Tuo Ricettario', 'Archivio locale e personalizzazione', [
-            _item(context, '🤖', 'AI Salvati', 'Le migliori scoperte fatte con lo Chef AI possono essere salvate per sempre nel tuo archivio.'),
-            _item(context, '👨‍🍳', 'Le Tue Creationi', 'Usa il tasto specifico in "Creati" per aggiungere manualmente le tue ricette segrete di famiglia.'),
-            _item(context, '💾', 'Consultazione Offline', 'Una volta salvate, le ricette sono consultabili anche senza connessione internet.'),
+            _item(context, Icons.psychology_rounded, 'AI Salvati', 'Le migliori scoperte fatte con lo Chef AI possono essere salvate per sempre nel tuo archivio.'),
+            _item(context, Icons.restaurant_menu_rounded, 'Le Tue Creationi', 'Usa il tasto specifico in "Creati" per aggiungere manualmente le tue ricette segrete di famiglia.'),
+            _item(context, Icons.save_rounded, 'Consultazione Offline', 'Una volta salvate, le ricette sono consultabili anche senza connessione internet.'),
           ]),
 
           _buildStep(context, 4, 'Sicurezza & Privacy', 'Protocollo Local-First', [
-            _item(context, '🔒', 'Full Privacy', 'Nessun dato personale esce dal telefono. Lo Chef AI riceve solo una lista di ingredienti vietati anonimizzata.'),
+            _item(context, Icons.lock_rounded, 'Full Privacy', 'Nessun dato personale esce dal telefono. Lo Chef AI riceve solo una lista di ingredienti vietati anonimizzata.'),
           ]),
 
           _buildStep(context, 5, 'Backup e Portabilità', 'I tuoi dati, sempre con te', [
-            _item(context, '📦', 'Esportazione Cifrata', 'Genera un file .bck protetto dalla tua password admin. Salvalo in un luogo sicuro (Cloud o PC).'),
-            _item(context, '🔄', 'Ripristino Rapido', 'Cambia telefono senza pensieri. Installa BioChef, vai in Impostazioni e importa il tuo file per riavere tutta la tua famiglia e le tue ricette.'),
-            _item(context, '🛠️', 'Manutenzione', 'Ti consigliamo di effettuare un backup dopo ogni modifica importante della famiglia o del ricettario.'),
+            _item(context, Icons.inventory_2_rounded, 'Esportazione Cifrata', 'Genera un file .bck protetto dalla tua password admin. Salvalo in un luogo sicuro (Cloud o PC).'),
+            _item(context, Icons.sync_rounded, 'Ripristino Rapido', 'Cambia telefono senza pensieri. Installa BioChef, vai in Impostazioni e importa il tuo file per riavere tutta la tua famiglia e le tue ricette.'),
+            _item(context, Icons.build_rounded, 'Manutenzione', 'Ti consigliamo di effettuare un backup dopo ogni modifica importante della famiglia o del ricettario.'),
           ]),
 
           _buildStep(context, 6, 'Il Motore AI (Groq)', 'Come far battere il cuore di BioChef', [
-            _item(context, '🚀', 'Groq Engine', 'BioChef usa la potenza di Groq per scrivere ricette. Registrati su console.groq.com per ottenere la tua API Key gratuita.'),
-            _item(context, '⚙️', 'Configurazione', 'Inserisci la chiave in Impostazioni > Configura API Groq. Senza di essa, le funzioni AI saranno limitate.'),
-            _item(context, '🧠', 'Modelli Consigliati', 'Per risultati d\'élite, configura il modello "llama-3.3-70b-specdec" o "llama-3.1-8b-instant".'),
+            _item(context, Icons.rocket_launch_rounded, 'Groq Engine', 'BioChef usa la potenza di Groq per scrivere ricette. Registrati su console.groq.com per ottenere la tua API Key gratuita.'),
+            _item(context, Icons.settings_rounded, 'Configurazione', 'Inserisci la chiave in Impostazioni > Configura API Groq. Senza di essa, le funzioni AI saranno limitate.'),
+            _item(context, Icons.psychology_alt_rounded, 'Modelli Consigliati', 'Per risultati d\'élite, configura il modello "llama-3.3-70b-specdec" o "llama-3.1-8b-instant".'),
           ]),
 
           const Divider(height: 40),
@@ -205,13 +205,13 @@ class GuideScreen extends StatelessWidget {
     );
   }
 
-  Widget _item(BuildContext context, String icon, String title, String desc) {
+  Widget _item(BuildContext context, IconData icon, String title, String desc) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(icon, style: const TextStyle(fontSize: 16)),
+          Icon(icon, size: 18, color: BC.getPrimary(context)),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -231,7 +231,7 @@ class GuideScreen extends StatelessWidget {
   Widget _buildFooter(BuildContext context) {
     return Column(
       children: [
-        const Text('BioChef AI — v0.2.4', style: TextStyle(fontSize: 10, color: Colors.grey, letterSpacing: 0.5)),
+        Text('BioChef AI — v${BCVersion.current}', style: const TextStyle(fontSize: 10, color: Colors.grey, letterSpacing: 0.5)),
         const SizedBox(height: 10),
         Icon(Icons.verified_user_rounded, size: 20, color: BC.getPrimary(context).withAlpha(80)),
       ],

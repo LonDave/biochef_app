@@ -40,60 +40,112 @@ class VersionsLog extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         children: [
           _buildHero(),
-          const SizedBox(height: 24),
-          _buildEraGroup(context, 'Support & Community Series (v0.3.x)', 'Canale Aperto', true, [
+          // Lo spazio tra Hero e il primo blocco è ora gestito internamente dai blocchi stessi
+          
+          _buildEraGroup(context, 'Harmony & Stability Series (v0.4.x)', 'Integrazione Minimalista', true, [
+            _buildVersionCard(context, '0.4.1', "Complete Icon Harmony", [
+              _item(
+                context,
+                Icons.palette_rounded,
+                'Icon Harmony',
+                'Sostituzione totale delle emoji con icone minimaliste in tutto il Ricettario.',
+              ),
+              _item(
+                context,
+                Icons.auto_fix_high_rounded,
+                'Visual Sync',
+                'Sincronizzazione degli header dell\'Hub AI e delle sezioni dettagli ricette.',
+              ),
+            ], true),
+            _buildVersionCard(context, '0.4.0', "Onboarding & Menu Alignment", [
+              _item(
+                context,
+                Icons.straighten_rounded,
+                'Menu Styles',
+                'Allineamento dello stile del menu regimi alimentari alla filosofia Zen.',
+              ),
+              _item(
+                context,
+                Icons.shield_rounded,
+                'Legal Box',
+                'Nuovo modulo di consenso strutturato nel processo di onboarding.',
+              ),
+              _item(
+                context,
+                Icons.auto_fix_high_rounded,
+                'Tab Bar Sync',
+                'Sostitute emoji con icone minimalisti uniformi in tutta l\'app.',
+              ),
+            ], false),
+          ]),
+
+          _buildEraGroup(context, 'Support & Community Series (v0.3.x)', 'Canale Aperto', false, [
+            _buildVersionCard(context, '0.3.9', "Visual Polish & Sync", [
+              _item(
+                context,
+                Icons.brush_rounded,
+                'Visual Polish',
+                'Sincronizzazione dei footer e rifinitura della dashboard impostazioni.',
+              ),
+              _item(
+                context,
+                Icons.sync_rounded,
+                'Aesthetics Sync',
+                'Rimozione highlight legacy dalle versioni precedenti per coerenza visuale.',
+              ),
+            ], false),
             _buildVersionCard(context, '0.3.8', "Visual Minimalism", [
               _item(
                 context,
-                '✨',
+                Icons.auto_fix_high_rounded,
                 'Icon Overhaul',
                 'Tutte le icone dell\'app sono ora in stile minimal-rounded reattivo.',
               ),
               _item(
                 context,
-                '🎨',
+                Icons.palette_rounded,
                 'Zen Aesthetics',
                 'Unificazione dello stile visuale per una coerenza totale.',
               ),
-            ], true),
+            ], false),
             _buildVersionCard(context, '0.3.7', "Settings Harmony", [
               _item(
                 context,
-                '🎨',
+                Icons.dashboard_customize_rounded,
                 'UI Overhaul',
                 'Nuovo design a dashboard categorizzata per le impostazioni.',
               ),
               _item(
                 context,
-                '✉️',
+                Icons.mail_rounded,
                 'Feedback Fix',
                 'Riparato il pulsante di invio feedback per una comunicazione fluida.',
               ),
-            ], true),
+            ], false),
             _buildVersionCard(context, '0.3.6', "Governance & Recovery", [
               _item(
                 context,
-                '🛑',
+                Icons.stop_circle_rounded,
                 'Account Controls',
                 'Corretto il Logout e aggiunta la funzione di Eliminazione Account.',
               ),
               _item(
                 context,
-                '🧹',
+                Icons.cleaning_services_rounded,
                 'Data Governance',
                 'Wipe totale di tutti i dati locali per una privacy estrema.',
               ),
-            ], true),
+            ], false),
             _buildVersionCard(context, '0.3.5', "The Tutor & Legal Shield", [
               _item(
                 context,
-                '🎓',
+                Icons.school_rounded,
                 'Tutor Center',
                 'Nuova area FAQ esperta e onboarding educativo a 7 slide.',
               ),
               _item(
                 context,
-                '🛡️',
+                Icons.security_rounded,
                 'Legal Shield Audit',
                 'Rimozione promesse di sicurezza assoluta per protezione legale.',
               ),
@@ -101,13 +153,13 @@ class VersionsLog extends StatelessWidget {
             _buildVersionCard(context, '0.3.4', "Polished Lifestyle", [
               _item(
                 context,
-                '💎',
+                Icons.diamond_rounded,
                 'Lifestyle Selection',
                 'Nuovo selettore premium per i regimi alimentari (Vegano, Keto, ecc).',
               ),
               _item(
                 context,
-                '✨',
+                Icons.auto_fix_high_rounded,
                 'UI Coherence',
                 'Design dei dialoghi rifinito per una migliore esperienza utente.',
               ),
@@ -115,13 +167,13 @@ class VersionsLog extends StatelessWidget {
             _buildVersionCard(context, '0.3.3', "Categorical Intelligence", [
               _item(
                 context,
-                '🍎',
+                Icons.restaurant_rounded,
                 'Intelligence Categoriale',
                 'L\'AI ora comprende che vietare "Frutta" o "Carne" implica il divieto di ogni sottocategoria.',
               ),
               _item(
                 context,
-                '🛡️',
+                Icons.security_rounded,
                 'Safety Hardening',
                 'Rafforzata la logica di esclusione per potenziare il supporto alla sicurezza.',
               ),
@@ -129,13 +181,13 @@ class VersionsLog extends StatelessWidget {
             _buildVersionCard(context, '0.3.2', "Scientific Research Mode", [
               _item(
                 context,
-                '🧪',
+                Icons.science_rounded,
                 'Protocollo di Ricerca',
                 'L\'AI ora effettua una scansione scientifica di ogni ingrediente prima di cucinare.',
               ),
               _item(
                 context,
-                '🔬',
+                Icons.biotech_rounded,
                 'Identificazione Bio',
                 'Riconoscimento accurato di regimi alimentari e classificazione biologica.',
               ),
@@ -143,13 +195,13 @@ class VersionsLog extends StatelessWidget {
             _buildVersionCard(context, '0.3.1', "Archive Integrity Release", [
               _item(
                 context,
-                '🏛️',
+                Icons.account_balance_rounded,
                 'Cronologia Completa',
                 'Ripristinata la storia completa da v0.2.1 per integrità di sistema.',
               ),
               _item(
                 context,
-                '🛡️',
+                Icons.security_rounded,
                 'Stabilità Nativa',
                 'Validazione finale dei percorsi Android per installazioni corazzate.',
               ),
@@ -157,42 +209,43 @@ class VersionsLog extends StatelessWidget {
             _buildVersionCard(context, '0.3.0', "BioChef Feedback Loop", [
               _item(
                 context,
-                '💬',
+                Icons.chat_bubble_rounded,
                 'Feedback Integrato',
                 'Invia suggerimenti e feedback direttamente dall\'app tramite GitHub.',
               ),
               _item(
                 context,
-                '🛡️',
+                Icons.security_rounded,
                 'OTA Stability',
                 'Risolti i crash nell\'installazione su Android 11+ (Scoped Storage Fix).',
               ),
               _item(
                 context,
-                '✨',
+                Icons.auto_fix_high_rounded,
                 'UX Polish',
                 'Nomi versione puliti e layout AI Chef dinamico.',
               ),
             ], false),
           ]),
           const SizedBox(height: 24),
+
           _buildEraGroup(context, 'Evolution Series (v0.2.x)', 'Ingegneria Moderna', false, [
             _buildVersionCard(context, '0.2.9', "UX & Layout Polish", [
               _item(
                 context,
-                '📏',
+                Icons.straighten_rounded,
                 'Layout AI Chef',
                 'Header dinamico nell\'Hub AI: risolto l\'overflow del banner chiave API.',
               ),
               _item(
                 context,
-                '✨',
+                Icons.auto_fix_high_rounded,
                 'Pulizia Versione',
                 'Nascondi numero build nei dialoghi per un look più pulito (es. v0.2.9).',
               ),
               _item(
                 context,
-                '🚀',
+                Icons.rocket_launch_rounded,
                 'Stabilità Core',
                 'Affinamento della logica di controllo aggiornamenti e startup.',
               ),
@@ -200,19 +253,19 @@ class VersionsLog extends StatelessWidget {
             _buildVersionCard(context, '0.2.8', "Ironclad Update System", [
               _item(
                 context,
-                '🛡️',
+                Icons.security_rounded,
                 'Protocollo Senior',
                 'Implementata logica di update persistente e skipping intelligente.',
               ),
               _item(
                 context,
-                '🏷️',
+                Icons.label_rounded,
                 'Versioning Auto',
                 'Sincronizzazione automatica con pubspec.yaml via PackageInfo.',
               ),
               _item(
                 context,
-                '💎',
+                Icons.diamond_rounded,
                 'Premium UI',
                 'Nuovi dialoghi di feedback dinamici e professionali.',
               ),
@@ -220,19 +273,19 @@ class VersionsLog extends StatelessWidget {
             _buildVersionCard(context, '0.2.7', "Dialog Fix & Update System", [
               _item(
                 context,
-                '🛡️',
+                Icons.security_rounded,
                 'Stabilità Dialoghi',
                 'Risolti i crash nei popup di aggiornamento e changelog.',
               ),
               _item(
                 context,
-                '🔄',
+                Icons.sync_rounded,
                 'Sequencing',
                 'I messaggi ora compaiono in ordine corretto senza sovrapporsi.',
               ),
               _item(
                 context,
-                '🏷️',
+                Icons.label_rounded,
                 'Badge Aggiornamenti',
                 'Aggiunta notifica visiva nelle impostazioni quando disponibile.',
               ),
@@ -240,13 +293,13 @@ class VersionsLog extends StatelessWidget {
             _buildVersionCard(context, '0.2.6', "Stability Focus", [
               _item(
                 context,
-                '🥬',
+                Icons.eco_rounded,
                 'Regimi Alimentari',
                 'Implementati filtri specifici per Vegani, Vegetariani e altro.',
               ),
               _item(
                 context,
-                '📜',
+                Icons.history_edu_rounded,
                 'Log Pulito',
                 'Semplificata la cronologia versioni per focalizzarsi sul presente.',
               ),
@@ -254,13 +307,13 @@ class VersionsLog extends StatelessWidget {
             _buildVersionCard(context, '0.2.5', "UI & Layout Polish", [
                _item(
                 context,
-                '🎨',
+                Icons.palette_rounded,
                 'Overlap Fix',
                 'Rimosso l\'overlap tra AppBar e contenuto nella Hub AI Chef.',
               ),
               _item(
                 context,
-                '📏',
+                Icons.straighten_rounded,
                 'Responsive',
                 'Migliorata la resa su schermi di diverse dimensioni.',
               ),
@@ -268,13 +321,13 @@ class VersionsLog extends StatelessWidget {
             _buildVersionCard(context, '0.2.4', "Modular Expansion", [
                _item(
                 context,
-                '📦',
+                Icons.inventory_2_rounded,
                 'Code Split',
                 'Divisione del codice in moduli per maggiore manutenibilità.',
               ),
               _item(
                 context,
-                '🚀',
+                Icons.rocket_launch_rounded,
                 'Performance',
                 'Aumento velocità di caricamento delle ricette salvate.',
               ),
@@ -282,7 +335,7 @@ class VersionsLog extends StatelessWidget {
             _buildVersionCard(context, '0.2.3', "Security Patch", [
                _item(
                 context,
-                '🔐',
+                Icons.lock_rounded,
                 'Obfuscation',
                 'Migliorata la sicurezza delle chiavi API nel codice sorgente.',
               ),
@@ -290,7 +343,7 @@ class VersionsLog extends StatelessWidget {
             _buildVersionCard(context, '0.2.2', "AI Prompt Tuning", [
                _item(
                 context,
-                '🤖',
+                Icons.psychology_rounded,
                 'Prompting',
                 'Affinamento delle istruzioni di sistema per ricette più accurate.',
               ),
@@ -298,7 +351,7 @@ class VersionsLog extends StatelessWidget {
             _buildVersionCard(context, '0.2.1', "Mobile Beta Launch", [
                _item(
                 context,
-                '📱',
+                Icons.smartphone_rounded,
                 'Beta Release',
                 'Prima distribuzione stabile della serie Evolution per Android.',
               ),
@@ -306,13 +359,13 @@ class VersionsLog extends StatelessWidget {
             _buildVersionCard(context, '0.2.0', "Evolution Baseline", [
                _item(
                 context,
-                '📐',
+                Icons.straighten_rounded,
                 'Responsive Engine',
                 'Introduzione del sistema di ridimensionamento dinamico (Res).',
               ),
               _item(
                 context,
-                '🛡️',
+                Icons.security_rounded,
                 'Legal Hardening',
                 'Implementazione onboarding legale e termini di servizio.',
               ),
@@ -328,7 +381,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.1.9', "Midnight Forest", [
                 _item(
                   context,
-                  '🌙',
+                  Icons.dark_mode_rounded,
                   'Dark Mode',
                   'Lancio ufficiale della modalità scura adattiva.',
                 ),
@@ -336,7 +389,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.1.8', "Titan Shield", [
                 _item(
                   context,
-                  '🛡️',
+                  Icons.security_rounded,
                   'Login Core',
                   'Hardening della sicurezza e onboarding legale obbligatorio.',
                 ),
@@ -344,7 +397,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.1.7', "Oracle Citadel", [
                 _item(
                   context,
-                  '🚀',
+                  Icons.rocket_launch_rounded,
                   'Core Fix',
                   'Risoluzione crash critici e refactoring navigazione principale.',
                 ),
@@ -352,7 +405,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.1.6', "Data Flow", [
                 _item(
                   context,
-                  '📦',
+                  Icons.inventory_2_rounded,
                   'Hive Optimization',
                   'Migliorata la persistenza dei dati familiari.',
                 ),
@@ -360,7 +413,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.1.5', "Chef Knowledge", [
                 _item(
                   context,
-                  '📖',
+                  Icons.menu_book_rounded,
                   'App Guide',
                   'Prima versione della Guida FAQ integrata.',
                 ),
@@ -368,7 +421,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.1.4', "Family Sync", [
                 _item(
                   context,
-                  '👨‍👩',
+                  Icons.family_restroom_rounded,
                   'Presence',
                   'Toggle rapido per la presenza a tavola dei familiari.',
                 ),
@@ -376,7 +429,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.1.3', "Prompt Engineering", [
                 _item(
                   context,
-                  '🤖',
+                  Icons.psychology_rounded,
                   'AI Tuning',
                   'Migliorata la qualità e la sicurezza delle ricette generate.',
                 ),
@@ -384,7 +437,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.1.2', "Recipe Vault", [
                 _item(
                   context,
-                  '💾',
+                  Icons.save_rounded,
                   'Storage',
                   'Salvataggio delle ricette preferite per consultazione offline.',
                 ),
@@ -392,7 +445,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.1.1', "Safety Logic", [
                 _item(
                   context,
-                  '🛡️',
+                  Icons.security_rounded,
                   'Allergy Check',
                   'Prima implementazione del controllo automatico allergeni.',
                 ),
@@ -400,7 +453,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.1.0', "Stable First", [
                 _item(
                   context,
-                  '🎉',
+                  Icons.celebration_rounded,
                   'Release',
                   'Prima versione stabile del motore AI Chef.',
                 ),
@@ -417,7 +470,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.0.9', "Tutorial Pro", [
                 _item(
                   context,
-                  '🎓',
+                  Icons.school_rounded,
                   'Onboarding',
                   'Implementazione della guida passo-passo iniziale.',
                 ),
@@ -425,7 +478,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.0.8', "UI Polishing", [
                 _item(
                   context,
-                  '🎨',
+                  Icons.palette_rounded,
                   'Icons Set',
                   'Aggiunti set di icone personalizzati per ingredienti e pasti.',
                 ),
@@ -433,7 +486,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.0.7', "Dietary Logic", [
                 _item(
                   context,
-                  '🥬',
+                  Icons.eco_rounded,
                   'Logic v1',
                   'Prima bozza del motore di filtraggio dietetico.',
                 ),
@@ -441,7 +494,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.0.6', "Initial Storage", [
                 _item(
                   context,
-                  '🐝',
+                  Icons.api_rounded,
                   'Hive Setup',
                   'Configurazione iniziale del database NoSQL Hive.',
                 ),
@@ -449,7 +502,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.0.5', "Color Matrix", [
                 _item(
                   context,
-                  '📐',
+                  Icons.straighten_rounded,
                   'Palette',
                   'Primi esperimenti con il sistema di colori adattivo.',
                 ),
@@ -457,7 +510,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.0.4', "Recipe Parser", [
                 _item(
                   context,
-                  '📑',
+                  Icons.assignment_rounded,
                   'Parsing',
                   'Sviluppo del parser per interpretare i risultati dell\'AI.',
                 ),
@@ -465,7 +518,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.0.3', "Tab Framework", [
                 _item(
                   context,
-                  '📐',
+                  Icons.straighten_rounded,
                   'Navigation',
                   'Struttura a Tab per Ricettario, Famiglia e Chef AI.',
                 ),
@@ -473,7 +526,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.0.2', "Logic Prototype", [
                 _item(
                   context,
-                  '⚙️',
+                  Icons.settings_rounded,
                   'Code Alpha',
                   'Prima logica di espansione dei divieti dietetici.',
                 ),
@@ -481,7 +534,7 @@ class VersionsLog extends StatelessWidget {
               _buildVersionCard(context, '0.0.1', "The Spark", [
                 _item(
                   context,
-                  '👶',
+                  Icons.child_care_rounded,
                   'Genesis',
                   'Prototipo iniziale e visione del progetto BioChef AI.',
                 ),
@@ -513,12 +566,12 @@ class VersionsLog extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    const Text('✨', style: TextStyle(fontSize: 40)),
+                    Icon(Icons.auto_awesome_rounded, size: 40, color: Colors.white.withAlpha(200)),
                     const SizedBox(height: 12),
-                    Text(
+                    const Text(
                       'Nuovi Orizzonti Culinari',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
@@ -538,27 +591,21 @@ class VersionsLog extends StatelessWidget {
                   children: [
                     _buildNewsItem(
                       context,
-                      '🛡️',
-                      'Legal Shield',
-                      'Audit legale completo: rimosse affermazioni di sicurezza assoluta.',
+                      Icons.palette_rounded,
+                      'Icon Harmony',
+                      'Sincronizzazione totale delle icone nel Ricettario e nell\'Hub AI.',
                     ),
                     _buildNewsItem(
                       context,
-                      '🛑',
-                      'Account Fix',
-                      'Ripristinato il Logout e l\'Eliminazione Account definitiva.',
+                      Icons.shield_rounded,
+                      'Legal Summary',
+                      'Nuovo modulo di consenso strutturato nel processo di onboarding.',
                     ),
                     _buildNewsItem(
                       context,
-                      '🚀',
-                      'BioChef 0.3.6',
-                      'Governance totale dei tuoi dati e della tua sicurezza.',
-                    ),
-                    _buildNewsItem(
-                      context,
-                      '🛡️',
-                      'Solidità Logica',
-                      'Migliorata la gestione degli stati e della memoria locale Hive.',
+                      Icons.straighten_rounded,
+                      'Menu Refinement',
+                      'Allineamento dello stile del menu regimi alla filosofia Zen.',
                     ),
                   ],
                 ),
@@ -583,7 +630,7 @@ class VersionsLog extends StatelessWidget {
 
   Widget _buildNewsItem(
     BuildContext context,
-    String icon,
+    IconData icon,
     String title,
     String desc,
   ) {
@@ -592,7 +639,7 @@ class VersionsLog extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(icon, style: const TextStyle(fontSize: 18)),
+          Icon(icon, size: 18, color: BC.getPrimary(context)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -627,9 +674,9 @@ class VersionsLog extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const Column(
+      child: Column(
         children: [
-          Text('📜', style: TextStyle(fontSize: 40)),
+          Icon(Icons.history_edu_rounded, size: 40, color: Colors.white.withAlpha(200)),
           SizedBox(height: 12),
           Text(
             'Cronologia Evolutiva',
@@ -656,7 +703,10 @@ class VersionsLog extends StatelessWidget {
     List<Widget> children,
   ) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(
+        top: initiallyExpanded ? 12 : 20, // Il blocco attivo sale più sopra
+        bottom: 12, // Spazio uguale tra i blocchi
+      ),
       decoration: BoxDecoration(
         color: BC.getPrimary(context).withAlpha(10),
         borderRadius: BorderRadius.circular(16),
@@ -753,14 +803,14 @@ class VersionsLog extends StatelessWidget {
     );
   }
 
-  Widget _item(BuildContext context, String icon, String title, String desc) {
+  Widget _item(BuildContext context, IconData icon, String title, String desc) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(icon, style: const TextStyle(fontSize: 14)),
-          const SizedBox(width: 10),
+          Icon(icon, size: 16, color: BC.getPrimary(context)),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -769,16 +819,16 @@ class VersionsLog extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
+                    fontSize: 13,
                     color: BC.getText(context),
-                    fontSize: 12,
                   ),
                 ),
                 Text(
                   desc,
                   style: TextStyle(
-                    color: BC.getTextSub(context),
                     fontSize: 11,
-                    height: 1.3,
+                    color: BC.getTextSub(context),
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -792,20 +842,10 @@ class VersionsLog extends StatelessWidget {
   Widget _buildFooter(BuildContext context) {
     return Column(
       children: [
-        Text(
-          'BioChef AI — v${BCVersion.current}',
-          style: TextStyle(
-            fontSize: 10,
-            color: Colors.grey,
-            letterSpacing: 0.5,
-          ),
-        ),
+        Text('BioChef AI — v${BCVersion.current}', style: const TextStyle(fontSize: 10, color: Colors.grey, letterSpacing: 0.5)),
         const SizedBox(height: 10),
-        Icon(
-          Icons.verified_user_outlined,
-          size: 20,
-          color: BC.getPrimary(context).withAlpha(80),
-        ),
+        Icon(Icons.verified_user_rounded, size: 20, color: BC.getPrimary(context).withAlpha(80)),
+        const SizedBox(height: 20),
       ],
     );
   }

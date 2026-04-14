@@ -290,13 +290,16 @@ Widget buildSicurezzaNote(BuildContext context, String text) {
 }
 
 /// Componente UI per visualizzare una sezione informativa (es. Ingredienti o Preparazione).
-Widget buildInfoSection(BuildContext context, String title, String content) {
+Widget buildInfoSection(BuildContext context, String title, String content, {IconData? icon}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(
-        title,
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: BC.getPrimary(context)),
+      Row(
+        children: [
+          Icon(icon ?? Icons.info_outline_rounded, size: 18, color: BC.getPrimary(context)),
+          const SizedBox(width: 10),
+          Text(title.toUpperCase(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: BC.getPrimary(context), letterSpacing: 1.2)),
+        ],
       ),
       const SizedBox(height: 6),
       Text(content, style: TextStyle(fontSize: 13, color: BC.getTextSub(context), height: 1.5)),

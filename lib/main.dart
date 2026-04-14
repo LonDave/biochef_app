@@ -6,7 +6,7 @@ import 'app.dart';
 import 'versions.dart';
 
 // ─────────────────────────────────────────────
-// BIOCHEF AI - ENTRY POINT (v0.2.6 "Stability Focus")
+// BIOCHEF AI - ENTRY POINT (v0.4.1+1 "Elite Sync")
 // ─────────────────────────────────────────────
 
 void main() async {

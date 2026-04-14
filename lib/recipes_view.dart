@@ -341,8 +341,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             _buildSafetyRadar(context, comp.critical, comp.warnings),
           
           if (sic.isNotEmpty) buildSicurezzaNote(context, sic),
-          buildInfoSection(context, '👨‍🍳 Ingredienti Professionali', ing.isNotEmpty ? ing : content),
-          if (pre.isNotEmpty) buildInfoSection(context, '🔥 Preparazione Dettagliata', pre),
+          buildInfoSection(context, 'Ingredienti Professionali', ing.isNotEmpty ? ing : content, icon: Icons.restaurant_menu_rounded),
+          if (pre.isNotEmpty) buildInfoSection(context, 'Preparazione Dettagliata', pre, icon: Icons.local_fire_department_rounded),
           
           const Divider(height: 40),
           
