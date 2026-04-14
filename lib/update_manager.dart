@@ -270,10 +270,7 @@ class BCUpdateManager {
 
   /// Avvia il processo di download e installazione OTA (Logica interna).
   static Stream<OtaEvent> _getUpdateStream(String url) {
-    return OtaUpdate().execute(
-      url,
-      destinationFilename: 'biochef_update.apk',
-    );
+    return OtaUpdate().execute(url);
   }
 }
 
