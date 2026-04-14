@@ -96,7 +96,7 @@ biochef/
 
 ```bash
 # 1. Clona il repository
-git clone https://github.com/your-username/biochef.git
+git clone https://github.com/LonDave/biochef.git
 cd biochef
 
 # 2. Installa le dipendenze
@@ -105,8 +105,6 @@ npm install
 # 3. Avvia il motore
 npm run boot-engine
 ```
-
-> Sostituisci `your-username` con il tuo username GitHub prima di pubblicare.
 
 ---
 
