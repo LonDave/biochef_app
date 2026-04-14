@@ -122,10 +122,12 @@ class BackupHelper {
       await file.writeAsString(fileContent);
 
       // 5. Condivisione (SharePlus v12 API)
-      final result = await sp.Share.shareXFiles(
-        [sp.XFile(file.path)],
-        subject: 'Backup BioChef AI',
-        text: 'Il mio backup BioChef AI. Ricordati la password scelta!',
+      final result = await sp.SharePlus.instance.share(
+        sp.ShareParams(
+          files: [sp.XFile(file.path)],
+          subject: 'Backup BioChef AI',
+          text: 'Il mio backup BioChef AI. Ricordati la password scelta!',
+        ),
       );
 
       // Chiudi il dialogo di caricamento usando il rootNavigator per sicurezza
@@ -160,7 +162,7 @@ class BackupHelper {
   static Future<void> importaBackup(BuildContext context) async {
     try {
       // 1. Selezione file (FilePicker API v11+)
-      fp.FilePickerResult? result = await fp.FilePicker.platform.pickFiles(
+      fp.FilePickerResult? result = await fp.FilePicker.pickFiles(
         type: fp.FileType.any,
       );
 
