@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:ota_update/ota_update.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:hive/hive.dart';
 import 'theme.dart';
 
 /// BCUpdateManager gestisce il controllo degli aggiornamenti tramite GitHub Releases.
@@ -17,8 +18,6 @@ class BCUpdateManager {
   /// Flag per evitare controlli multipli nella stessa sessione app.
   static bool _hasCheckedThisSession = false;
 
-  /// Versione ignorata solo in questa sessione (fino al prossimo avvio).
-  static String? _sessionIgnoredVersion;
 
   /// Controlla se è disponibile una nuova versione su GitHub.
   /// Se disponibile, mostra un dialogo all'utente.
@@ -31,26 +30,21 @@ class BCUpdateManager {
 
     try {
       final updateInfo = await getUpdateInfo();
-      if (updateInfo == null) {
-        if (!silent && context.mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Impossibile recuperare informazioni sugli aggiornamenti.'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        }
-        return;
-      }
+      if (updateInfo == null) return;
 
       final String currentVersion = updateInfo['current']!;
       final String latestVersion = updateInfo['latest']!;
       final String downloadUrl = updateInfo['url']!;
       
+      final box = Hive.box('adminBox');
+      final String? lastIgnored = box.get('lastIgnoredVersion');
+
+      debugPrint("UpdateManager: Current: $currentVersion | Latest: $latestVersion | Ignored: $lastIgnored");
+
       if (_isNewer(currentVersion, latestVersion)) {
-        // Check se questa versione è stata già ignorata in questa sessione (solo per check automatici)
-        if (silent && _sessionIgnoredVersion == latestVersion) {
-          debugPrint("UpdateManager: Versione $latestVersion già ignorata in questa sessione.");
+        // Logica di scarto: se il controllo è automatico e abbiamo già ignorato questa versione, usciamo.
+        if (silent && latestVersion == lastIgnored) {
+          debugPrint("UpdateManager: Versione $latestVersion già ignorata dall'utente. Salto popup.");
           return;
         }
 
@@ -58,12 +52,7 @@ class BCUpdateManager {
            _mostraDialogAggiornamento(context, latestVersion, downloadUrl);
         }
       } else if (!silent && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Sei già alla versione più recente ($currentVersion).'),
-            backgroundColor: BC.primary,
-          ),
-        );
+        _mostraDialogGiaAggiornato(context, currentVersion);
       }
     } catch (e) {
       if (!silent && context.mounted) {
@@ -119,36 +108,33 @@ class BCUpdateManager {
 
   /// Confronta due versioni stringa (semver). Ritorna true se 'latest' è più recente di 'current'.
   static bool _isNewer(String current, String latest) {
-    // Gestione versioni con build number (es. 0.2.6+1 -> 0.2.6)
-    String cleanCurrent = current.split('+')[0];
-    String cleanLatest = latest.split('+')[0];
+    // Normalizzazione: rimuove 'v' e whitespace, gestisce build number
+    String cleanCur = current.toLowerCase().replaceAll('v', '').trim().split('+')[0];
+    String cleanLat = latest.toLowerCase().replaceAll('v', '').trim().split('+')[0];
 
-    List<int> currentParts = cleanCurrent.split('.').map((e) => int.tryParse(e) ?? 0).toList();
-    List<int> latestParts = cleanLatest.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    List<int> curParts = cleanCur.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    List<int> latParts = cleanLat.split('.').map((e) => int.tryParse(e) ?? 0).toList();
     
-    // Pareggiamento lunghezze
-    int maxLen = currentParts.length > latestParts.length ? currentParts.length : latestParts.length;
-    while (currentParts.length < maxLen) {
-      currentParts.add(0);
-    }
-    while (latestParts.length < maxLen) {
-      latestParts.add(0);
-    }
-
-    for (int i = 0; i < maxLen; i++) {
-      if (latestParts[i] > currentParts[i]) return true;
-      if (latestParts[i] < currentParts[i]) return false;
+    // Confronto gerarchico (Major.Minor.Patch)
+    int length = curParts.length > latParts.length ? curParts.length : latParts.length;
+    for (int i = 0; i < length; i++) {
+        int vCur = i < curParts.length ? curParts[i] : 0;
+        int vLat = i < latParts.length ? latParts[i] : 0;
+        if (vLat > vCur) return true;
+        if (vLat < vCur) return false;
     }
 
-    // Se le versioni base sono uguali, controlliamo il build number se presente
-    if (current.contains('+') && latest.contains('+')) {
-      int curBuild = int.tryParse(current.split('+')[1]) ?? 0;
-      int latBuild = int.tryParse(latest.split('+')[1]) ?? 0;
-      return latBuild > curBuild;
-    } else if (!current.contains('+') && latest.contains('+')) {
-      // Se current non ha build e latest sì, latest è più recente (es. 0.2.6 vs 0.2.6+1)
-      return true;
-    }
+    // Se la versione base è identica, confrontiamo il build number solo se presente in entrambi o nel latest
+    try {
+      if (current.contains('+') && latest.contains('+')) {
+        int bCur = int.tryParse(current.split('+')[1]) ?? 0;
+        int bLat = int.tryParse(latest.split('+')[1]) ?? 0;
+        return bLat > bCur;
+      } else if (!current.contains('+') && latest.contains('+')) {
+        // Esempio: 0.2.7 vs 0.2.7+1
+        return true;
+      }
+    } catch (_) {}
 
     return false;
   }
@@ -159,36 +145,33 @@ class BCUpdateManager {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Row(
           children: [
             Icon(Icons.system_update_alt_rounded, color: BC.getPrimary(ctx)),
             const SizedBox(width: 12),
             const Text(
-              'Nuova Versione',
+              'Aggiornamento',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
         ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('È disponibile BioChef AI v$version', style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              const Text(
-                'L\'aggiornamento verrà scaricato ed eseguito automaticamente. '
-                'I tuoi dati e le tue ricette rimarranno al sicuro.',
-                style: TextStyle(fontSize: 13, color: Colors.grey),
-              ),
-            ],
-          ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('BioChef AI v$version', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            const SizedBox(height: 12),
+            const Text(
+              'Una nuova release è pronta per te! L\'installazione manterrà intatti tutti i tuoi dati.',
+              style: TextStyle(fontSize: 13, color: Colors.grey),
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () {
-              // Memorizza che questa versione è stata ignorata solo per questa sessione
-              _sessionIgnoredVersion = version;
+              Hive.box('adminBox').put('lastIgnoredVersion', version);
               Navigator.pop(ctx);
             },
             child: const Text('Più tardi'),
@@ -198,7 +181,76 @@ class BCUpdateManager {
               Navigator.pop(ctx);
               _mostraDialogProgresso(context, url);
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: BC.getPrimary(context),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
             child: const Text('Aggiorna Ora'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Mostra il dialogo quando l'app è già aggiornata.
+  static void _mostraDialogGiaAggiornato(BuildContext context, String currentVersion) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.green.withAlpha(20),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check_circle_outline_rounded, color: Colors.green, size: 60),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Sei all\'avanguardia!',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: BC.getText(ctx),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Stai utilizzando l\'ultima versione disponibile di BioChef AI.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: BC.getTextSub(ctx)),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: BC.getPrimary(ctx).withAlpha(30),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                'v$currentVersion',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
+                  color: BC.getPrimary(ctx),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+        actions: [
+          Center(
+            child: TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OTTIMO', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
           ),
         ],
       ),

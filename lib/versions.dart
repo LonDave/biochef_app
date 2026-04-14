@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'theme.dart';
 
 // ─────────────────────────────────────────────
 // VERSIONING & CHANGELOG SYSTEM
 // ─────────────────────────────────────────────
 
-/// Versione stabile corrente dell'applicazione.
-const String kAppVersion = '0.2.6';
+/// Gestore dinamico della versione dell'app.
+class BCVersion {
+  static String current = '0.0.0';
+  
+  /// Inizializza la versione leggendola dal pubspec.yaml (tramite il sistema nativo).
+  static Future<void> init() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      current = info.version;
+    } catch (_) {}
+  }
+}
 
 /// VersionsLog è il componente che visualizza la cronologia degli aggiornamenti.
 /// Permette di distinguere tra le varie serie evolutive di BioChef AI.
@@ -31,7 +42,27 @@ class VersionsLog extends StatelessWidget {
           _buildHero(),
           const SizedBox(height: 24),
           _buildEraGroup(context, 'Evolution Series (v0.2.x)', 'Ingegneria Moderna', true, [
-            _buildVersionCard(context, '0.2.6', "Dietary Security & Update Fix", [
+            _buildVersionCard(context, '0.2.7', "Dialog Fix & Update System", [
+              _item(
+                context,
+                '🛡️',
+                'Stabilità Dialoghi',
+                'Risolti i crash nei popup di aggiornamento e changelog.',
+              ),
+              _item(
+                context,
+                '🔄',
+                'Sequencing',
+                'I messaggi ora compaiono in ordine corretto senza sovrapporsi.',
+              ),
+              _item(
+                context,
+                '🏷️',
+                'Badge Aggiornamenti',
+                'Aggiunta notifica visiva nelle impostazioni quando disponibile.',
+              ),
+            ], true),
+            _buildVersionCard(context, '0.2.6', "Dietary Security Baseline", [
               _item(
                 context,
                 '🥬',
@@ -40,17 +71,11 @@ class VersionsLog extends StatelessWidget {
               ),
               _item(
                 context,
-                '🔄',
-                'Fix Update',
-                'Risolto il problema del pulsante di aggiornamento e del popup notifiche.',
-              ),
-              _item(
-                context,
                 '📜',
                 'Log Pulito',
                 'Semplificata la cronologia versioni per focalizzarsi sul presente.',
               ),
-            ], true),
+            ], false),
           ]),
 
           _buildEraGroup(
@@ -259,7 +284,7 @@ class VersionsLog extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Versione v$kAppVersion',
+                      'Versione v${BCVersion.current}',
                       style: const TextStyle(color: Colors.white70, fontSize: 11),
                     ),
                   ],
@@ -272,21 +297,21 @@ class VersionsLog extends StatelessWidget {
                   children: [
                     _buildNewsItem(
                       context,
-                      '🥬',
-                      'Regimi Alimentari',
-                      'Filtri intelligenti per Vegani, Vegetariani e altro per una sicurezza totale.',
-                    ),
-                    _buildNewsItem(
-                      context,
-                      '🔄',
-                      'Update System Fix',
-                      'Risolto il meccanismo di aggiornamento automatico e manuale.',
-                    ),
-                    _buildNewsItem(
-                      context,
                       '🛡️',
-                      'Baseline v$kAppVersion',
-                      'Ottimizzazioni strutturali e stabilità migliorata.',
+                      'Stabilità Dialoghi',
+                      'Risolti i crash nei popup e migliorata la sequenza di comparsa.',
+                    ),
+                    _buildNewsItem(
+                      context,
+                      '🏷️',
+                      'Integrazione Settings',
+                      'Notifica visiva degli aggiornamenti direttamente nelle impostazioni.',
+                    ),
+                    _buildNewsItem(
+                      context,
+                      '🚀',
+                      'BioChef 0.2.7',
+                      'Ottimizzazioni strutturali e stabilità del sistema di update.',
                     ),
                   ],
                 ),
@@ -520,8 +545,8 @@ class VersionsLog extends StatelessWidget {
   Widget _buildFooter(BuildContext context) {
     return Column(
       children: [
-        const Text(
-          'BioChef AI — v$kAppVersion',
+        Text(
+          'BioChef AI — v${BCVersion.current}',
           style: TextStyle(
             fontSize: 10,
             color: Colors.grey,

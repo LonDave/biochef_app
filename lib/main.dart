@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'app.dart';
+import 'versions.dart';
 
 // ─────────────────────────────────────────────
 // BIOCHEF AI - ENTRY POINT (v0.2.6 "Stability Focus")
@@ -11,6 +12,7 @@ import 'app.dart';
 void main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    await BCVersion.init();
 
     // Gestione errori Flutter (UI/Build)
     FlutterError.onError = (FlutterErrorDetails details) {
