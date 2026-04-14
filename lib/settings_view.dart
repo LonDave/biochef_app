@@ -206,17 +206,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: () {
-              Hive.box('adminBox').put('isLoggedIn', false);
-              Navigator.pop(context);
-            },
-            icon: const Icon(Icons.logout, color: Colors.red),
-            label: const Text('Esci (Logout Chef)', style: TextStyle(color: Colors.red)),
-            style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.red)),
+          child: Column(
+            children: [
+              OutlinedButton.icon(
+                onPressed: () {
+                  Hive.box('adminBox').put('isLoggedIn', false);
+                  // Torniamo alla home: il ValueListenableBuilder in app.dart 
+                  // intercetta il cambio e mostra la schermata di registrazione/login.
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                icon: const Icon(Icons.logout, color: Colors.orange),
+                label: const Text('Esci (Logout Chef)', style: TextStyle(color: Colors.orange)),
+                style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.orange)),
+              ),
+              const SizedBox(height: 12),
+              TextButton.icon(
+                onPressed: () => _mostraDialogEliminaAccount(context),
+                icon: const Icon(Icons.delete_forever_outlined, color: Colors.red, size: 18),
+                label: const Text('Elimina Account e Dati', style: TextStyle(color: Colors.red, fontSize: 12)),
+              ),
+            ],
           ),
         ),
       ],
+    );
+  }
+
+  void _mostraDialogEliminaAccount(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('⚠️ Eliminazione Totale'),
+        content: const Text(
+          'Questa azione cancellerà PERMANENTEMENTE il tuo profilo admin, la tua famiglia, tutte le ricette salvate e la cronologia.\n\nSei sicuro di voler procedere? L\'azione è irreversibile.'
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('ANNULLA')),
+          ElevatedButton(
+            onPressed: () async {
+              // Wipe totale dei box Hive
+              await Hive.box('adminBox').clear();
+              await Hive.box('familyBox').clear();
+              await Hive.box('savedRecipesBox').clear();
+              await Hive.box('customRecipesBox').clear();
+              await Hive.box('historyBox').clear();
+              
+              if (context.mounted) {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            child: const Text('ELIMINA TUTTO'),
+          ),
+        ],
+      ),
     );
   }
 

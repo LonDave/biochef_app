@@ -42,20 +42,34 @@ class VersionsLog extends StatelessWidget {
           _buildHero(),
           const SizedBox(height: 24),
           _buildEraGroup(context, 'Support & Community Series (v0.3.x)', 'Canale Aperto', true, [
-            _buildVersionCard(context, '0.3.5', "The Tutor's Legacy", [
+            _buildVersionCard(context, '0.3.6', "Governance & Recovery", [
+              _item(
+                context,
+                '🛑',
+                'Account Controls',
+                'Corretto il Logout e aggiunta la funzione di Eliminazione Account.',
+              ),
+              _item(
+                context,
+                '🧹',
+                'Data Governance',
+                'Wipe totale di tutti i dati locali per una privacy estrema.',
+              ),
+            ], true),
+            _buildVersionCard(context, '0.3.5', "The Tutor & Legal Shield", [
               _item(
                 context,
                 '🎓',
-                'Educational Expansion',
-                'Nuovo Centro Tutor con FAQ esperte e onboarding approfondito.',
+                'Tutor Center',
+                'Nuova area FAQ esperta e onboarding educativo a 7 slide.',
               ),
               _item(
                 context,
-                '📚',
-                'Guida d\'Élite',
-                'Riorganizzazione delle risorse di supporto per una padronanza totale.',
+                '🛡️',
+                'Legal Shield Audit',
+                'Rimozione promesse di sicurezza assoluta per protezione legale.',
               ),
-            ], true),
+            ], false),
             _buildVersionCard(context, '0.3.4', "Polished Lifestyle", [
               _item(
                 context,
@@ -496,21 +510,21 @@ class VersionsLog extends StatelessWidget {
                   children: [
                     _buildNewsItem(
                       context,
-                      '🎓',
-                      'Tutor Center',
-                      'Nuova guida FAQ esperta disponibile nelle impostazioni.',
+                      '🛡️',
+                      'Legal Shield',
+                      'Audit legale completo: rimosse affermazioni di sicurezza assoluta.',
                     ),
                     _buildNewsItem(
                       context,
-                      '📚',
-                      'Elite Onboarding',
-                      'Tutorial iniziale ampliato per spiegare le nuove logiche AI.',
+                      '🛑',
+                      'Account Fix',
+                      'Ripristinato il Logout e l\'Eliminazione Account definitiva.',
                     ),
                     _buildNewsItem(
                       context,
                       '🚀',
-                      'BioChef 0.3.5',
-                      'Diventa un esperto con la versione dell\'insegnamento.',
+                      'BioChef 0.3.6',
+                      'Governance totale dei tuoi dati e della tua sicurezza.',
                     ),
                     _buildNewsItem(
                       context,
