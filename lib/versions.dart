@@ -42,6 +42,26 @@ class VersionsLog extends StatelessWidget {
           _buildHero(),
           const SizedBox(height: 24),
           _buildEraGroup(context, 'Evolution Series (v0.2.x)', 'Ingegneria Moderna', true, [
+            _buildVersionCard(context, '0.2.9', "Senior Clean Slate", [
+              _item(
+                context,
+                '🧹',
+                'Pruning Piattaforme',
+                'Rimosso supporto residuo iOS/MacOS/Linux/Web per un progetto più snello.',
+              ),
+              _item(
+                context,
+                '📏',
+                'Layout AI Chef',
+                'Header dinamico nell\'Hub AI: risolto l\'overflow del banner chiave API.',
+              ),
+              _item(
+                context,
+                '🚀',
+                'Ottimizzazione PC',
+                'Migliorata la compatibilità per i test locali su Windows.',
+              ),
+            ], true),
             _buildVersionCard(context, '0.2.8', "Ironclad Update System", [
               _item(
                 context,
@@ -61,7 +81,7 @@ class VersionsLog extends StatelessWidget {
                 'Premium UI',
                 'Nuovi dialoghi di feedback dinamici e professionali.',
               ),
-            ], true),
+            ], false),
             _buildVersionCard(context, '0.2.7', "Dialog Fix & Update System", [
               _item(
                 context,
@@ -359,21 +379,21 @@ class VersionsLog extends StatelessWidget {
                   children: [
                     _buildNewsItem(
                       context,
-                      '🛡️',
-                      'Protocollo Senior',
-                      'Logica di update persistente che rispetta le tue scelte (Skip).',
+                      '🧹',
+                      'Senior Cleanup',
+                      'Rimosso codice e cartelle non necessari (iOS/Mac/Web) per massima velocità.',
                     ),
                     _buildNewsItem(
                       context,
-                      '🏷️',
-                      'Auto-Versioning',
-                      'L\'app è ora sempre sincronizzata con la configurazione di progetto.',
+                      '📏',
+                      'Layout Dinamico',
+                      'L\'header dell\'AI Chef ora si auto-adatta senza più errori grafici.',
                     ),
                     _buildNewsItem(
                       context,
-                      '💎',
-                      'Premium Feedback',
-                      'Dialoghi di successo e caricamento ridisegnati per un look d\'élite.',
+                      '🖥️',
+                      'Windows & Mobile',
+                      'Ottimizzato per i tuoi test su PC e la release finale su Android.',
                     ),
                   ],
                 ),

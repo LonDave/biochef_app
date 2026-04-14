@@ -348,7 +348,7 @@ class _RecipeHubState extends State<RecipeHub> {
       slivers: [
         SliverToBoxAdapter(
           child: Container(
-            height: Res.pad(context, 180),
+            constraints: BoxConstraints(minHeight: Res.pad(context, 180)),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [BC.primary, BC.mid],
