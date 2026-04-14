@@ -42,13 +42,7 @@ class VersionsLog extends StatelessWidget {
           _buildHero(),
           const SizedBox(height: 24),
           _buildEraGroup(context, 'Evolution Series (v0.2.x)', 'Ingegneria Moderna', true, [
-            _buildVersionCard(context, '0.2.9', "Senior Clean Slate", [
-              _item(
-                context,
-                '🧹',
-                'Pruning Piattaforme',
-                'Rimosso supporto residuo iOS/MacOS/Linux/Web per un progetto più snello.',
-              ),
+            _buildVersionCard(context, '0.2.9', "UX & Layout Polish", [
               _item(
                 context,
                 '📏',
@@ -57,9 +51,15 @@ class VersionsLog extends StatelessWidget {
               ),
               _item(
                 context,
+                '✨',
+                'Pulizia Versione',
+                'Nascondi numero build nei dialoghi per un look più pulito (es. v0.2.9).',
+              ),
+              _item(
+                context,
                 '🚀',
-                'Ottimizzazione PC',
-                'Migliorata la compatibilità per i test locali su Windows.',
+                'Stabilità Core',
+                'Affinamento della logica di controllo aggiornamenti e startup.',
               ),
             ], true),
             _buildVersionCard(context, '0.2.8', "Ironclad Update System", [
@@ -379,21 +379,21 @@ class VersionsLog extends StatelessWidget {
                   children: [
                     _buildNewsItem(
                       context,
-                      '🧹',
-                      'Senior Cleanup',
-                      'Rimosso codice e cartelle non necessari (iOS/Mac/Web) per massima velocità.',
-                    ),
-                    _buildNewsItem(
-                      context,
                       '📏',
                       'Layout Dinamico',
                       'L\'header dell\'AI Chef ora si auto-adatta senza più errori grafici.',
                     ),
                     _buildNewsItem(
                       context,
-                      '🖥️',
-                      'Windows & Mobile',
-                      'Ottimizzato per i tuoi test su PC e la release finale su Android.',
+                      '✨',
+                      'UI Raffinata',
+                      'Badge versione puliti e senza più numeri di build superflui.',
+                    ),
+                    _buildNewsItem(
+                      context,
+                      '🛡️',
+                      'Solidità Logica',
+                      'Migliorata la gestione degli stati e della memoria locale Hive.',
                     ),
                   ],
                 ),

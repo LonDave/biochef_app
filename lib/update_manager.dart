@@ -234,7 +234,7 @@ class BCUpdateManager {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                'v$currentVersion',
+                'v${currentVersion.split('+')[0]}',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 11,
