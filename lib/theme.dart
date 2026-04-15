@@ -1,113 +1,208 @@
 import 'package:flutter/material.dart';
 
-// ──────────────────────────────────────────────────────────────────────────────
-// DESIGN SYSTEM "BIOCHEF ELITE" (v0.4.4)
-// ──────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// COLORI GLOBALI BIOCHEF (Design System)
+// ─────────────────────────────────────────────
 
-/// BC coordina l'identità visiva dell'applicazione (Design System).
-/// Gestisce la palette colori adattiva per i temi "Fresh Mist" e "Midnight Forest".
+/// BC è la classe centrale del Design System BioChef.
+/// Contiene le palette colori per i temi Fresh Mist e Midnight Forest,
+/// oltre a utility per il recupero dinamico dei colori basato sul contesto.
 class BC {
-  // Palette Light (Fresh & Natural)
-  static const primary = Color(0xFF1B4332); 
-  static const background = Color(0xFFF7F9F7);
+  // Palette Light Mode (Fresh & Natural Premium)
+  static const primary = Color(0xFF1B4332); // Deep Forest
+  static const background = Color(0xFFF7F9F7); // Clean Paper
   static const surface = Colors.white;
-  static const accent = Color(0xFF409167); 
-  static const accentLight = Color(0xFFD8E2DC);
+  static const accent = Color(0xFF409167); // Sage Green
+  static const accentL = Color(0xFFD8E2DC);
 
-  // Palette Dark (Midnight Forest)
-  static const darkPrimary = Color(0xFFB7E4C7); 
-  static const darkAccent = Color(0xFF52B788); 
-  static const darkBackground = Color(0xFF04100C);
-  static const darkSurface = Color(0xFF0D1E19);
+  // Palette Dark Mode (Midnight Forest Ascension)
+  static const dPrimary = Color(0xFFB7E4C7); // Glow Mint (Contrast)
+  static const dAccent = Color(0xFF52B788); // Vibrant Moss
+  static const dBackground = Color(0xFF04100C); // Deepest Forest Void
+  static const dSurface = Color(0xFF0D1E19); // Dense Foliage Layer
 
-  // Stati Funzionali
+  // Toni Funzionali
   static const danger = Color(0xFFC0392B);
-  static const warning = Color(0xFFF39C12);
-  static const forestMid = Color(0xFF2D6A4F);
+  static const amber = Color(0xFFF39C12);
+  static const mid = Color(0xFF2D6A4F); // Medium Forest
 
-  /// Ritorna true se il dispositivo sta utilizzando la Dark Mode.
-  static bool isDark(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
+  /// Verifica se il tema corrente è Scurò.
+  static bool isDark(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark;
 
-  /// Metodi di accesso dinamico ai colori filtrati per il contesto di luminosità.
-  static Color getPrimary(BuildContext context) => isDark(context) ? darkAccent : primary;
-  static Color getText(BuildContext context) => isDark(context) ? const Color(0xFFEDF5EE) : const Color(0xFF1A1A1A);
-  static Color getTextSub(BuildContext context) => isDark(context) ? const Color(0xFF90A495) : const Color(0xFF4A4A4A);
-  static Color getCard(BuildContext context) => isDark(context) ? darkSurface : surface;
-  static Color getBackground(BuildContext context) => isDark(context) ? darkBackground : background;
+  /// Recupera il colore primario adattivo.
+  static Color getPrimary(BuildContext context) =>
+      isDark(context) ? dAccent : primary;
 
-  /// Generatore del Tema Light basato su Material 3.
+  /// Recupera il colore del testo principale.
+  static Color getText(BuildContext context) =>
+      isDark(context) ? const Color(0xFFEDF5EE) : const Color(0xFF1A1A1A);
+
+  /// Recupera il colore del testo secondario.
+  static Color getTextSub(BuildContext context) =>
+      isDark(context) ? const Color(0xFF90A495) : const Color(0xFF4A4A4A);
+
+  /// Recupera il colore di sfondo delle card.
+  static Color getCard(BuildContext context) =>
+      isDark(context) ? dSurface : surface;
+
+  /// Recupera il colore di sfondo principale.
+  static Color getBackground(BuildContext context) =>
+      isDark(context) ? dBackground : background;
+
+  /// Recupera il colore per i campi di input (contrastato).
+  static Color getField(BuildContext context) =>
+      isDark(context) ? Colors.white.withAlpha(25) : Colors.black.withAlpha(20);
+
+  // --- Theme Builders (Spostati da main.dart per scalabilità) ---
+
+  /// Costruisce la configurazione del Tema Light.
   static ThemeData lightTheme(BuildContext context) {
-    return _buildTheme(Brightness.light, seed: primary, bg: background, surf: surface);
-  }
-
-  /// Generatore del Tema Dark basato su Material 3.
-  static ThemeData darkTheme(BuildContext context) {
-    return _buildTheme(Brightness.dark, seed: darkPrimary, bg: darkBackground, surf: darkSurface);
-  }
-
-  static ThemeData _buildTheme(Brightness b, {required Color seed, required Color bg, required Color surf}) {
-    final bool isD = b == Brightness.dark;
     return ThemeData(
       useMaterial3: true,
-      brightness: b,
-      colorSchemeSeed: seed,
-      scaffoldBackgroundColor: bg,
-      appBarTheme: AppBarTheme(
-        backgroundColor: isD ? surf : seed,
-        foregroundColor: isD ? seed : Colors.white,
+      brightness: Brightness.light,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primary,
+        primary: primary,
+        secondary: accent,
+        surface: surface,
+        error: danger,
+      ),
+      scaffoldBackgroundColor: background,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
         elevation: 0,
-        centerTitle: true,
+      ),
+      tabBarTheme: const TabBarThemeData(
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white60,
+        indicatorColor: Colors.white,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: isD ? darkAccent : primary,
-          foregroundColor: isD ? darkBackground : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          backgroundColor: primary,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
-      cardTheme: CardThemeData(
-        color: surf,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-           borderRadius: BorderRadius.circular(20),
-           side: BorderSide(color: (isD ? darkAccent : primary).withAlpha(30)),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.black.withAlpha(20),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: primary, width: 1.5),
+        ),
+        labelStyle: const TextStyle(color: Color(0xFF4A4A4A), fontSize: 13),
+        floatingLabelStyle: const TextStyle(color: primary, fontWeight: FontWeight.bold),
+        prefixIconColor: primary,
       ),
     );
   }
 
-  // Utility specifiche per componenti legacy
-  static Color getLegalHeaderColor(BuildContext context) => isDark(context) ? darkPrimary : primary;
-  static Color getLegalTextColor(BuildContext context) => isDark(context) ? const Color(0xFFE0E4DE) : const Color(0xFF2D3B31);
-}
-
-// ──────────────────────────────────────────────────────────────────────────────
-// RESPONSIVE ADAPTIVE UTILITY (v0.2.1 "Window Master")
-// ──────────────────────────────────────────────────────────────────────────────
-
-/// Res gestisce la scalabilità del layout tra diversi fattori di forma (Phone, Tablet, PC).
-class Res {
-  static double width(BuildContext context) => MediaQuery.sizeOf(context).width;
-  static double height(BuildContext context) => MediaQuery.sizeOf(context).height;
-
-  /// Determina il fattore di scala basato sulla larghezza della viewport.
-  /// Ottimizzato per Windows PC dove la finestra può essere ridimensionata arbitrariamente.
-  static double scaleFactor(BuildContext context) {
-    final double w = width(context);
-    if (w > 1200) return 1.4; // Desktop Ultra-Wide
-    if (w > 800) return 1.25;  // Desktop / Tablet Landscape
-    if (w > 600) return 1.15;  // Tablet
-    if (w < 350) return 0.9;   // Small Phone
-    return 1.0;                // Standard Mobile (Baseline)
+  /// Costruisce la configurazione del Tema Dark.
+  static ThemeData darkTheme(BuildContext context) {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: dPrimary,
+        brightness: Brightness.dark,
+        primary: dAccent,
+        surface: dSurface,
+      ),
+      scaffoldBackgroundColor: dBackground,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: dSurface,
+        foregroundColor: dPrimary,
+        elevation: 0,
+      ),
+      tabBarTheme: const TabBarThemeData(
+        labelColor: dPrimary,
+        unselectedLabelColor: Colors.white38,
+        indicatorColor: dAccent,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: dAccent,
+          foregroundColor: dBackground,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white.withAlpha(25),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: dAccent, width: 1.5),
+        ),
+        labelStyle: const TextStyle(color: Color(0xFF90A495), fontSize: 13),
+        floatingLabelStyle: const TextStyle(color: dAccent, fontWeight: FontWeight.bold),
+        prefixIconColor: dAccent,
+      ),
+    );
   }
 
-  /// Calcola la dimensione del font (Font Size) scalata.
-  static double fs(BuildContext context, double size) => size * scaleFactor(context);
+  // --- Utility Legacy e Specifiche ---
+  static Color getMyCustomButtonColor(BuildContext context) =>
+      isDark(context) ? primary : dAccent;
+  static Color getLegalHeaderColor(BuildContext context) =>
+      isDark(context) ? dPrimary : primary;
+  static Color getLegalButtonColor(BuildContext context) =>
+      isDark(context) ? dAccent : primary;
+  static Color getLegalTextColor(BuildContext context) =>
+      isDark(context) ? const Color(0xFFE0E4DE) : const Color(0xFF2D3B31);
+  static Color getAccentL(BuildContext context) =>
+      isDark(context) ? const Color(0xFF252A25) : accentL;
+  static Color getLegalButtonTextColor(BuildContext context) =>
+      isDark(context) ? dBackground : Colors.white;
+}
 
-  /// Calcola la dimensione del padding o margine scalato.
-  static double pad(BuildContext context, double p) => p * scaleFactor(context);
+// ─────────────────────────────────────────────
+// RESPONSIVE DESIGN UTILITY (v0.2.0)
+// ─────────────────────────────────────────────
+class Res {
+  static double w(BuildContext context) => MediaQuery.sizeOf(context).width;
+  static double h(BuildContext context) => MediaQuery.sizeOf(context).height;
 
-  /// Ritorna true se il layout deve adattarsi a uno schermo grande.
-  static bool isLargeScreen(BuildContext context) => width(context) > 720;
+  // Fattore di scala basato su una larghezza standard di 375px (iPhone 12/13/14)
+  static double scale(BuildContext context) {
+    double width = w(context);
+    if (width > 600) return 1.25; // Tablet
+    if (width < 340) return 0.85; // Small Phone
+    return width / 375.0;
+  }
+
+  static bool isTablet(BuildContext context) => w(context) > 600;
+  static bool isSmall(BuildContext context) => w(context) < 340;
+
+  /// Scala il font in modo armonioso.
+  static double fs(BuildContext context, double size) {
+    return (size * scale(context)).clamp(size * 0.8, size * 1.5);
+  }
+
+  /// Scala il padding/margine in modo armonioso.
+  static double pad(BuildContext context, double p) {
+    return p * scale(context);
+  }
 }

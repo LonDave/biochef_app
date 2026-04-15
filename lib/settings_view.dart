@@ -214,29 +214,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          String msg = '';
           if (useSystem) {
+            // Da Auto a Dark
             box.put('useSystemTheme', false);
             box.put('isDarkModeManual', true);
-            msg = '🌙 Tema Scuro attivato';
           } else if (isDark) {
+            // Da Dark a Light
             box.put('useSystemTheme', false);
             box.put('isDarkModeManual', false);
-            msg = '☀️ Tema Chiaro attivato';
           } else {
+            // Da Light a Auto
             box.put('useSystemTheme', true);
-            msg = '⚙️ Segui impostazioni sistema';
           }
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(msg),
-              duration: const Duration(seconds: 1),
-              behavior: SnackBarBehavior.floating,
-              width: 220,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-          );
         },
         borderRadius: BorderRadius.circular(12),
         child: Container(

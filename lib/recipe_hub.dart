@@ -9,12 +9,8 @@ import 'security.dart';
 import 'recipes_view.dart';
 import 'ai_protocol.dart';
 
-// ──────────────────────────────────────────────────────────────────────────────
-// HUB GENERAZIONE RICETTE AI (v0.4.4 "Chef Intelligence")
-// ──────────────────────────────────────────────────────────────────────────────
-
-/// RecipeHub coordina l'interazione con l'intelligenza artificiale per la 
-/// generazione di menù personalizzati basati sui vincoli del nucleo familiare.
+/// RecipeHub è il motore dell'AI Chef. Gestisce la generazione di menù
+/// tramite l'API di Groq e il filtraggio dietetico in tempo reale.
 class RecipeHub extends StatefulWidget {
   const RecipeHub({super.key});
 
@@ -23,232 +19,278 @@ class RecipeHub extends StatefulWidget {
 }
 
 class _RecipeHubState extends State<RecipeHub> {
-  // --- STATO DEL COMPONENTE ---
   List<String> _recipes = [];
-  bool _isLoading = false;
-  String _lastPromptUsed = '';
-  
-  // Controller per l'input utente
-  final _fridgeController = TextEditingController();
-  final _guestsCountController = TextEditingController();
-  final _eventNotesController = TextEditingController();
-  
-  // Indice del menu espandibile (Selection Mode)
-  int? _activeSelectionIndex; 
+  bool _loading = false;
+  String _lastPrompt = '';
+  final _frigoC = TextEditingController();
+  final _festaPeopleC = TextEditingController();
+  final _festaNoteC = TextEditingController();
+  int? _expandedIndex; // null = nessuno, 1 = Al Volo, 2 = Festa
 
   @override
-  void dispose() {
-    _fridgeController.dispose();
-    _guestsCountController.dispose();
-    _eventNotesController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
   }
 
-  /// Estrae una sintesi delle ultime attività culinarie salvate nel database.
-  /// Serve ad alimentare il contesto dell'AI per garantire varietà nei suggerimenti.
-  String _getHistoryContext() {
-    final historyBox = Hive.box('historyBox');
-    final List<dynamic> history = historyBox.values.toList();
-    
-    // Sort decrescente per timestamp
-    history.sort((a, b) => (b['timestamp'] ?? 0).compareTo(a['timestamp'] ?? 0));
-    
+  /// Recupera una sintesi dei pasti recenti per garantire varietà.
+  String _getHistorySummary() {
+    final hBox = Hive.box('historyBox');
+    final List<dynamic> history = hBox.values.toList();
+    // Prendiamo gli ultimi 10 pasti
+    history.sort(
+      (a, b) => (b['timestamp'] ?? 0).compareTo(a['timestamp'] ?? 0),
+    );
     final lastMeals = history
         .take(10)
         .map((m) => "- ${m['meal']}: ${m['title']}")
         .join("\n");
 
-    return lastMeals.isEmpty 
-        ? "Nessuna cronologia pasti ancora." 
-        : "CRONOLOGIA RECENTE (Evita pasti simili per varietà):\n$lastMeals";
+    if (lastMeals.isEmpty) return "Nessuna cronologia pasti ancora.";
+    return "CRONOLOGIA RECENTE (Evita pasti simili per varietà):\n$lastMeals";
   }
 
-  /// Analizza i feedback e le valutazioni espresse dall'utente sulle ricette passate.
-  String _getUserPreferencesContext() {
-    final savedBox = Hive.box('savedRecipesBox');
-    final customBox = Hive.box('customRecipesBox');
+  /// Recupera una sintesi dei gusti e feedback basata sulle valutazioni passate.
+  String _getFeedbackSummary() {
+    final sBox = Hive.box('savedRecipesBox');
+    final cBox = Hive.box('customRecipesBox');
 
-    final List<dynamic> allRecipes = [...savedBox.values, ...customBox.values];
-    
-    final favorites = allRecipes
+    final List<dynamic> all = [...sBox.values, ...cBox.values];
+    final favs = all
         .where((r) => (r['rating'] ?? 0) >= 4)
         .map((r) => r['title'])
         .take(5)
         .join(", ");
-        
-    final pastNotes = allRecipes
+    final comments = all
         .where((r) => (r['comment'] ?? '').toString().isNotEmpty)
         .map((r) => "- ${r['title']}: ${r['comment']}")
         .take(5)
         .join("\n");
 
-    if (favorites.isEmpty && pastNotes.isEmpty) return "Nessun feedback registrato.";
-    return "PIATTI PREFERITI: $favorites\nNOTE E SUGGERIMENTI PASSATI:\n$pastNotes";
+    if (favs.isEmpty && comments.isEmpty) {
+      return "Nessun feedback registrato ancora.";
+    }
+
+    return "PIATTI PREFERITI: $favs\nNOTE E SUGGERIMENTI PASSATI:\n$comments";
   }
 
-  /// Orchestra la chiamata asincrona all'Engine di Groq.
-  /// Gestisce la pre-validazione, la costruzione del prompt e il parsing dei risultati.
-  Future<void> _requestAISuggestions(String prompt) async {
+  /// Esegue la chiamata all'API di Groq per generare le ricette.
+  Future<void> _callAI(String prompt) async {
     final apiKey = BCSecurity.getGroqKey() ?? "";
     if (apiKey.isEmpty) {
       if (!mounted) return;
-      _showErrorDialog("Motore AI Spento", "Configura la tua API Key nelle impostazioni (⚙️).");
+      _mostraErroreAPI(
+        "Motore AI Spento",
+        "Configura la tua chiave API nelle impostazioni (⚙️) per attivare lo Chef.",
+      );
       return;
     }
 
+    final String feedback = _getFeedbackSummary();
+    final String history = _getHistorySummary();
+
     setState(() {
-      _isLoading = true;
+      _loading = true;
       _recipes = [];
-      _lastPromptUsed = prompt;
+      _lastPrompt = prompt;
     });
 
     try {
-      // Validazione euristica preliminare per sicurezza ed efficienza
       if (BCAIProtocol.isNonFoodItem(prompt)) {
         if (mounted) {
-           _showErrorDialog("Chef Incredulo", "BioChef rileva elementi non commestibili o pericolosi. Inserisci ingredienti reali.");
-           setState(() => _isLoading = false);
+           _mostraErroreAPI("Chef Incredulo", "BioChef rileva elementi non commestibili o pericolosi. Per favore, inserisci ingredienti alimentari reali.");
+           setState(() => _loading = false);
            return;
         }
       }
 
       final fBox = Hive.box('familyBox');
-      final activeMembers = fBox.values.where((m) => m['presente'] ?? true).toList();
-      
-      // Determinazione dinamica del numero di coperti
-      int peopleCount = prompt.contains('FESTA') 
-          ? (int.tryParse(_guestsCountController.text) ?? 10) 
-          : (activeMembers.isEmpty ? 1 : activeMembers.length);
+      final family = fBox.values.where((m) => m['presente'] ?? true).toList();
+      int numPersone = 1;
+      // Ora puntiamo sempre a 3 ricette per Al Volo e Festa/Evento, oltre a Sorprendimi.
+      if (prompt.contains('FESTA')) {
+        numPersone = int.tryParse(_festaPeopleC.text) ?? 10;
+      } else {
+        numPersone = family.isEmpty ? 1 : family.length;
+      }
 
-      // Consolidamento dei vincoli familiari (Espansione semantica)
-      final StringBuffer restrictionBuffer = StringBuffer();
-      for (final member in activeMembers) {
-        restrictionBuffer.writeln(
-          '► ${member['nome']}: ${BCDietary.expandRestrictions(member['nonGraditi'] ?? '')}',
+      final StringBuffer divieti = StringBuffer();
+      for (final m in family) {
+        divieti.writeln(
+          '► ${m['nome']}: ${BCDietary.espandiDivieti(m['nonGraditi'] ?? '')}',
         );
       }
 
-      final response = await http.post(
-          Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
-          headers: {
-            'Authorization': 'Bearer $apiKey',
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            "model": BCSecurity.groqModel,
-            "messages": [
-              {
-                "role": "system",
-                "content": BCAIProtocol.generateSystemPrompt(
-                  numPeople: peopleCount,
-                  divieti: restrictionBuffer.toString(),
-                  feedback: _getUserPreferencesContext(),
-                  history: _getHistoryContext(),
-                ),
-              },
-              {"role": "user", "content": prompt},
-            ],
-            "temperature": 0.2, // Precisione massima
-            "top_p": 0.9,
-          }),
-        ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .post(
+            Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
+            headers: {
+              'Authorization': 'Bearer $apiKey',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              "model": BCSecurity.groqModel,
+              "messages": [
+                {
+                  "role": "system",
+                  "content": BCAIProtocol.generateSystemPrompt(
+                    numPeople: numPersone,
+                    divieti: divieti.toString(),
+                    feedback: feedback,
+                    history: history,
+                  ),
+                },
+                {"role": "user", "content": prompt},
+              ],
+              "temperature": 0.2, // Minima temperatura per massima aderenza ai vincoli
+              "top_p": 0.9,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final String rawContent = data['choices'][0]['message']['content'];
-        _processResponse(rawContent);
+        final String fullText = data['choices'][0]['message']['content'];
+        String cleanText = fullText.replaceAll('**', '').replaceAll('__', '');
+
+        // Normalizzazione Chirurgica: se l'AI usa varianti invece di "[TITOLO]"
+        cleanText = cleanText.replaceAll(RegExp(r'RICETTA \d+:', caseSensitive: false), '[TITOLO]');
+        cleanText = cleanText.replaceAll(RegExp(r'OPZIONE \w+:', caseSensitive: false), '[TITOLO]');
+        
+        bool hasTitle = cleanText.toUpperCase().contains('[TITOLO]');
+        bool hasIngredients = cleanText.toUpperCase().contains('[INGREDIENTI]');
+
+        // Controllo Rifiuto Professionale: solo se mancano i tag fondamentali delle ricette.
+        // Se mancano sia titolo che ingredienti, è probabilmente un messaggio discorsivo (rifiuto o errore).
+        if (!hasTitle && !hasIngredients) {
+           if (mounted) {
+             final cleanRefusal = cleanText.replaceAll('<<RICETTA>>', '').trim();
+             _mostraErroreAPI("Chef Educato", cleanRefusal.isNotEmpty ? cleanRefusal : "Richiesta non valida.");
+             _frigoC.clear();
+             setState(() => _loading = false);
+             return;
+           }
+        }
+        
+        // Parsing blocchi
+        List<String> rawBlocks = cleanText.split('<<RICETTA>>');
+        if (rawBlocks.length < 2 && hasTitle) {
+          rawBlocks = cleanText.split(RegExp(r'\[TITOLO\]', caseSensitive: false));
+        }
+        
+        List<String> splitResult = [];
+        for (var b in rawBlocks) {
+          String recipe = b.trim();
+          if (recipe.isEmpty) continue;
+
+          // Recupero Tag Titolo: se manca ma ci sono gli ingredienti, forziamo il tag per non rompere la UI
+          if (!recipe.toUpperCase().contains('[TITOLO]') && recipe.toUpperCase().contains('[INGREDIENTI]')) {
+             recipe = '[TITOLO] Nuova Proposta Chef\n$recipe';
+          }
+          
+          if (recipe.toUpperCase().contains('[INGREDIENTI]') || recipe.toUpperCase().contains('[PREPARAZIONE]')) {
+            splitResult.add(recipe);
+          }
+        }
+
+        if (mounted) {
+          if (splitResult.isEmpty) {
+            _mostraErroreAPI(
+              "Chef Confuso",
+              "L'AI ha prodotto un formato imprevisto. Prova con ingredienti reali!",
+            );
+          }
+          setState(() => _recipes = splitResult);
+        }
       } else {
-        throw Exception("Errore API Groq: ${response.statusCode}");
+        final err = jsonDecode(response.body);
+        throw Exception(err['error']['message'] ?? "Errore Groq");
       }
     } catch (e) {
-      if (mounted) _showErrorDialog("Chef Occupato", "Impossibile contattare l'intelligenza culinaria.\n\n$e");
+      if (mounted) {
+        _mostraErroreAPI(
+          "Chef Occupato",
+          "Impossibile contattare lo Chef AI. Verifica connessione e chiave API.\n\n$e",
+        );
+        setState(() {
+          _recipes = [];
+        });
+      }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
-  /// Esegue il perxing e la normalizzazione dei blocchi ricetta ricevuti dall'AI.
-  void _processResponse(String rawContent) {
-    String cleanText = rawContent.replaceAll('**', '').replaceAll('__', '');
-    
-    // Normalizzazione dei marker strutturali
-    cleanText = cleanText.replaceAll(RegExp(r'RICETTA \d+:', caseSensitive: false), '[TITOLO]');
-    cleanText = cleanText.replaceAll(RegExp(r'OPZIONE \w+:', caseSensitive: false), '[TITOLO]');
-    
-    if (!cleanText.toUpperCase().contains('[TITOLO]') && !cleanText.toUpperCase().contains('[INGREDIENTI]')) {
-       _showErrorDialog("Chef Educato", "L'AI ha declinato la richiesta per motivi di sicurezza o coerenza.");
-       return;
-    }
-    
-    // Segmentazione dei blocchi ricetta
-    List<String> blocks = cleanText.split('<<RICETTA>>');
-    if (blocks.length < 2 && cleanText.toUpperCase().contains('[TITOLO]')) {
-      blocks = cleanText.split(RegExp(r'\[TITOLO\]', caseSensitive: false));
-    }
-    
-    final List<String> parsedRecipes = [];
-    for (var b in blocks) {
-      String recipe = b.trim();
-      if (recipe.isEmpty) continue;
-
-      if (!recipe.toUpperCase().contains('[TITOLO]') && recipe.toUpperCase().contains('[INGREDIENTI]')) {
-         recipe = '[TITOLO] Proposta dello Chef\n$recipe';
-      }
-      
-      if (recipe.toUpperCase().contains('[INGREDIENTI]') || recipe.toUpperCase().contains('[PREPARAZIONE]')) {
-        parsedRecipes.add(recipe);
-      }
-    }
-
-    if (mounted) {
-      if (parsedRecipes.isEmpty) _showErrorDialog("Chef Confuso", "Formato di output non valido.");
-      setState(() => _recipes = parsedRecipes);
-    }
-  }
-
-  void _showErrorDialog(String title, String msg) {
+  void _mostraErroreAPI(String title, String msg) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: BC.danger, fontSize: Res.fs(context, 20))),
-        content: Text(msg, style: TextStyle(fontSize: Res.fs(context, 14), height: 1.5)),
-        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK'))],
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: BC.danger,
+            fontSize: Res.fs(context, 20),
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Text(
+            msg,
+            style: TextStyle(fontSize: Res.fs(context, 14), height: 1.5),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'OK',
+              style: TextStyle(
+                fontSize: Res.fs(context, 15),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
-
-  // --- RENDERING UI ---
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: _buildAppBar(),
+      appBar: AppBar(
+        // Rimosso il titolo per evitare overlap con il contenuto del body (v0.2.5)
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        actions: [
+          if (_recipes.isNotEmpty)
+            IconButton(
+              icon: Icon(
+                Icons.close_rounded,
+                size: Res.fs(context, 24),
+                color: Colors.white,
+              ),
+              onPressed: () => setState(() {
+                _recipes = [];
+              }),
+            ),
+        ],
+      ),
       body: Container(
         decoration: BoxDecoration(color: BC.getBackground(context)),
-        child: _isLoading
+        child: _loading
             ? _buildPremiumLoading()
-            : (_recipes.isNotEmpty ? _buildResultsList() : _buildLaunchDashboard()),
+            : (_recipes.isNotEmpty
+                  ? _buildPremiumResults()
+                  : _buildPremiumLaunchMenu()),
       ),
-      floatingActionButton: (_recipes.isNotEmpty && !_isLoading) ? _buildActionFab() : null,
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-        onPressed: () => Navigator.pop(context),
-      ),
-      actions: [
-        if (_recipes.isNotEmpty)
-          IconButton(
-            icon: Icon(Icons.close_rounded, size: Res.fs(context, 24), color: Colors.white),
-            onPressed: () => setState(() => _recipes = []),
-          ),
-      ],
+      floatingActionButton: (_recipes.isNotEmpty && !_loading)
+          ? _buildPremiumFab()
+          : null,
     );
   }
 
@@ -259,60 +301,217 @@ class _RecipeHubState extends State<RecipeHub> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [BC.getPrimary(context).withAlpha(40), BC.getBackground(context)],
+          colors: [
+            BC.getPrimary(context).withAlpha(40),
+            BC.getBackground(context),
+          ],
         ),
       ),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(strokeWidth: 6, strokeCap: StrokeCap.round),
-            const SizedBox(height: 32),
-            Text('BIOCHEF AI',
-                style: TextStyle(fontSize: Res.fs(context, 24), fontWeight: FontWeight.w900, color: BC.getPrimary(context), letterSpacing: 2)),
-            const SizedBox(height: 8),
-            Text('Analisi dei database scientifici in corso...',
-                style: TextStyle(color: BC.getTextSub(context), fontWeight: FontWeight.bold, fontSize: Res.fs(context, 13))),
+            CircularProgressIndicator(
+              strokeWidth: Res.pad(context, 6),
+              strokeCap: StrokeCap.round,
+            ),
+            SizedBox(height: Res.pad(context, 32)),
+            Text(
+              'BIOCHEF AI',
+              style: TextStyle(
+                fontSize: Res.fs(context, 24),
+                fontWeight: FontWeight.w900,
+                color: BC.getPrimary(context),
+                letterSpacing: 2,
+              ),
+            ),
+            SizedBox(height: Res.pad(context, 8)),
+            Text(
+              'Sto elaborando i tuoi menù di famiglia...',
+              style: TextStyle(
+                color: BC.getTextSub(context),
+                fontWeight: FontWeight.bold,
+                fontSize: Res.fs(context, 13),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLaunchDashboard() {
-    final bool hasApiKey = (BCSecurity.getGroqKey() ?? "").isNotEmpty;
+  Widget _buildPremiumLaunchMenu() {
+    final bool hasKey = (BCSecurity.getGroqKey() ?? "").isNotEmpty;
 
     return CustomScrollView(
       slivers: [
-        SliverToBoxAdapter(child: _buildDashboardHeader(hasApiKey)),
+        SliverToBoxAdapter(
+          child: Container(
+            constraints: BoxConstraints(minHeight: Res.pad(context, 180)),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [BC.primary, BC.mid],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(Res.pad(context, 32)),
+                bottomRight: Radius.circular(Res.pad(context, 32)),
+              ),
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  Res.pad(context, 24),
+                  Res.pad(context, 12), // Più spazio per pulizia visiva
+                  Res.pad(context, 24),
+                  Res.pad(context, 10),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.restaurant_menu_rounded, color: Colors.white, size: Res.fs(context, 24)),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Benvenuto Chef',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: Res.fs(context, 22),
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: Res.pad(context, 4)),
+                    Text(
+                      'Scegli come vuoi essere ispirato.',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: Res.fs(context, 12),
+                      ),
+                    ),
+                    if (!hasKey) ...[
+                      SizedBox(height: Res.pad(context, 12)),
+                      _buildAlertBanner(),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
         SliverPadding(
           padding: EdgeInsets.all(Res.pad(context, 16)),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              _buildFeatureCard(
-                icon: Icons.auto_awesome_rounded,
-                title: 'Sorprendimi',
-                subtitle: '3 menu casuali bilanciati',
-                colors: [BC.primary, BC.forestMid],
-                onTap: () => _requestAISuggestions('Genera 3 ricette variegate a sorpresa per la mia famiglia'),
+              _buildMainCard(
+                Icons.auto_awesome_rounded,
+                'Sorprendimi',
+                '3 menu casuali bilanciati',
+                [BC.primary, BC.mid],
+                () => _callAI(
+                  'Genera esattamente 3 ricette creative e variegate a sorpresa per la mia famiglia',
+                ),
               ),
-              const SizedBox(height: 12),
-              _buildSelectionCard(
-                id: 1,
-                icon: Icons.bolt_rounded,
-                title: 'Al Volo',
-                subtitle: 'Svuota il frigo in modo smart',
-                colors: [const Color(0xFFF39C12), const Color(0xFFE67E22)],
-                expandedChild: _buildFridgeInput(),
+              SizedBox(height: Res.pad(context, 12)),
+              _buildExpandingPremiumCard(
+                1,
+                Icons.bolt_rounded,
+                'Al Volo',
+                'Usa quello che hai in casa',
+                [const Color(0xFFF39C12), const Color(0xFFE67E22)],
+                Column(
+                  children: [
+                    TextField(
+                      controller: _frigoC,
+                      style: TextStyle(fontSize: Res.fs(context, 13)),
+                      decoration: InputDecoration(
+                        labelText: 'Ingredienti',
+                        prefixIcon: Icon(
+                          Icons.kitchen_rounded,
+                          size: Res.fs(context, 18),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: Res.pad(context, 10)),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFE67E22),
+                          padding: EdgeInsets.symmetric(
+                            vertical: Res.pad(context, 10),
+                          ),
+                        ),
+                        onPressed: () => _callAI(
+                          "Genera ricette VELOCI con: ${_frigoC.text}",
+                        ),
+                        child: Text(
+                          'Genera ora',
+                          style: TextStyle(fontSize: Res.fs(context, 13)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 12),
-              _buildSelectionCard(
-                id: 2,
-                icon: Icons.celebration_rounded,
-                title: 'Festa',
-                subtitle: 'Grandi eventi e menu speciali',
-                colors: [const Color(0xFF8E44AD), const Color(0xFF2980B9)],
-                expandedChild: _buildEventInput(),
+              SizedBox(height: Res.pad(context, 12)),
+              _buildExpandingPremiumCard(
+                2,
+                Icons.celebration_rounded,
+                'Festa',
+                'Grandi eventi e note extra',
+                [const Color(0xFF8E44AD), const Color(0xFF2980B9)],
+                Column(
+                  children: [
+                    TextField(
+                      controller: _festaPeopleC,
+                      keyboardType: TextInputType.number,
+                      style: TextStyle(fontSize: Res.fs(context, 13)),
+                      decoration: InputDecoration(
+                        labelText: 'Persone?',
+                        prefixIcon: Icon(
+                          Icons.people,
+                          size: Res.fs(context, 18),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: Res.pad(context, 10)),
+                    TextField(
+                      controller: _festaNoteC,
+                      style: TextStyle(fontSize: Res.fs(context, 14)),
+                      decoration: InputDecoration(
+                        labelText: 'Note extra (es. cena di gala)',
+                        prefixIcon: Icon(
+                          Icons.note_alt,
+                          size: Res.fs(context, 20),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: Res.pad(context, 10)),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2980B9),
+                          padding: EdgeInsets.symmetric(
+                            vertical: Res.pad(context, 10),
+                          ),
+                        ),
+                        onPressed: () => _callAI(
+                          "Menu FESTA per ${_festaPeopleC.text} persone. Note: ${_festaNoteC.text}",
+                        ),
+                        child: Text(
+                          'Pianifica Evento',
+                          style: TextStyle(fontSize: Res.fs(context, 13)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ]),
           ),
@@ -321,144 +520,188 @@ class _RecipeHubState extends State<RecipeHub> {
     );
   }
 
-  Widget _buildDashboardHeader(bool hasKey) {
+  Widget _buildAlertBanner() {
     return Container(
-      constraints: BoxConstraints(minHeight: Res.pad(context, 180)),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(colors: [BC.primary, BC.forestMid], begin: Alignment.topLeft),
-        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(32), bottomRight: Radius.circular(32)),
+      padding: EdgeInsets.symmetric(
+        horizontal: Res.pad(context, 12),
+        vertical: Res.pad(context, 8),
       ),
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(Res.pad(context, 24)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(children: [
-                const Icon(Icons.restaurant_menu_rounded, color: Colors.white, size: 24),
-                const SizedBox(width: 12),
-                Text('Benvenuto Chef', style: TextStyle(color: Colors.white, fontSize: Res.fs(context, 22), fontWeight: FontWeight.w900)),
-              ]),
-              const SizedBox(height: 4),
-              const Text('Il tuo tutor culinario d\'élite è pronto.', style: TextStyle(color: Colors.white70, fontSize: 12)),
-              if (!hasKey) ...[const SizedBox(height: 12), _buildAlertBadge()],
-            ],
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(40),
+        borderRadius: BorderRadius.circular(Res.pad(context, 12)),
+        border: Border.all(color: Colors.white24, width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.white,
+            size: Res.fs(context, 18),
           ),
-        ),
+          SizedBox(width: Res.pad(context, 10)),
+          Text(
+            'API NON CONFIGURATA',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: Res.fs(context, 11),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildAlertBadge() {
+  Widget _buildMainCard(
+    IconData icon,
+    String title,
+    String sub,
+    List<Color> gradient,
+    VoidCallback onTap,
+  ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(color: Colors.white.withAlpha(40), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white24)),
-      child: const Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.warning_amber_rounded, color: Colors.white, size: 18),
-        SizedBox(width: 10),
-        Text('API NON CONFIGURATA', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
-      ]),
-    );
-  }
-
-  Widget _buildFeatureCard({required IconData icon, required String title, required String subtitle, required List<Color> colors, required VoidCallback onTap}) {
-    return Container(
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), gradient: LinearGradient(colors: colors)),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(Res.pad(context, 20)),
+        gradient: LinearGradient(colors: gradient),
+        boxShadow: [
+          BoxShadow(
+            color: gradient[0].withAlpha(60),
+            blurRadius: Res.pad(context, 8),
+            offset: Offset(0, Res.pad(context, 4)),
+          ),
+        ],
+      ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(Res.pad(context, 20)),
           child: Padding(
             padding: EdgeInsets.all(Res.pad(context, 16)),
-            child: Row(children: [
-              Icon(icon, color: Colors.white, size: 32),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text(subtitle, style: const TextStyle(color: Colors.white70, fontSize: 12)),
-                ]),
-              ),
-              const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
-            ]),
+            child: Row(
+              children: [
+                Icon(icon, color: Colors.white, size: Res.fs(context, 32)),
+                SizedBox(width: Res.pad(context, 16)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: Res.fs(context, 18),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        sub,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: Res.fs(context, 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Colors.white,
+                  size: Res.fs(context, 16),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSelectionCard({required int id, required IconData icon, required String title, required String subtitle, required List<Color> colors, required Widget expandedChild}) {
-    final bool isOpened = _activeSelectionIndex == id;
+  Widget _buildExpandingPremiumCard(
+    int index,
+    IconData icon,
+    String title,
+    String sub,
+    List<Color> colors,
+    Widget child,
+  ) {
+    final bool isExp = _expandedIndex == index;
     return Container(
-      decoration: BoxDecoration(color: BC.getCard(context), borderRadius: BorderRadius.circular(20)),
-      child: Column(children: [
-        ListTile(
-          leading: Icon(icon, color: colors[0], size: 28),
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          subtitle: Text(subtitle, style: const TextStyle(fontSize: 11)),
-          trailing: Icon(isOpened ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: colors[0]),
-          onTap: () => setState(() => _activeSelectionIndex = isOpened ? null : id),
-        ),
-        if (isOpened) Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), child: expandedChild),
-      ]),
+      decoration: BoxDecoration(
+        color: BC.getCard(context),
+        borderRadius: BorderRadius.circular(Res.pad(context, 20)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(20),
+            blurRadius: Res.pad(context, 8),
+            offset: Offset(0, Res.pad(context, 3)),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: Res.pad(context, 16),
+              vertical: Res.pad(context, 4),
+            ),
+            leading: Icon(
+              icon,
+              color: colors[0],
+              size: Res.fs(context, 28),
+            ),
+            title: Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: Res.fs(context, 16),
+              ),
+            ),
+            subtitle: Text(
+              sub,
+              style: TextStyle(fontSize: Res.fs(context, 11)),
+            ),
+            trailing: Icon(
+              isExp ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+              color: colors[0],
+              size: Res.fs(context, 20),
+            ),
+            onTap: () => setState(() => _expandedIndex = isExp ? null : index),
+          ),
+          if (isExp)
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                Res.pad(context, 16),
+                0,
+                Res.pad(context, 16),
+                Res.pad(context, 16),
+              ),
+              child: child,
+            ),
+        ],
+      ),
     );
   }
 
-  Widget _buildFridgeInput() {
-    return Column(children: [
-      TextField(
-        controller: _fridgeController,
-        decoration: const InputDecoration(labelText: 'Ingredienti disponibili', prefixIcon: Icon(Icons.kitchen_rounded, size: 18)),
-      ),
-      const SizedBox(height: 10),
-      SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE67E22)),
-          onPressed: () => _requestAISuggestions("Genera ricette VELOCI con: ${_fridgeController.text}"),
-          child: const Text('Genera ora'),
-        ),
-      ),
-    ]);
-  }
-
-  Widget _buildEventInput() {
-    return Column(children: [
-      TextField(
-        controller: _guestsCountController,
-        keyboardType: TextInputType.number,
-        decoration: const InputDecoration(labelText: 'Numero di coperti', prefixIcon: Icon(Icons.people, size: 18)),
-      ),
-      const SizedBox(height: 10),
-      TextField(
-        controller: _eventNotesController,
-        decoration: const InputDecoration(labelText: 'Note extra (es. Cena Romantica)', prefixIcon: Icon(Icons.note_alt, size: 18)),
-      ),
-      const SizedBox(height: 10),
-      SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2980B9)),
-          onPressed: () => _requestAISuggestions("Menu FESTA per ${_guestsCountController.text} persone. Note: ${_eventNotesController.text}"),
-          child: const Text('Pianifica Evento'),
-        ),
-      ),
-    ]);
-  }
-
-  Widget _buildResultsList() {
+  Widget _buildPremiumResults() {
     return ListView.builder(
-      padding: EdgeInsets.fromLTRB(Res.pad(context, 16), Res.pad(context, 100), Res.pad(context, 16), Res.pad(context, 100)),
+      padding: EdgeInsets.fromLTRB(
+        Res.pad(context, 16),
+        Res.pad(context, 120),
+        Res.pad(context, 16),
+        Res.pad(context, 100),
+      ),
       itemCount: _recipes.length,
       itemBuilder: (ctx, i) => AIChefCard(recipeRaw: _recipes[i]),
     );
   }
 
-  Widget _buildActionFab() {
+  Widget _buildPremiumFab() {
     return FloatingActionButton.extended(
       backgroundColor: BC.getPrimary(context),
-      onPressed: () => _requestAISuggestions(_lastPromptUsed),
+      onPressed: () => _callAI(_lastPrompt),
       icon: const Icon(Icons.refresh_rounded, color: Colors.white),
       label: const Text('Altre Idee', style: TextStyle(color: Colors.white)),
     );

@@ -39,12 +39,12 @@ class BCUpdateManager {
       final box = Hive.box('adminBox');
       final String? lastIgnored = box.get('lastIgnoredVersion');
 
-      debugPrint("UpdateManager: Current: $currentVersion | Latest: $latestVersion | Ignored: $lastIgnored");
+      debugPrint("UpdateManager check: Local=$currentVersion | Remote=$latestVersion | Ignored=$lastIgnored");
 
       if (_isNewer(currentVersion, latestVersion)) {
         // Logica di scarto: se il controllo è automatico e abbiamo già ignorato questa versione, usciamo.
         if (silent && latestVersion == lastIgnored) {
-          debugPrint("UpdateManager: Versione $latestVersion già ignorata dall'utente. Salto popup.");
+          debugPrint("UpdateManager: Versione $latestVersion già ignorata. Salto popup.");
           return;
         }
 
@@ -55,23 +55,26 @@ class BCUpdateManager {
         _mostraDialogGiaAggiornato(context, currentVersion);
       }
     } catch (e) {
+      debugPrint("UpdateManager Exception: $e");
       if (!silent && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Errore update: $e'), backgroundColor: Colors.redAccent),
+          SnackBar(content: Text('Errore controllo aggiornamenti: $e'), backgroundColor: Colors.redAccent),
         );
       }
     }
   }
 
   /// Restituisce informazioni sulla versione corrente, l'ultima su GitHub e l'URL APK.
-  /// Ritorna null in caso di errore o se non trova asset APK.
   static Future<Map<String, String>?> getUpdateInfo() async {
     try {
       final PackageInfo packageInfo = await PackageInfo.fromPlatform();
       final String currentVersion = packageInfo.version + (packageInfo.buildNumber.isNotEmpty ? "+${packageInfo.buildNumber}" : ""); 
       
       final response = await http.get(Uri.parse(apiUrl)).timeout(const Duration(seconds: 15));
-      if (response.statusCode != 200) return null;
+      if (response.statusCode != 200) {
+         debugPrint("UpdateManager: GitHub API returned ${response.statusCode}");
+         return null;
+      }
 
       final Map<String, dynamic> data = jsonDecode(response.body);
       final String latestTagName = data['tag_name'] ?? ""; 
@@ -86,7 +89,10 @@ class BCUpdateManager {
         orElse: () => null,
       );
 
-      if (apkAsset == null) return null;
+      if (apkAsset == null) {
+        debugPrint("UpdateManager: No APK asset found in latest release.");
+        return null;
+      }
 
       return {
         'current': currentVersion,
@@ -94,28 +100,29 @@ class BCUpdateManager {
         'url': apkAsset['browser_download_url'],
       };
     } catch (e) {
-      debugPrint("UpdateManager Error: $e");
+      debugPrint("UpdateManager getUpdateInfo error: $e");
       return null;
     }
   }
 
-  /// Verifica se è disponibile un aggiornamento (Logica per UI settings).
+  /// Verifica se è disponibile un aggiornamento.
   static Future<bool> isUpdateAvailable() async {
     final info = await getUpdateInfo();
     if (info == null) return false;
     return _isNewer(info['current']!, info['latest']!);
   }
 
-  /// Confronta due versioni stringa (semver). Ritorna true se 'latest' è più recente di 'current'.
+  /// Confronta due versioni (SemVer). Ritorna true se 'latest' è più recente di 'current'.
   static bool _isNewer(String current, String latest) {
-    // Normalizzazione: rimuove 'v' e whitespace, gestisce build number
-    String cleanCur = current.toLowerCase().replaceAll('v', '').trim().split('+')[0];
-    String cleanLat = latest.toLowerCase().replaceAll('v', '').trim().split('+')[0];
+    // Normalizzazione: separa la base dal build number (+)
+    String cleanCurBase = current.split('+')[0].toLowerCase().replaceAll('v', '').trim();
+    String cleanLatBase = latest.split('+')[0].toLowerCase().replaceAll('v', '').trim();
 
-    List<int> curParts = cleanCur.split('.').map((e) => int.tryParse(e) ?? 0).toList();
-    List<int> latParts = cleanLat.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    // Estrazione parti numeriche (gestisce 0.4.3-beta as 0.4.3)
+    List<int> curParts = cleanCurBase.split('.').map((e) => int.tryParse(RegExp(r'\d+').stringMatch(e) ?? '0') ?? 0).toList();
+    List<int> latParts = cleanLatBase.split('.').map((e) => int.tryParse(RegExp(r'\d+').stringMatch(e) ?? '0') ?? 0).toList();
     
-    // Confronto gerarchico (Major.Minor.Patch)
+    // 1. Confronto gerarchico per Major.Minor.Patch
     int length = curParts.length > latParts.length ? curParts.length : latParts.length;
     for (int i = 0; i < length; i++) {
         int vCur = i < curParts.length ? curParts[i] : 0;
@@ -124,14 +131,19 @@ class BCUpdateManager {
         if (vLat < vCur) return false;
     }
 
-    // Se la versione base è identica, confrontiamo il build number solo se presente in entrambi o nel latest
+    // 2. Se la base è identica, confrontiamo il Build Number (parte dopo il '+')
     try {
-      if (current.contains('+') && latest.contains('+')) {
-        int bCur = int.tryParse(current.split('+')[1]) ?? 0;
-        int bLat = int.tryParse(latest.split('+')[1]) ?? 0;
+      String? buildCurStr = current.contains('+') ? current.split('+')[1] : null;
+      String? buildLatStr = latest.contains('+') ? latest.split('+')[1] : null;
+
+      if (buildCurStr != null && buildLatStr != null) {
+        int bCur = int.tryParse(RegExp(r'\d+').stringMatch(buildCurStr) ?? '0') ?? 0;
+        int bLat = int.tryParse(RegExp(r'\d+').stringMatch(buildLatStr) ?? '0') ?? 0;
         return bLat > bCur;
-      } else if (!current.contains('+') && latest.contains('+')) {
-        // Esempio: 0.2.7 vs 0.2.7+1
+      } 
+      
+      // Se solo la remota ha un build number, è un aggiornamento (es. 0.4.3 vs 0.4.3+1)
+      if (buildCurStr == null && buildLatStr != null) {
         return true;
       }
     } catch (_) {}

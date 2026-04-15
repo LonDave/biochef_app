@@ -5,35 +5,37 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'app.dart';
 import 'versions.dart';
 
-// ──────────────────────────────────────────────────────────────────────────────
-// BIOCHEF AI - ARCHITETTURA DI BOOTSTRAP (v0.4.4 "Elite Core")
-// ──────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// BIOCHEF AI - ENTRY POINT (v0.4.1+1 "Elite Sync")
+// ─────────────────────────────────────────────
 
-/// Punto di ingresso principale dell'applicativo.
-/// Stabilisce il perimetro di sicurezza tramite [runZonedGuarded] e inizializza
-/// i servizi core di persistenza e versionamento.
 void main() async {
   runZonedGuarded(() async {
-    // Garantisce l'inizializzazione dei binding Flutter prima di ogni operazione asincrona
     WidgetsFlutterBinding.ensureInitialized();
-    
-    // Sincronizzazione metadati versione con il pacchetto nativo
     await BCVersion.init();
 
-    // 1. GESTIONE ERRORI FRAMEWORK (UI/Build)
+    // Gestione errori Flutter (UI/Build)
     FlutterError.onError = (FlutterErrorDetails details) {
       FlutterError.presentError(details);
-      _logError("FLUTTER-UI", details.exception, details.stack);
+      debugPrint("""
+[FLUTTER ERROR]
+Exception: ${details.exception}
+Context: ${details.context}
+Stacktrace: ${details.stack}
+""");
     };
 
-    // 2. GESTIONE ERRORI PIATTAFORMA (Async/Native Dispatcher)
+    // Gestione errori Platform/Async
     PlatformDispatcher.instance.onError = (error, stack) {
-      _logError("PLATFORM-ASYNC", error, stack);
-      return true; // Previene il crash immediato del processo
+      debugPrint("""
+[PLATFORM ERROR]
+Error: $error
+Stacktrace: $stack
+""");
+      return true; // Errore gestito
     };
 
-    // 3. STORAGE PERSISTENTE (NoSQL Hive)
-    // Inizializzazione parallela dei box per ottimizzare i tempi di latenza al boot
+    // Inizializzazione Hive con protezione
     try {
       await Hive.initFlutter();
       await Future.wait([
@@ -44,22 +46,11 @@ void main() async {
         Hive.openBox('historyBox'),
       ]);
     } catch (e) {
-       debugPrint("CRITICAL-STORAGE-ERROR: $e");
+      debugPrint("HIVE-INIT-ERROR: $e");
     }
 
-    // Lancio del widget root dell'applicazione
     runApp(const BioChefApp());
   }, (error, stack) {
-    _logError("GLOBAL-ZONE", error, stack);
+    debugPrint("ZONED-ERROR: $error");
   });
-}
-
-/// Helper di logging centralizzato per la diagnostica in fase di sviluppo e build.
-void _logError(String context, dynamic error, [StackTrace? stack]) {
-  debugPrint("""
-[BIOCHEF ERROR REPORT]
-Ambito: $context
-Dettaglio: $error
-Traccia: ${stack ?? 'N/A'}
-""");
 }

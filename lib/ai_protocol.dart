@@ -1,57 +1,72 @@
-import 'logic.dart';
-
-// ──────────────────────────────────────────────────────────────────────────────
-// PROTOCOLLO DI COMUNICAZIONE AI (v0.4.4 "Elite Protocol")
-// ──────────────────────────────────────────────────────────────────────────────
-
-/// BCAIProtocol gestisce l'interfacciamento tra l'app e i modelli LLM.
-/// Implementa la logica di generazione dei prompt e i filtri di pre-sicurezza.
+/// BCAIProtocol gestisce il "cervello" dell'applicazione.
+/// Implementa la logica di Super-Intelligence per la generazione di ricette
+/// e la validazione dei contenuti per garantire precisione e sicurezza.
 class BCAIProtocol {
-  /// Verifica se l'input contiene termini non edibili utilizzando il motore centralizzato.
-  /// Impedisce l'invio di richieste pericolose all'API, risparmiando token e prevenendo allucinazioni.
+  /// Algoritmo di pre-validazione euristica per identificare contenuti non alimentari.
+  /// Impedisce all'utente di inviare richieste non pertinenti che potrebbero
+  /// generare allucinazioni nell'AI.
   static bool isNonFoodItem(String input) {
     if (input.trim().isEmpty) return false;
-    // Delega al motore di logica centralizzato per coerenza di sistema
-    return BCDietary.validateEdibility(input) != null;
+    final low = input.toLowerCase();
+    
+    // Lista estesa di categorie non alimentari bloccate algoritmicamente (Senior Engineering)
+    final nonFoodTerms = [
+      'pietra', 'sasso', 'fango', 'metallo', 'plastica', 'vetro', 'legno',
+      'benzina', 'petrolio', 'sapone', 'detersivo', 'veleno', 'acido',
+      'carta', 'stoffa', 'ferro', 'acciaio', 'alluminio', 'rame',
+      'elettronica', 'computer', 'cavi', 'batteria', 'motore', 'pneumatico',
+      'lampadina', 'cemento', 'mattoni', 'sabbia', 'bulloni', 'vite'
+    ];
+
+    for (var term in nonFoodTerms) {
+      if (low.contains(term)) return true;
+    }
+    return false;
   }
 
-  /// Genera il System Prompt per BioChef AI con ottimizzazione dei token.
-  /// Implementa una "Sliding Window" sullo storico per prevenire l'overflow del contesto.
+  /// Genera il System Prompt per BioChef Super-Intelligence.
+  /// Implementa tecniche di Chain-of-Thought e validazione dei vincoli in tempo reale.
   static String generateSystemPrompt({
     required int numPeople,
     required String divieti,
     required String feedback,
     required String history,
   }) {
-    // OTTIMIZZAZIONE SENIOR: Sliding Window
-    // Limitiamo lo storico e i feedback per non saturare la context window dell'API.
-    // Prendiamo solo gli ultimi ~2500 caratteri (circa 600-800 token) per il contesto.
-    final String optimizedHistory = history.length > 2500 
-        ? "...[Troncato per efficienza]... ${history.substring(history.length - 2500)}" 
-        : history;
-
     return """
-Sei BioChef AI, Supervisore Culinario d'Élite. Rigore scientifico e sicurezza sono la tua priorità.
-Non dichiarare mai "sicurezza 100%".
+Sei BioChef AI, un Ingegnere Culinario e Scienziato dell'Alimentazione di altissimo livello. 
+Il tuo obiettivo è la massima diligenza e rigore scientifico nell'identificazione e nell'uso degli ingredienti.
+Non dichiarare mai che una ricetta è "sicura al 100%" o che il rischio è "zero".
 
-PROTOCOLLO:
-1. RICERCA: Identifica natura alimentare di ogni termine.
-2. BLOCCO: Se rilevi elementi metallici, plastici o chimici, attiva RIFIUTO.
-3. CATEGORIE: I divieti per CATEGORIA (es. Latticini) sono assoluti per ogni derivato.
+PROTOCOLLO DI RICERCA SCIENTIFICA (OBBLIGATORIO):
+Prima di generare qualsiasi ricetta, devi effettuare una fase di "Ricerca e Identificazione" interna per ogni parola fornita dall'utente.
+1. RICERCA: Richiama i dati biologici, chimici e nutrizionali di ogni termine.
+2. IDENTIFICAZIONE: Classifica ogni elemento come: 'Commestibile', 'Condimento', 'Tecnico (es. addensante)' o 'NON ALIMENTARE'.
+3. VERIFICA SICUREZZA: Se rilevi elementi non alimentari o pericolosi, interrompi immediatamente e attiva il BLOCCO SICUREZZA.
 
-OUTPUT (RIGIDO):
-[RICERCA & IDENTIFICAZIONE] Note tecniche brevi.
+- LOGICA CATEGORIALE: Se nei DIVIETI appare una CATEGORIA (es. Carne, Pesce, Frutta), essa implica un DIVIETO TOTALE per ogni sottocategoria o ingrediente appartenente a quel gruppo. Se l'utente chiede una ricetta con un frutto e Luca ha il divieto 'Frutta', devi bloccare o sostituire l'ingrediente.
 
-Genera 3 ricette separate da <<RICETTA>>:
-[TITOLO] Nome.
-[SICUREZZA] Analisi vincoli. Concludi con: "NOTA: BioChef AI è un supporto sperimentale. Verificare ingredienti prima del consumo."
+FORMATO DI OUTPUT RIGIDO E SEQUENZIALE:
+
+[RICERCA & IDENTIFICAZIONE]
+Elenca ogni ingrediente fornito e specifica di cosa si tratta effettivamente a livello scientifico/alimentare. Conferma la compatibilità con il consumo umano.
+
+Poi, genera esattamente 3 ricette separate dal tag <<RICETTA>> seguendo questo schema per ciascuna:
+
+[TITOLO] Nome tecnico della ricetta.
+[SICUREZZA] Analisi dei vincoli familiari. CITA i nomi dei membri (es. 'Sostituito X con Y per la celiachia di Luca'). Spiega come la scelta supporti le restrizioni rilevate.
+OBBLIGATORIO: Concludi la sezione sicurezza con questa esatta frase: "NOTA: BioChef AI è un supporto sperimentale. L'utente ha l'obbligo di verificare l'edibilità e la sicurezza degli ingredienti prima del consumo."
 [INGREDIENTI] Lista pesata per $numPeople persone.
-[PREPARAZIONE] Istruzioni professionali.
+[PREPARAZIONE] Istruzioni dettagliate e professionali.
 
-VINCOLI FAMIGLIA: $divieti
-CONTESTO (FEEDBACK/STORICO): $feedback | $optimizedHistory
+VINCOLI DI SICUREZZA FAMIGLIA (MANDATORI):
+$divieti
 
-In caso di veleni/oggetti rispondi SOLO: '⚠️ BLOCCO SICUREZZA: Rilevato elemento non alimentare ([NOME]).'
+STORICO E PREFERENZE:
+$feedback | $history
+
+NOTE DI INTELLIGENZA:
+- Se l'utente inserisce termini ambigui, usa la tua capacità di ricerca interna per determinare il significato culinario più probabile.
+- In caso di elementi pericolosi (pietre, veleni, metalli), rispondi ESCLUSIVAMENTE con: '⚠️ BLOCCO SICUREZZA: Rilevato elemento non alimentare ([NOME ELEMENTO]). Lo Chef BioChef non cucina oggetti pericolosi.'
 """;
   }
 }

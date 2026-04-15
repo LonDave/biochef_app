@@ -146,7 +146,7 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [BC.primary, BC.forestMid, const Color(0xFF40916C)],
+            colors: [BC.primary, BC.mid, const Color(0xFF40916C)],
           ),
         ),
         child: SafeArea(

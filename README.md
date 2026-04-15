@@ -65,7 +65,7 @@ flutter run
 
 ---
 
-## 👨‍💻 Developed by [Davide Longo (LonDave)](https://github.com/LonDave)
+## 👨💻 Developed by [Davide Longo (LonDave)](https://github.com/LonDave)
 Copyright © 2026. Licensed under [MIT + Bilingual Safety Rider (Compliance Art. 1229 C.C.)](LICENSE).
 
 ---

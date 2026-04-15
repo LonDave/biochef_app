@@ -50,7 +50,7 @@ class _AIChefCardState extends State<AIChefCard> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [BC.primary, BC.forestMid],
+                    colors: [BC.primary, BC.mid],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -140,7 +140,7 @@ class _AIChefCardState extends State<AIChefCard> {
                             label: const Text('Cucina'),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 12),
-                              backgroundColor: BC.forestMid,
+                              backgroundColor: BC.mid,
                               foregroundColor: Colors.white,
                               elevation: 4,
                             ),
@@ -329,7 +329,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     final pre = getSection(content, '[PREPARAZIONE]', '');
 
     // Analisi compatibilità dinamica basata sui familiari ATTUALMENTE presenti
-    final comp = BCDietary.analyzeCompatibility(content);
+    final comp = BCDietary.analizzaCompatibilita(content);
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),
