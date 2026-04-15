@@ -42,6 +42,26 @@ class VersionsLog extends StatelessWidget {
           _buildHero(),
           const SizedBox(height: 24),
           _buildEraGroup(context, 'Harmony & Stability Series (v0.4.x)', 'Integrazione Minimalista', true, [
+            _buildVersionCard(context, '0.4.4', "Premium Shield & Docs", [
+              _item(
+                context,
+                Icons.shield_rounded,
+                'Legal Safe Rider (V2)',
+                'Integrazione della nuova licenza MIT con BioChef Safe Rider per una conformità legale superiore.',
+              ),
+              _item(
+                context,
+                Icons.security_rounded,
+                'Premium Password UI',
+                'Refactoring estetico dell\'indicatore di robustezza password con colori sincronizzati al design system.',
+              ),
+              _item(
+                context,
+                Icons.description_rounded,
+                'Docs Overhaul',
+                'Nuovo README.md professionale con badge dinamici e documentazione bilingue integrata.',
+              ),
+            ], true),
             _buildVersionCard(context, '0.4.3', "UI Sync & Flow Harmony", [
               _item(
                 context,
@@ -67,7 +87,7 @@ class VersionsLog extends StatelessWidget {
                 'Syntax Hardening',
                 'Risolti glitch sintattici nei widget tree delle versioni precedenti.',
               ),
-            ], true),
+            ], false),
             _buildVersionCard(context, '0.4.2', "The GPT Upgrade", [
               _item(
                 context,
@@ -626,21 +646,21 @@ class VersionsLog extends StatelessWidget {
                   children: [
                     _buildNewsItem(
                       context,
-                      Icons.sync_lock_rounded,
-                      'Auth Flow Harmony',
-                      'Perfezionato il logout e risolto il bug della schermata fantasma post-login.',
+                      Icons.shield_rounded,
+                      'Legal Safe Rider (V2)',
+                      'Nuova licenza MIT + Safety Rider integrata ufficialmente nel progetto.',
                     ),
                     _buildNewsItem(
                       context,
-                      Icons.palette_rounded,
-                      'Sync Iconografico',
-                      'Rimozione totale delle emoji e passaggio completo allo stile Material Rounded.',
+                      Icons.security_rounded,
+                      'Premium Security UI',
+                      'Restyling dell\'indicatore password: rimosse emoji e sincronizzati i colori al brand.',
                     ),
                     _buildNewsItem(
                       context,
-                      Icons.bolt_rounded,
-                      'Motore 0.4.3+',
-                      'Ottimizzazione della stabilità con il nuovo motore GPT-OSS 120B.',
+                      Icons.description_rounded,
+                      'Docs & README',
+                      'Aggiornata la documentazione tecnica e il README con badge dinamici e multilingua.',
                     ),
                   ],
                 ),

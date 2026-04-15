@@ -52,22 +52,22 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
       if (score == 0) {
         _strengthLabel = '';
       } else if (score <= 0.25) {
-        _strengthLabel = 'Debole 🔴';
+        _strengthLabel = 'Debole';
       } else if (score <= 0.5) {
-        _strengthLabel = 'Media 🟠';
+        _strengthLabel = 'Media';
       } else if (score <= 0.75) {
-        _strengthLabel = 'Buona 🟡';
+        _strengthLabel = 'Buona';
       } else {
-        _strengthLabel = 'Ottima 🟢';
+        _strengthLabel = 'Ottima';
       }
     });
   }
 
   Color _getStrengthColor() {
-    if (_strength <= 0.25) return Colors.red;
-    if (_strength <= 0.5) return Colors.orange;
-    if (_strength <= 0.75) return Colors.yellow.shade700;
-    return Colors.green;
+    if (_strength <= 0.25) return BC.danger;
+    if (_strength <= 0.5) return BC.amber;
+    if (_strength <= 0.75) return Colors.yellow.shade800;
+    return BC.accent;
   }
 
   /// Gestisce la logica di login o registrazione.
@@ -242,15 +242,26 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
             ),
           ),
           if (!_isAlreadyRegistered && _passController.text.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            LinearProgressIndicator(
-              value: _strength,
-              backgroundColor: Colors.grey.shade300,
-              color: _getStrengthColor(),
-              minHeight: 6,
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: _strength,
+                backgroundColor: BC.isDark(context) ? Colors.white.withAlpha(20) : Colors.black.withAlpha(20),
+                color: _getStrengthColor(),
+                minHeight: 5,
+              ),
             ),
-            const SizedBox(height: 6),
-            Text(_strengthLabel, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: _getStrengthColor())),
+            const SizedBox(height: 8),
+            Text(
+              _strengthLabel.toUpperCase(),
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.1,
+                color: _getStrengthColor(),
+              ),
+            ),
           ],
           if (_errore.isNotEmpty) ...[
             const SizedBox(height: 12),
