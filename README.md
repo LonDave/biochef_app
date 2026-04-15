@@ -9,11 +9,11 @@
 
 ---
 
-## 🌎 [English](#english) | [Italiano](#italiano) | [Security](#the-biochef-protocol-technical) | [Legal](#legal-shield) | [Install](#setup--installation)
+## 🌎 [English](#english) | [Italiano](#italiano) | [Security](#security) | [License](https://github.com/LonDave/biochef_app/blob/main/LICENSE) | [Install](#install)
 
 ---
 
-## English
+## <a name="english"></a>English
 
 ### 🌟 Key Features
 - **Smart AI Interaction**: Powered by Groq LLM with sliding window token optimization.
@@ -27,7 +27,7 @@
 
 ---
 
-## Italiano
+## <a name="italiano"></a>Italiano
 
 ### 🌟 Caratteristiche Principali
 - **Interazione AI Intelligente**: Basata su Groq LLM con ottimizzazione Sliding Window dei token.
@@ -41,7 +41,7 @@
 
 ---
 
-## 🧩 The BioChef Protocol (Technical)
+## <a name="security"></a>🧩 The BioChef Protocol (Technical)
 **Context Management**: BioChef implements a Sliding Window to stay within optimal token limits (2500 chars) for maximum speed.
 **Salted XOR Encryption**: Backups are salted and validated via SHA-256 before any data is processed.
 
@@ -56,7 +56,7 @@
 
 ---
 
-## 🚀 Setup & Installation
+## <a name="install"></a>🚀 Setup & Installation
 ```bash
 git clone https://github.com/LonDave/biochef_app.git
 flutter pub get
