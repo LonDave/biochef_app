@@ -1,4 +1,4 @@
-# BioChef AI — v0.4.5 "Excellence Refined"
+# BioChef AI"
 
 ![BioChef UI Mockup](biochef_ui_mockup_1776260625217.png)
 
