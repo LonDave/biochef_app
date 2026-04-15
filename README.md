@@ -9,7 +9,7 @@
 
 ---
 
-## 🌎 [English](#english) | [Italiano](#italiano) | [Security](#security) | [License](LICENSE) | [Install](#install)
+## 🌎 [English](#english) | [Italiano](#italiano) | [Security](#security) | [License] (LICENSE) | [Install](#install)
 
 ---
 
@@ -66,7 +66,7 @@ flutter run
 ---
 
 ## 👨‍💻 Developed by [Davide Longo (LonDave)](https://github.com/LonDave)
-Copyright © 2026. Licensed under [MIT + AI Safety Clause](LICENSE).
+Copyright © 2026. Licensed under [MIT + Bilingual Safety Rider (Compliance Art. 1229 C.C.)](LICENSE).
 
 ---
 *Precision. Safety. Intelligence.* / *Precisione. Sicurezza. Intelligenza.*
