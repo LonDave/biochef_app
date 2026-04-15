@@ -1,6 +1,4 @@
-# BioChef AI"
-
-![BioChef UI Mockup](biochef_ui_mockup_1776260625217.png)
+# BioChef AI
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-blue.svg?style=flat-square&logo=flutter)](https://flutter.dev)
 [![AI Engine](https://img.shields.io/badge/AI_Engine-Groq_LLM-darkgreen.svg?style=flat-square&logo=openai)](https://groq.com)
