@@ -8,12 +8,12 @@ import 'settings_view.dart';
 import 'logic.dart';
 import 'update_manager.dart';
 
-// ─────────────────────────────────────────────
-// FAMILY & COMMAND HUB
-// ─────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
+// FAMILY & COMMAND HUB (v0.4.4 "Elite Nexus")
+// ──────────────────────────────────────────────────────────────────────────────
 
-/// FamilyScreen è il centro di comando principale per l'utente loggato.
-/// Orchestra la gestione del nucleo familiare, del ricettario e del calendario.
+/// FamilyScreen è il centro nevralgico dell'applicazione per l'utente autenticato.
+/// Orchestra la gestione del nucleo familiare, del ricettario salvato e della cronologia pasti.
 class FamilyScreen extends StatefulWidget {
   const FamilyScreen({super.key});
 
@@ -29,33 +29,40 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkStartupFlow());
+    // Inizializzazione flussi di controllo all'avvio
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initializeStartupChecks());
   }
 
-  void _checkStartupFlow() async {
-    // 1. Controllo versionamento interno (Changelog)
-    await _checkVersion();
+  /// Esegue i controlli di integrità e aggiornamento all'apertura dell'app.
+  void _initializeStartupChecks() async {
+    // 1. Verifica versionamento interno e visualizzazione Changelog se necessario
+    await _handleVersionChangelog();
     
-    // 2. Controllo aggiornamenti online (GitHub) - Triggerato una volta per sessione
+    // 2. Controllo disponibilità nuovi aggiornamenti su repository remoto
     if (mounted) {
       BCUpdateManager.checkUpdate(context, silent: true);
     }
   }
 
-  Future<void> _checkVersion() async {
-    final box = Hive.box('adminBox');
-    final String lastSeen = box.get('lastSeenVersion', defaultValue: '0.0.0');
+  /// Gestisce la logica di visualizzazione del popup delle novità.
+  Future<void> _handleVersionChangelog() async {
+    final adminBox = Hive.box('adminBox');
+    final String lastSeenVersion = adminBox.get('lastSeenVersion', defaultValue: '0.0.0');
     
-    // Se è la prima installazione (0.0.0), salviamo la versione silenziosamente
-    if (lastSeen == '0.0.0') {
-      await box.put('lastSeenVersion', BCVersion.current);
+    // Prima inizializzazione: salto silenzioso del changelog
+    if (lastSeenVersion == '0.0.0') {
+      await adminBox.put('lastSeenVersion', BCVersion.current);
       return;
     }
 
-    if (lastSeen != BCVersion.current) {
+    // Visualizza il changelog solo in caso di disallineamento tra versioni
+    if (lastSeenVersion != BCVersion.current) {
       if (!mounted) return;
-      await showDialog(context: context, builder: (_) => const VersionsLog(showOnlyCurrent: true));
-      await box.put('lastSeenVersion', BCVersion.current);
+      await showDialog(
+        context: context, 
+        builder: (_) => const VersionsLog(showOnlyCurrent: true)
+      );
+      await adminBox.put('lastSeenVersion', BCVersion.current);
     }
   }
 
@@ -67,22 +74,12 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    final String nomAdmin = Hive.box('adminBox').get('adminName', defaultValue: 'Chef');
+    final String adminName = Hive.box('adminBox').get('adminName', defaultValue: 'Chef');
+    
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(Res.pad(context, 130)),
-        child: Container(
-          decoration: BoxDecoration(gradient: LinearGradient(colors: [BC.primary, BC.mid], begin: Alignment.centerLeft)),
-          child: SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildHeader(nomAdmin),
-                _buildTabBar(),
-              ],
-            ),
-          ),
-        ),
+        child: _buildGradientHeader(adminName),
       ),
       body: TabBarView(
         controller: _tabController,
@@ -92,23 +89,47 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
           _buildCalendarTab(),
         ],
       ),
-      floatingActionButton: _buildChefFab(),
+      floatingActionButton: _buildAIChefFab(),
     );
   }
 
-  Widget _buildHeader(String nomAdmin) {
+  // --- COMPONENTI UI - HEADER & NAVIGATION ---
+
+  Widget _buildGradientHeader(String adminName) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [BC.primary, BC.forestMid], 
+          begin: Alignment.centerLeft
+        )
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildTopBar(adminName),
+            _buildCustomTabBar(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopBar(String adminName) {
     return Padding(
       padding: EdgeInsets.fromLTRB(Res.pad(context, 16), Res.pad(context, 8), Res.pad(context, 8), 0),
       child: Row(
         children: [
-          Text('🍃', style: TextStyle(fontSize: Res.fs(context, 28))),
-          SizedBox(width: Res.pad(context, 10)),
+          Icon(Icons.eco_rounded, size: Res.fs(context, 28), color: Colors.white.withAlpha(200)),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('BioChef AI', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: Res.fs(context, 18))),
-                Text('Ciao, $nomAdmin!', style: TextStyle(color: Colors.white70, fontSize: Res.fs(context, 12))),
+                Text('BioChef AI', 
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: Res.fs(context, 18))),
+                Text('Ciao, $adminName!', 
+                  style: TextStyle(color: Colors.white70, fontSize: Res.fs(context, 12))),
               ],
             ),
           ),
@@ -121,12 +142,14 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildTabBar() {
+  Widget _buildCustomTabBar() {
     return TabBar(
       controller: _tabController,
       labelColor: Colors.white,
       indicatorColor: BC.accent,
+      indicatorWeight: 3,
       labelStyle: TextStyle(fontSize: Res.fs(context, 13), fontWeight: FontWeight.bold),
+      unselectedLabelStyle: TextStyle(fontSize: Res.fs(context, 12)),
       tabs: const [
         Tab(icon: Icon(Icons.groups_rounded), text: 'Famiglia'), 
         Tab(icon: Icon(Icons.menu_book_rounded), text: 'Ricettario'), 
@@ -135,117 +158,130 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildChefFab() {
+  Widget _buildAIChefFab() {
     return FloatingActionButton.extended(
       onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RecipeHub())),
       icon: Icon(Icons.restaurant_menu_rounded, size: Res.fs(context, 20)),
-      label: Text('Chef AI', style: TextStyle(fontSize: Res.fs(context, 14))),
+      label: Text('CHEF AI', style: TextStyle(fontSize: Res.fs(context, 14), fontWeight: FontWeight.bold, letterSpacing: 1.1)),
     );
   }
 
-  // --- FAMILY TAB ---
+  // --- TAB FAMILY: GESTIONE NUCLEO FAMILIARE ---
+
   Widget _buildFamilyTab() {
     return ValueListenableBuilder(
       valueListenable: Hive.box('familyBox').listenable(),
-      builder: (context, Box box, _) {
-        if (box.isEmpty) return _buildEmptyFamily();
+      builder: (context, Box familyBox, _) {
+        if (familyBox.isEmpty) return _buildEmptyFamilyState();
+        
         return ListView.builder(
           padding: EdgeInsets.fromLTRB(Res.pad(context, 14), Res.pad(context, 14), Res.pad(context, 14), Res.pad(context, 100)),
-          itemCount: box.length + 1,
-          itemBuilder: (ctx, i) {
-            if (i == 0) return _buildAddMemberButton();
-            return _buildMemberCard(box, i - 1);
+          itemCount: familyBox.length + 1,
+          itemBuilder: (ctx, index) {
+            if (index == 0) return _buildActionAddCard();
+            return _buildMemberListItem(familyBox, index - 1);
           },
         );
       },
     );
   }
 
-  Widget _buildEmptyFamily() {
+  Widget _buildEmptyFamilyState() {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.people_outline_rounded, size: 80, color: BC.getPrimary(context).withAlpha(100)),
-          const Text('Nessun familiare registrato', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
-          ElevatedButton(onPressed: _aggiungiMembro, child: const Text('Aggiungi ora')),
+          const Text('Nessun familiare registrato', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Text('Aggiungi i membri per personalizzare la dieta.', style: TextStyle(color: BC.getTextSub(context))),
+          const SizedBox(height: 24),
+          ElevatedButton(onPressed: _openMemberRegistration, child: const Text('Comincia Ora')),
         ],
       ),
     );
   }
 
-  Widget _buildAddMemberButton() {
+  Widget _buildActionAddCard() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: ElevatedButton.icon(onPressed: _aggiungiMembro, icon: const Icon(Icons.person_add_rounded), label: const Text('Aggiungi Familiare')),
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(elevation: 0),
+        onPressed: _openMemberRegistration, 
+        icon: const Icon(Icons.person_add_rounded), 
+        label: const Text('AGGIUNGI MEMBRO FAMILIARE')
+      ),
     );
   }
 
-  Widget _buildMemberCard(Box box, int i) {
-    final m = box.getAt(i);
-    final bool presente = m['presente'] ?? true;
-    final String intol = m['intolleranze'] ?? '';
-    final String dislikes = m['nonGraditi'] ?? '';
-    final String regime = m['regime'] ?? '';
+  Widget _buildMemberListItem(Box box, int index) {
+    final member = box.getAt(index);
+    final bool isPresent = member['presente'] ?? true;
+    final String intolerance = member['intolleranze'] ?? '';
+    final String dislikes = member['nonGraditi'] ?? '';
+    final String regime = member['regime'] ?? '';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: BC.getPrimary(context).withAlpha(50)),
-      ),
       child: Column(
         children: [
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             leading: CircleAvatar(
               radius: 24,
-              backgroundColor: presente ? BC.primary : Colors.grey.withAlpha(80),
-              child: Text(m['nome'][0].toUpperCase(), 
+              backgroundColor: isPresent ? BC.primary : Colors.grey.withAlpha(80),
+              child: Text(member['nome'][0].toUpperCase(), 
                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
             ),
-            title: Text(m['nome'], style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
-            subtitle: Text(presente ? 'Presente a tavola' : 'Non presente', 
+            title: Text(member['nome'], style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+            subtitle: Text(isPresent ? 'Presente alla prossima cena' : 'Assente', 
                       style: TextStyle(
                         fontSize: 11, 
-                        fontWeight: presente ? FontWeight.bold : FontWeight.normal,
-                        color: presente ? BC.getPrimary(context) : Colors.grey,
+                        fontWeight: isPresent ? FontWeight.bold : FontWeight.normal,
+                        color: isPresent ? BC.getPrimary(context) : Colors.grey,
                       )),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(icon: const Icon(Icons.edit_rounded, size: 20), onPressed: () => _modificaMembro(i)),
-                IconButton(icon: const Icon(Icons.delete_forever_rounded, size: 20, color: Colors.red), 
-                           onPressed: () => _confermaElimina(i)),
-                const SizedBox(width: 4),
-                Switch(
-                  value: presente,
-                  activeThumbColor: BC.accent,
-                  onChanged: (v) {
-                    final updated = Map<dynamic, dynamic>.from(m);
-                    updated['presente'] = v;
-                    box.putAt(i, updated);
-                  },
-                ),
-              ],
-            ),
+            trailing: _buildMemberActions(box, index, member, isPresent),
           ),
-          if (intol.isNotEmpty || dislikes.isNotEmpty || regime.isNotEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  if (regime.isNotEmpty) _buildTag(Icons.eco_rounded, 'Regime: $regime', Colors.green),
-                  if (intol.isNotEmpty) _buildTag(Icons.warning_amber_rounded, 'Allergia: $intol', Colors.red),
-                  if (dislikes.isNotEmpty) _buildTag(Icons.heart_broken_rounded, 'No: $dislikes', Colors.orange),
-                ],
-              ),
-            ),
+          if (intolerance.isNotEmpty || dislikes.isNotEmpty || regime.isNotEmpty)
+            _buildMemberTags(regime, intolerance, dislikes),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMemberActions(Box box, int index, dynamic member, bool isPresent) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(icon: const Icon(Icons.edit_rounded, size: 20), onPressed: () => _openMemberEditor(index)),
+        IconButton(icon: const Icon(Icons.delete_forever_rounded, size: 20, color: Colors.red), 
+                   onPressed: () => _confirmMemberDeletion(index)),
+        const SizedBox(width: 4),
+        Switch(
+          value: isPresent,
+          activeThumbColor: BC.accent,
+          onChanged: (value) {
+            final updated = Map<dynamic, dynamic>.from(member);
+            updated['presente'] = value;
+            box.putAt(index, updated);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMemberTags(String regime, String intol, String dislikes) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          if (regime.isNotEmpty) _buildTag(Icons.eco_rounded, 'Regime: $regime', Colors.green),
+          if (intol.isNotEmpty) _buildTag(Icons.warning_amber_rounded, 'Allergia: $intol', Colors.red),
+          if (dislikes.isNotEmpty) _buildTag(Icons.heart_broken_rounded, 'No: $dislikes', Colors.orange),
         ],
       ),
     );
@@ -265,36 +301,15 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
           Icon(icon, size: 14, color: color),
           const SizedBox(width: 6),
           Flexible(
-            child: Text(
-              label,
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color), maxLines: 1, overflow: TextOverflow.ellipsis),
           ),
         ],
       ),
     );
   }
 
-  void _confermaElimina(int index) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Elimina Familiare'),
-        content: const Text('Sei sicuro di voler rimuovere questo membro dalla famiglia?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annulla')),
-          TextButton(
-            onPressed: () { Hive.box('familyBox').deleteAt(index); Navigator.pop(ctx); },
-            child: const Text('Elimina', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
+  // --- TAB RECIPES: RICETTARIO DIGITALE ---
 
-  // --- RECIPE TAB ---
   Widget _buildRecipeBookTab() {
     return DefaultTabController(
       length: 2,
@@ -302,158 +317,102 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
         children: [
           TabBar(
             labelColor: BC.getPrimary(context),
-            unselectedLabelColor: BC.getTextSub(context),
             indicatorColor: BC.getPrimary(context),
             tabs: const [
-              Tab(icon: Icon(Icons.psychology_rounded, size: 20), text: 'AI Salvati'), 
-              Tab(icon: Icon(Icons.restaurant_menu_rounded, size: 20), text: 'Creati')
+              Tab(icon: Icon(Icons.psychology_rounded, size: 20), text: 'Generazioni AI'), 
+              Tab(icon: Icon(Icons.restaurant_menu_rounded, size: 20), text: 'Ricette Manuali')
             ],
           ),
-          Expanded(child: TabBarView(children: [_buildRecipeList('savedRecipesBox'), _buildRecipeList('customRecipesBox')])),
+          Expanded(child: TabBarView(children: [_buildRecipeListView('savedRecipesBox'), _buildRecipeListView('customRecipesBox')])),
         ],
       ),
     );
   }
 
-  Widget _buildRecipeList(String boxName) {
+  Widget _buildRecipeListView(String boxName) {
     return ValueListenableBuilder(
       valueListenable: Hive.box(boxName).listenable(),
       builder: (context, Box box, _) {
         final bool isCustom = boxName == 'customRecipesBox';
-        if (box.isEmpty && !isCustom) return const Center(child: Text('Ancora nessuna ricetta.'));
+        if (box.isEmpty && !isCustom) return const Center(child: Text('Ancora nessuna ricetta salvata.'));
         
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 100),
           itemCount: box.length + (isCustom ? 1 : 0),
-          itemBuilder: (ctx, i) {
-            if (isCustom && i == 0) return _buildAddRecipeButton();
-            return _buildRecipeTile(box.getAt(isCustom ? i - 1 : i), isCustom ? i - 1 : i, boxName);
+          itemBuilder: (ctx, index) {
+            if (isCustom && index == 0) return _buildManualRecipeAction();
+            final recipeIndex = isCustom ? index - 1 : index;
+            return _buildRecipeTile(box.getAt(recipeIndex), recipeIndex, boxName);
           },
         );
       },
     );
   }
 
-  Widget _buildAddRecipeButton() {
+  Widget _buildManualRecipeAction() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: ElevatedButton.icon(
-        onPressed: _aggiungiRicettaManuale, 
+        onPressed: _openManualRecipeEditor, 
         icon: const Icon(Icons.note_add_rounded), 
-        label: const Text('Crea Nuova Ricetta'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: BC.accent,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
+        label: const Text('SCRIVI NUOVA RICETTA'),
+        style: ElevatedButton.styleFrom(backgroundColor: BC.accent, foregroundColor: Colors.white),
       ),
     );
   }
 
-  Widget _buildRecipeTile(dynamic r, int i, String boxName) {
-    final String content = r['content'] ?? '';
-    final comp = BCDietary.analizzaCompatibilita(content);
-    final bool isDangerous = !comp.isSafe;
-    final bool hasWarning = comp.warnings.isNotEmpty;
+  Widget _buildRecipeTile(dynamic recipe, int index, String boxName) {
+    final String content = recipe['content'] ?? '';
+    final compatibility = BCDietary.analyzeCompatibility(content);
+    final bool isCritical = !compatibility.isSafe;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      elevation: 0,
-      color: BC.getCard(context).withAlpha(150),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Res.pad(context, 16)),
-        side: BorderSide(color: BC.getPrimary(context).withAlpha(30)),
-      ),
       child: ListTile(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Res.pad(context, 16))),
-        tileColor: isDangerous ? Colors.red.withAlpha(15) : null,
-        title: Text(
-          r['title'], 
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: Res.fs(context, 15),
-            color: isDangerous ? Colors.redAccent : null,
-          )
-        ),
+        tileColor: isCritical ? Colors.red.withAlpha(15) : null,
+        title: Text(recipe['title'], 
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: isCritical ? Colors.redAccent : null)),
         leading: Container(
-          padding: EdgeInsets.all(Res.pad(context, 8)),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: isDangerous ? Colors.red.withAlpha(30) : BC.getPrimary(context).withAlpha(20),
+            color: isCritical ? Colors.red.withAlpha(30) : BC.getPrimary(context).withAlpha(20),
             shape: BoxShape.circle,
           ),
           child: Icon(
-            isDangerous 
-              ? Icons.report_problem_rounded 
-              : (hasWarning ? Icons.info_outline_rounded : Icons.restaurant_rounded),
-            color: isDangerous ? Colors.red : (hasWarning ? Colors.orange : BC.getPrimary(context)),
-            size: Res.fs(context, 18),
+            isCritical ? Icons.report_problem_rounded : Icons.restaurant_rounded,
+            color: isCritical ? Colors.red : BC.getPrimary(context),
+            size: 18,
           ),
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (isDangerous) Text('⚠️ NON SICURO', style: TextStyle(color: Colors.red, fontSize: Res.fs(context, 9), fontWeight: FontWeight.w900, letterSpacing: 0.5)),
-            SizedBox(width: Res.pad(context, 8)),
-            Icon(Icons.arrow_forward_ios_rounded, size: Res.fs(context, 12), color: BC.getTextSub(context)),
-          ],
-        ),
-        onTap: () => _mostraDettaglio(r, boxName == 'customRecipesBox', i),
+        trailing: isCritical 
+            ? const Text('RISCHIO', style: TextStyle(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold))
+            : const Icon(Icons.arrow_forward_ios_rounded, size: 12),
+        onTap: () => Navigator.push(context, MaterialPageRoute(
+            builder: (_) => RecipeDetailScreen(recipe: recipe, isCustom: boxName == 'customRecipesBox', index: index))),
       ),
     );
   }
 
-  // --- CALENDAR TAB ---
+  // --- TAB CALENDAR: STORICO ALIMENTARE ---
+
   Widget _buildCalendarTab() {
     return ValueListenableBuilder(
       valueListenable: Hive.box('historyBox').listenable(),
-      builder: (context, Box box, _) {
-        final history = box.values.toList().reversed.toList();
-        if (history.isEmpty) return const Center(child: Text('Calendario vuoto.'));
+      builder: (context, Box historyBox, _) {
+        final historyList = historyBox.values.toList().reversed.toList();
+        if (historyList.isEmpty) return const Center(child: Text('Ancora nessun pasto registrato.'));
         
-        final savedBox = Hive.box('savedRecipesBox');
-        final customBox = Hive.box('customRecipesBox');
-
         return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-          itemCount: history.length,
-          separatorBuilder: (_, _) => const Divider(height: 1, color: Colors.white10),
-          itemBuilder: (ctx, i) {
-            final h = history[i];
-            final String title = h['title'] ?? 'Ricetta';
-            
-            // Cerchiamo la valutazione associata a questa ricetta
-            dynamic recipeMatch;
-            try {
-              recipeMatch = savedBox.values.firstWhere((r) => r['title'] == title, orElse: () => null);
-              recipeMatch ??= customBox.values.firstWhere((r) => r['title'] == title, orElse: () => null);
-            } catch (_) {}
-
-            final int rating = recipeMatch != null ? (recipeMatch['rating'] ?? 0) : 0;
-            final String comm = recipeMatch != null ? (recipeMatch['comment'] ?? '') : '';
-
+          itemCount: historyList.length,
+          separatorBuilder: (_, _) => const Divider(height: 1, color: Colors.black12),
+          itemBuilder: (ctx, index) {
+            final entry = historyList[index];
             return ListTile(
               contentPadding: const EdgeInsets.symmetric(vertical: 8),
-              leading: Icon(h['meal'] == 'Pranzo' ? Icons.wb_sunny : Icons.nightlight_round, color: BC.accent),
-              title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("${h['date']} - ${h['meal']}", style: TextStyle(fontSize: 12, color: BC.getTextSub(context))),
-                  if (rating > 0) Row(
-                    children: [
-                      ...List.generate(5, (idx) => Icon(
-                        idx < rating ? Icons.star_rounded : Icons.star_outline_rounded,
-                        color: idx < rating ? Colors.amber : Colors.grey,
-                        size: 14,
-                      )),
-                      if (comm.isNotEmpty) ...[
-                        const SizedBox(width: 8),
-                        Expanded(child: Text('"$comm"', style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 11), overflow: TextOverflow.ellipsis)),
-                      ]
-                    ],
-                  ),
-                ],
-              ),
+              leading: Icon(entry['meal'] == 'Pranzo' ? Icons.wb_sunny_rounded : Icons.nightlight_round, color: BC.accent),
+              title: Text(entry['title'] ?? 'Ricetta', style: const TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text("${entry['date']} — ${entry['meal']}", style: TextStyle(fontSize: 12, color: BC.getTextSub(context))),
             );
           },
         );
@@ -461,78 +420,76 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
     );
   }
 
-  // --- LOGICA DIALOG & SETTINGS ---
+  // --- LOGICA DI NAVIGAZIONE E DIALOG ---
 
-  void _aggiungiMembro() {
+  void _openMemberRegistration() {
+    showDialog(context: context, builder: (_) => const _MemberDialogContent());
+  }
+
+  void _openMemberEditor(int index) {
+    final member = Hive.box('familyBox').getAt(index);
+    showDialog(context: context, builder: (_) => _MemberDialogContent(member: member, index: index));
+  }
+
+  void _confirmMemberDeletion(int index) {
     showDialog(
       context: context,
-      builder: (_) => const _MemberDialogContent(),
+      builder: (ctx) => AlertDialog(
+        title: const Text('Elimina Familiare'),
+        content: const Text('Rimuovendo questo membro, le sue intolleranze non verranno più considerate dallo Chef.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annulla')),
+          TextButton(
+            onPressed: () { Hive.box('familyBox').deleteAt(index); Navigator.pop(ctx); },
+            child: const Text('Elimina', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
     );
   }
 
-  void _modificaMembro(int index) {
-    final box = Hive.box('familyBox');
-    final m = box.getAt(index);
-    showDialog(
-      context: context,
-      builder: (_) => _MemberDialogContent(member: m, index: index),
-    );
-  }
-
-  void _aggiungiRicettaManuale() {
-    final titC = TextEditingController();
-    final ingC = TextEditingController();
-    final preC = TextEditingController();
+  void _openManualRecipeEditor() {
+    final titleCtrl = TextEditingController();
+    final ingredientsCtrl = TextEditingController();
+    final preparationCtrl = TextEditingController();
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.restaurant_menu_rounded, color: BC.getPrimary(context)),
-            const SizedBox(width: 12),
-            const Text('Nuova Ricetta'),
-          ],
-        ),
+        title: const Text('Scrivi Ricetta'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: titC, decoration: const InputDecoration(labelText: 'Titolo Ricetta')),
-              const SizedBox(height: 10),
-              TextField(controller: ingC, maxLines: 3, decoration: const InputDecoration(labelText: 'Ingredienti')),
-              const SizedBox(height: 10),
-              TextField(controller: preC, maxLines: 5, decoration: const InputDecoration(labelText: 'Preparazione')),
+              TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Titolo')),
+              TextField(controller: ingredientsCtrl, maxLines: 3, decoration: const InputDecoration(labelText: 'Ingredienti')),
+              TextField(controller: preparationCtrl, maxLines: 5, decoration: const InputDecoration(labelText: 'Procedimento')),
             ],
           ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annulla')),
           ElevatedButton(onPressed: () {
-            if (titC.text.isNotEmpty) {
+            if (titleCtrl.text.isNotEmpty) {
               Hive.box('customRecipesBox').add({
-                'title': titC.text,
-                'content': "[TITOLO]\n${titC.text}\n[SICUREZZA]\nRicetta manuale garantita dall'utente.\n[INGREDIENTI]\n${ingC.text}\n[PREPARAZIONE]\n${preC.text}",
+                'title': titleCtrl.text,
+                'content': "[TITOLO]\n${titleCtrl.text}\n[SICUREZZA]\nRicetta manuale: validata dall'utente.\n[INGREDIENTI]\n${ingredientsCtrl.text}\n[PREPARAZIONE]\n${preparationCtrl.text}",
                 'timestamp': DateTime.now().millisecondsSinceEpoch,
                 'rating': 0,
                 'comment': '',
               });
               Navigator.pop(ctx);
             }
-          }, child: const Text('Salva Ricetta')),
+          }, child: const Text('Salva nel Ricettario')),
         ],
       ),
     );
   }
+}
 
-  void _mostraDettaglio(dynamic r, bool isCustom, int index) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => RecipeDetailScreen(recipe: r, isCustom: isCustom, index: index)));
-  }
-} // Chiusura corretta di _FamilyScreenState
-
-// ─────────────────────────────────────────────
-// COMPONENTI DIALOG (Incapsulati per Stabilità v0.4.1)
-// ─────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
+// DIALOG CONTENT: EDITING MEMBRO FAMILIARE (v0.4.1)
+// ──────────────────────────────────────────────────────────────────────────────
 
 class _MemberDialogContent extends StatefulWidget {
   final dynamic member;
@@ -544,224 +501,104 @@ class _MemberDialogContent extends StatefulWidget {
 }
 
 class _MemberDialogContentState extends State<_MemberDialogContent> {
-  late TextEditingController nomeC;
-  late TextEditingController intolC;
-  late TextEditingController odiatiC;
-  late bool haAllergie;
-  late String selectedRegime;
+  late TextEditingController nameController;
+  late TextEditingController intoleranceController;
+  late TextEditingController dislikesController;
+  late bool hasAllergies;
+  late String selectedDietaryRegime;
 
   @override
   void initState() {
     super.initState();
     final m = widget.member;
-    nomeC = TextEditingController(text: m?['nome'] ?? '');
-    intolC = TextEditingController(text: m?['intolleranze'] ?? '');
-    odiatiC = TextEditingController(text: m?['nonGraditi'] ?? '');
-    haAllergie = (m?['intolleranze'] ?? '').toString().isNotEmpty;
-    selectedRegime = m?['regime'] == null || m?['regime'] == '' ? 'Onnivoro' : m!['regime'];
+    nameController = TextEditingController(text: m?['nome'] ?? '');
+    intoleranceController = TextEditingController(text: m?['intolleranze'] ?? '');
+    dislikesController = TextEditingController(text: m?['nonGraditi'] ?? '');
+    hasAllergies = (m?['intolleranze'] ?? '').toString().isNotEmpty;
+    selectedDietaryRegime = (m?['regime'] == null || m?['regime'] == '') ? 'Onnivoro' : m!['regime'];
   }
 
   @override
   void dispose() {
-    nomeC.dispose();
-    intolC.dispose();
-    odiatiC.dispose();
+    nameController.dispose();
+    intoleranceController.dispose();
+    dislikesController.dispose();
     super.dispose();
   }
 
-  bool get haMembroValido => nomeC.text.trim().isNotEmpty;
-
   @override
   Widget build(BuildContext context) {
-    final bool isEdit = widget.member != null;
+    final bool isEditing = widget.member != null;
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: Row(
-        children: [
-          Icon(isEdit ? Icons.edit_note_rounded : Icons.person_add_rounded, color: BC.getPrimary(context)),
-          const SizedBox(width: 12),
-          Text(isEdit ? 'Modifica' : 'Nuovo Familiare'),
-        ],
-      ),
+      title: Text(isEditing ? 'Modifica Profilo' : 'Nuovo Familiare'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionHeader(context, 'DATI ANAGRAFICI'),
-            TextField(
-              controller: nomeC, 
-              onChanged: (_) => setState(() {}),
-              decoration: _inputDeco(context, 'Nome *', 'es. Mario', Icons.badge_rounded),
-            ),
-            const SizedBox(height: 20),
-            _buildRegimeSelector(context, selectedRegime, (v) => setState(() => selectedRegime = v!)),
-            const SizedBox(height: 24),
-            _buildSectionHeader(context, 'SICUREZZA & GUSTI'),
-            TextField(
-              controller: odiatiC, 
-              decoration: _inputDeco(context, 'Cibi Sgraditi', 'es. Cipolla, Pepe (opzionale)', Icons.heart_broken_rounded),
-            ),
+            TextField(controller: nameController, decoration: _getDecoration('Nome *', Icons.badge_rounded)),
             const SizedBox(height: 16),
-            _buildAllergyToggle(context, haAllergie, (v) => setState(() => haAllergie = v)),
-            if (haAllergie) ...[
-              const SizedBox(height: 12),
-              TextField(
-                controller: intolC, 
-                decoration: _inputDeco(context, 'Specifiche Allergie', 'es. Glutine, Lattosio', Icons.warning_amber_rounded),
-              ),
-            ],
+            _buildRegimeDropdown(),
+            const SizedBox(height: 16),
+            TextField(controller: dislikesController, decoration: _getDecoration('Gusti sgraditi', Icons.heart_broken_rounded)),
+            const SizedBox(height: 16),
+            _buildAllergySwitch(),
+            if (hasAllergies) 
+              TextField(controller: intoleranceController, decoration: _getDecoration('Specifiche Allergie', Icons.warning_amber_rounded)),
           ],
         ),
       ),
       actions: [
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annulla')),
         ElevatedButton(
-          onPressed: haMembroValido ? () => _salva() : null, 
-          child: Text(isEdit ? 'Aggiorna' : 'Salva Familiare'),
+          onPressed: nameController.text.isNotEmpty ? _saveMemberData : null, 
+          child: Text(isEditing ? 'Aggiorna' : 'Salva Profilo'),
         ),
       ],
     );
   }
 
-  void _salva() {
-    try {
-      final data = {
-        'nome': nomeC.text.trim(),
-        'intolleranze': haAllergie ? intolC.text.trim() : '',
-        'nonGraditi': odiatiC.text.trim(),
-        'regime': selectedRegime == 'Onnivoro' ? '' : selectedRegime,
-        'presente': widget.member?['presente'] ?? true,
-      };
-      
-      final box = Hive.box('familyBox');
-      if (widget.member != null) {
-        box.putAt(widget.index!, data);
-      } else {
-        box.add(data);
-      }
-      Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Errore nel salvataggio.')));
+  void _saveMemberData() {
+    final data = {
+      'nome': nameController.text.trim(),
+      'intolleranze': hasAllergies ? intoleranceController.text.trim() : '',
+      'nonGraditi': dislikesController.text.trim(),
+      'regime': selectedDietaryRegime == 'Onnivoro' ? '' : selectedDietaryRegime,
+      'presente': widget.member?['presente'] ?? true,
+    };
+    final box = Hive.box('familyBox');
+    if (widget.index != null) {
+      box.putAt(widget.index!, data);
+    } else {
+      box.add(data);
     }
+    Navigator.pop(context);
   }
 
-  InputDecoration _inputDeco(BuildContext context, String label, String hint, IconData icon) {
+  InputDecoration _getDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      hintText: hint,
-      prefixIcon: Icon(icon, color: BC.getPrimary(context).withAlpha(150), size: 20),
+      prefixIcon: Icon(icon, color: BC.getPrimary(context).withAlpha(150)),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w900,
-          color: BC.getPrimary(context).withAlpha(180),
-          letterSpacing: 1.5,
-        ),
-      ),
+  Widget _buildRegimeDropdown() {
+    return DropdownButtonFormField<String>(
+      initialValue: selectedDietaryRegime,
+      decoration: _getDecoration('Regime Alimentare', Icons.restaurant_rounded),
+      items: ['Onnivoro', 'Vegetariano', 'Vegano', 'Chetogenico', 'Paleo']
+          .map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
+      onChanged: (v) => setState(() => selectedDietaryRegime = v!),
     );
   }
 
-  Widget _buildRegimeSelector(BuildContext context, String current, Function(String?) onChanged) {
-    final List<Map<String, String>> options = [
-      {'val': 'Onnivoro', 'icon': '🍽', 'desc': 'Alimentazione completa'},
-      {'val': 'Vegetariano', 'icon': '🥚', 'desc': 'No carne e pesce'},
-      {'val': 'Vegano', 'icon': '🍃', 'desc': 'Esclude derivati animali'},
-      {'val': 'Chetogenico', 'icon': '🥑', 'desc': 'Bassi carboidrati'},
-      {'val': 'Paleo', 'icon': '🦴', 'desc': 'Alimentazione ancestrale'},
-    ];
-
-    final String safeValue = current.isEmpty ? 'Onnivoro' : current;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(context, 'REGIME ALIMENTARE'),
-        DropdownButtonFormField<String>(
-          isExpanded: true,
-          borderRadius: BorderRadius.circular(20),
-          initialValue: safeValue,
-          dropdownColor: BC.getCard(context).withAlpha(250),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: BC.getCard(context).withAlpha(150),
-            prefixIcon: Icon(Icons.restaurant_rounded, color: BC.getPrimary(context), size: 18),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide(color: BC.getPrimary(context).withAlpha(40)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide(color: BC.getPrimary(context), width: 2),
-            ),
-          ),
-          icon: Icon(Icons.keyboard_arrow_down_rounded, color: BC.getPrimary(context)),
-          selectedItemBuilder: (ctx) => options.map((o) => Row(
-            children: [
-              Text(o['icon']!, style: const TextStyle(fontSize: 16)),
-              const SizedBox(width: 10),
-              Text(o['val']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-            ],
-          )).toList(),
-          items: options.map((o) => DropdownMenuItem(
-            value: o['val'],
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(color: BC.getPrimary(context).withAlpha(15), borderRadius: BorderRadius.circular(8)),
-                    child: Text(o['icon']!, style: const TextStyle(fontSize: 16)),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(o['val']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                        Text(o['desc']!, style: TextStyle(fontSize: 9, color: BC.getTextSub(context))),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )).toList(),
-          onChanged: onChanged,
-        ),
-      ],
+  Widget _buildAllergySwitch() {
+    return SwitchListTile(
+      title: const Text('Ha allergie?', style: TextStyle(fontSize: 14)),
+      value: hasAllergies, 
+      onChanged: (v) => setState(() => hasAllergies = v)
     );
   }
-
-  Widget _buildAllergyToggle(BuildContext context, bool current, Function(bool) onChanged) {
-    return Row(
-      children: [
-        Icon(current ? Icons.warning_amber_rounded : Icons.health_and_safety_rounded, 
-             color: current ? Colors.red : BC.getPrimary(context).withAlpha(150), size: 20),
-        const SizedBox(width: 12),
-        Expanded(child: Text('Questo membro ha allergie?', style: TextStyle(fontSize: 13, color: BC.getText(context)))),
-        Switch(
-          value: current, 
-          activeThumbColor: Colors.redAccent,
-          onChanged: onChanged,
-        ),
-      ],
-    );
-  }
-
 }

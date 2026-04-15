@@ -5,58 +5,67 @@ import 'onboarding.dart';
 import 'admin.dart';
 import 'family.dart';
 
-// ─────────────────────────────────────────────
-// APP ROOT & NAVIGATION ORCHESTRATOR
-// ─────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
+// ROOT APP & ORCHESTRAZIONE NAVIGATION (v0.4.4 "Elite Flow")
+// ──────────────────────────────────────────────────────────────────────────────
 
-/// BioChefApp è il cuore dell'applicazione.
-/// Gestisce il tema globale, le transizioni fluide e il routing intelligente
-/// basato sullo stato legale e di autenticazione dell'utente.
+/// BioChefApp è la classe radice dell'applicativo.
+/// Gestisce lo stato globale del tema, le transizioni di routing e la 
+/// persistenza reattiva delle preferenze utente tramite [ValueListenableBuilder].
 class BioChefApp extends StatelessWidget {
   const BioChefApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
+      // Ascolta i cambiamenti nel box delle impostazioni amministrative
       valueListenable: Hive.box('adminBox').listenable(),
-      builder: (context, Box box, _) {
-        // Recupero preferenze tema e stato sessione
-        final bool sessioneAttiva = box.get('isLoggedIn', defaultValue: false);
-        final bool useSystemTheme = box.get('useSystemTheme', defaultValue: true);
-        final bool isDarkModeManual = box.get('isDarkModeManual', defaultValue: false);
+      builder: (context, Box adminBox, _) {
+        
+        // 1. GESTIONE PREFERENZE VISIVE
+        final bool isSessionActive = adminBox.get('isLoggedIn', defaultValue: false);
+        final bool useSystemTheme = adminBox.get('useSystemTheme', defaultValue: true);
+        final bool isDarkModeManual = adminBox.get('isDarkModeManual', defaultValue: false);
 
-        ThemeMode tMode = ThemeMode.system;
+        ThemeMode currentThemeMode = ThemeMode.system;
         if (!useSystemTheme) {
-          tMode = isDarkModeManual ? ThemeMode.dark : ThemeMode.light;
+          currentThemeMode = isDarkModeManual ? ThemeMode.dark : ThemeMode.light;
         }
 
+        // 2. METADATI DI SICUREZZA E CONFORMITÀ
+        final bool isLegalAccepted = adminBox.get('legalAccepted', defaultValue: false);
+
         return MaterialApp(
+          // La Key forzata garantisce il reset dello stack in caso di logout o cambio legale critico
+          key: ValueKey('${isSessionActive}_$isLegalAccepted'),
           title: 'BioChef AI',
           debugShowCheckedModeBanner: false,
-          themeMode: tMode,
+          themeMode: currentThemeMode,
           
-          // Temi centralizzati in BC
+          // Definizioni dei temi delegate al Design System centralizzato
           theme: BC.lightTheme(context),
           darkTheme: BC.darkTheme(context),
 
-          // Routing basato sull'autorizzazione
-          home: _determineHomeScreen(box, sessioneAttiva),
+          // Logica di instradamento basata sullo stato di autorizzazione
+          home: _determineInitialRoute(adminBox, isSessionActive),
         );
       },
     );
   }
 
-  /// Determina la schermata iniziale corretta assicurando la conformità legale.
-  Widget _determineHomeScreen(Box box, bool sessioneAttiva) {
-    // 1. Controllo Onboarding Legale (Priorità Massima)
+  /// Calcola la schermata di destinazione iniziale garantendo il rispetto dei vincoli legali.
+  /// Implementa un controllo sequenziale: Conformità Legale -> Autenticazione.
+  Widget _determineInitialRoute(Box box, bool isSessionActive) {
+    // Audit della conformità legale (Art. 1341-1342 c.c.)
     final bool legalAccepted = box.get('legalAccepted', defaultValue: false);
-    final bool vessatorieAccepted = box.get('vessatorieAccepted', defaultValue: false);
+    final bool vessatoryAccepted = box.get('vessatorieAccepted', defaultValue: false);
     
-    if (!legalAccepted || !vessatorieAccepted) {
+    // Se i termini legali non sono stati completati, forza l'onboarding legale
+    if (!legalAccepted || !vessatoryAccepted) {
       return const OnboardingLegalScreen();
     }
 
-    // 2. Controllo Autenticazione
-    return sessioneAttiva ? const FamilyScreen() : const AdminRegistrationScreen();
+    // Instradamento basato sullo stato della sessione (Login/Registrazione)
+    return isSessionActive ? const FamilyScreen() : const AdminRegistrationScreen();
   }
 }

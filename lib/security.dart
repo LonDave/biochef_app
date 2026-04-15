@@ -12,12 +12,21 @@ class BCSecurity {
     'batteri', 'virus', 'cadaver', 'sangue', 'mangiab', 'commestib',
   };
 
+  /// Modello AI predefinito su Groq (v0.4.2)
+  static const String groqModel = 'openai/gpt-oss-120b';
+
   /// Recupera la chiave API Groq dal box admin.
   static String? getGroqKey() => Hive.box('adminBox').get('groqKey');
 
   /// Salva la chiave API Groq nel box admin.
   static Future<void> saveGroqKey(String value) async =>
       await Hive.box('adminBox').put('groqKey', value);
+
+  /// Verifica se una chiave API Groq è sintatticamente valida (formato gsk_...).
+  static bool isGroqKeyValid(String key) {
+    // Le chiavi Groq iniziano tipicamente con gsk_ seguite da una stringa alfanumerica lunga
+    return RegExp(r'^gsk_[a-zA-Z0-9]{32,}$').hasMatch(key.trim());
+  }
 
   /// Recupera la password amministratore (Chef).
   static String? getPass() => Hive.box('adminBox').get('adminPass');
@@ -29,6 +38,7 @@ class BCSecurity {
   /// Verifica se la password fornita corrisponde a quella salvata.
   static bool validatePass(String input) {
     final saved = getPass() ?? '';
+    if (saved.isEmpty) return true; // Profilo non ancora inizializzato
     return input.trim() == saved.trim();
   }
 }

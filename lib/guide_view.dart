@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'theme.dart';
 import 'versions.dart';
+import 'security.dart';
 
 // ─────────────────────────────────────────────
 // GUIDE & FAQ MODULE
@@ -30,7 +31,7 @@ class GuideScreen extends StatelessWidget {
             _item(context, Icons.check_circle_rounded, 'Presenza a Tavola', 'Usa il toggle nella card famiglia per includere o escludere un membro dalla prossima generazione.'),
           ]),
 
-          _buildStep(context, 2, 'Potenza Chef AI', 'Generazione d\'Élite con Llama 3', [
+          _buildStep(context, 2, 'Potenza Chef AI', 'Generazione d\'Élite con ${BCSecurity.groqModel}', [
             _item(context, Icons.kitchen_rounded, 'Opzione "Al Volo"', 'Perfetta per consumare ciò che hai già in frigorifero. Inserisci gli ingredienti e lascia che lo Chef crei la magia.'),
             _item(context, Icons.celebration_rounded, 'Opzione "Festa/Evento"', 'Configura il numero di ospiti (anche fuori famiglia) e eventuali intolleranze extra per menu di gruppo.'),
             _item(context, Icons.bolt_rounded, 'Velocità di Esecuzione', 'Grazie a Groq, le ricette vengono generate in pochi secondi rispettando tutti i parametri di sicurezza.'),
@@ -55,7 +56,7 @@ class GuideScreen extends StatelessWidget {
           _buildStep(context, 6, 'Il Motore AI (Groq)', 'Come far battere il cuore di BioChef', [
             _item(context, Icons.rocket_launch_rounded, 'Groq Engine', 'BioChef usa la potenza di Groq per scrivere ricette. Registrati su console.groq.com per ottenere la tua API Key gratuita.'),
             _item(context, Icons.settings_rounded, 'Configurazione', 'Inserisci la chiave in Impostazioni > Configura API Groq. Senza di essa, le funzioni AI saranno limitate.'),
-            _item(context, Icons.psychology_alt_rounded, 'Modelli Consigliati', 'Per risultati d\'élite, configura il modello "llama-3.3-70b-specdec" o "llama-3.1-8b-instant".'),
+            _item(context, Icons.psychology_alt_rounded, 'Modelli Consigliati', 'Per risultati d\'élite, il modello "${BCSecurity.groqModel}" è lo standard di riferimento.'),
           ]),
 
           const Divider(height: 40),
@@ -111,7 +112,7 @@ class GuideScreen extends StatelessWidget {
         _faqItem(
           context,
           'Perché serve una API Key di Groq?',
-          'BioChef è un software gratuito. Fornendo la tua chiave, hai il pieno controllo sui costi e sulla privacy delle tue chiamate AI, appoggiandoti a modelli d\'élite come Llama 3.3.'
+          'BioChef è un software gratuito. Fornendo la tua chiave, hai il pieno controllo sui costi e sulla privacy delle tue chiamate AI, appoggiandoti a modelli d\'élite come ${BCSecurity.groqModel}.'
         ),
       ],
     );

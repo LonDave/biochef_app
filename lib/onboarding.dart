@@ -3,9 +3,15 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'theme.dart';
 import 'admin.dart';
 import 'family.dart';
+// import 'security.dart'; // Rimosso perché inutilizzato
 
-/// OnboardingLegalScreen è la prima schermata mostrata all'utente al primo avvio.
-/// Gestisce l'accettazione obbligatoria dei termini legali e dei disclaimer AI.
+// ──────────────────────────────────────────────────────────────────────────────
+// ONBOARDING LEGALE E DI SCOPERTA (v0.4.4 "Compliance Elite")
+// ──────────────────────────────────────────────────────────────────────────────
+
+/// OnboardingLegalScreen è il gatekeeper iniziale dell'applicazione.
+/// Assicura che l'utente prenda visione dei disclaimer sulla sicurezza IA 
+/// e accetti formalmente i termini di servizio prima dell'accesso ai dati.
 class OnboardingLegalScreen extends StatefulWidget {
   const OnboardingLegalScreen({super.key});
 
@@ -14,8 +20,9 @@ class OnboardingLegalScreen extends StatefulWidget {
 }
 
 class _OnboardingLegalScreenState extends State<OnboardingLegalScreen> {
-  bool _accettoTermini = false;
-  bool _accettoSpecificamente = false;
+  // --- STATO DEL CONSENSO ---
+  bool _isTermsAccepted = false;
+  bool _isSpecificConsentGiven = false;
 
   @override
   Widget build(BuildContext context) {
@@ -25,104 +32,64 @@ class _OnboardingLegalScreenState extends State<OnboardingLegalScreen> {
         bottom: false,
         child: Column(
           children: [
-            // Header con icona e titolo
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                Res.pad(context, 24),
-                Res.pad(context, 28),
-                Res.pad(context, 24),
-                Res.pad(context, 12),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(Res.pad(context, 10)),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(30),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Text(
-                      '🍃',
-                      style: TextStyle(fontSize: Res.fs(context, 26)),
-                    ),
-                  ),
-                  SizedBox(width: Res.pad(context, 14)),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Benvenuto su BioChef',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: Res.fs(context, 22),
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        Text(
-                          'Tutor Culinario d\'Élite',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: Res.fs(context, 14),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Contenitore testi legali (Scrollable)
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.only(top: 10),
-                decoration: BoxDecoration(
-                  color: BC.getCard(context),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(36),
-                    topRight: Radius.circular(36),
-                  ),
-                ),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(36),
-                    topRight: Radius.circular(36),
-                  ),
-                  child: ListView(
-                    padding: EdgeInsets.all(Res.pad(context, 24)),
-                    children: [
-                      const LegalText(),
-                      const SizedBox(height: 30),
-                      const Divider(),
-                      const SizedBox(height: 20),
-                      const SizedBox(height: 20),
-                      _buildConsentBox(context),
-                      const SizedBox(height: 40),
-                      
-                      // Bottone di Proseguimento
-                      if (_accettoTermini && _accettoSpecificamente)
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _prosegui,
-                            child: const Text('ACCETTO E INIZIO'),
-                          ),
-                        ),
-                      const SizedBox(height: 30),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            _buildHeader(context),
+            Expanded(child: _buildLegalContainer(context)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildConsentBox(BuildContext context) {
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(Res.pad(context, 24)),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(Res.pad(context, 10)),
+            decoration: BoxDecoration(color: Colors.white.withAlpha(30), borderRadius: BorderRadius.circular(14)),
+            child: Icon(Icons.eco_rounded, size: Res.fs(context, 26), color: Colors.white.withAlpha(200)),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Benvenuto su BioChef', 
+                  style: TextStyle(color: Colors.white, fontSize: Res.fs(context, 22), fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+                const Text('Tutor Culinario d\'Élite', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegalContainer(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: BC.getCard(context),
+        borderRadius: const BorderRadius.only(topLeft: Radius.circular(36), topRight: Radius.circular(36)),
+      ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(topLeft: Radius.circular(36), topRight: Radius.circular(36)),
+        child: ListView(
+          padding: EdgeInsets.all(Res.pad(context, 24)),
+          children: [
+            const LegalContent(),
+            const SizedBox(height: 30),
+            _buildConsentModule(context),
+            const SizedBox(height: 40),
+            if (_isTermsAccepted && _isSpecificConsentGiven) _buildActionButton(),
+            const SizedBox(height: 30),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConsentModule(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -133,42 +100,28 @@ class _OnboardingLegalScreenState extends State<OnboardingLegalScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.fact_check_rounded, color: BC.getPrimary(context), size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'MODULO DI CONSENSO',
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 12,
-                  color: BC.getPrimary(context),
-                  letterSpacing: 1,
-                ),
-              ),
-            ],
-          ),
+          const Row(children: [
+            Icon(Icons.fact_check_rounded, color: BC.primary, size: 20),
+            SizedBox(width: 8),
+            Text('PROTOCOLLO DI CONSENSO', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1)),
+          ]),
           const SizedBox(height: 12),
           CheckboxListTile(
-            value: _accettoTermini,
-            onChanged: (v) => setState(() => _accettoTermini = v ?? false),
+            value: _isTermsAccepted,
+            onChanged: (v) => setState(() => _isTermsAccepted = v ?? false),
             dense: true,
             contentPadding: EdgeInsets.zero,
-            activeColor: BC.primary,
-            title: const Text(
-              'Accetto i Termini di Servizio e l\'Informativa Privacy',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            ),
+            title: const Text('Accetto i Termini di Servizio e la Privacy Policy', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
           ),
           CheckboxListTile(
-            value: _accettoSpecificamente,
-            onChanged: (v) => setState(() => _accettoSpecificamente = v ?? false),
+            value: _isSpecificConsentGiven,
+            onChanged: (v) => setState(() => _isSpecificConsentGiven = v ?? false),
             dense: true,
             contentPadding: EdgeInsets.zero,
             activeColor: Colors.orange,
             title: Text(
-              'APPROVAZIONE SPECIFICA (Artt. 1341-1342 c.c.): Approvo espressamente le clausole limitative di cui ai punti 2 (Responsabilità), 3 (Rischi AI), 4 (Manleva) e 6 (Foro Competente).',
-              style: TextStyle(fontSize: 11, color: Colors.orange.shade900, fontWeight: FontWeight.w600),
+              'APPROVAZIONE SPECIFICA (Artt. 1341-1342 c.c.): Consenso esplicito per limitazione responsabilità (Punto 2) e Manleva (Punto 4).',
+              style: TextStyle(fontSize: 11, color: Colors.orange.shade900, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -176,180 +129,111 @@ class _OnboardingLegalScreenState extends State<OnboardingLegalScreen> {
     );
   }
 
-  /// Finalizza l'onboarding legale e indirizza l'utente alla registrazione o alla home.
-  void _prosegui() async {
+  Widget _buildActionButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: _finalizeOnboarding,
+        child: const Text('ACCETTO E PROSEGUO'),
+      ),
+    );
+  }
+
+  void _finalizeOnboarding() async {
     final box = Hive.box('adminBox');
     await box.put('legalAccepted', true);
     await box.put('vessatorieAccepted', true);
 
-    final String? nomAdmin = box.get('adminName');
-    final String? passAdmin = box.get('adminPass');
-
     if (!mounted) return;
-
-    if (nomAdmin == null || passAdmin == null) {
-      // Primo avvio assoluto -> Registrazione Admin
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const AdminRegistrationScreen()),
-      );
-    } else {
-      // Ritorno all'app -> Home (FamilyScreen)
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const FamilyScreen()),
-      );
-    }
+    
+    // Controllo se esiste già un profilo admin registrato
+    final String? adminName = box.get('adminName');
+    final target = (adminName == null) ? const AdminRegistrationScreen() : const FamilyScreen();
+    
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => target));
   }
 }
 
-/// LegalText contiene il corpo strutturato dei termini di servizio.
-/// Organizza le informazioni legali in titoli e paragrafi leggibili.
-class LegalText extends StatelessWidget {
-  const LegalText({super.key});
+// ──────────────────────────────────────────────────────────────────────────────
+// CORPO TESTUALE LEGALE (Componente Riutilizzabile)
+// ──────────────────────────────────────────────────────────────────────────────
 
-  Widget _h(BuildContext context, String t) => Padding(
-        padding: const EdgeInsets.only(top: 18, bottom: 4),
-        child: Text(
-          t,
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 13,
-            color: BC.getLegalHeaderColor(context),
-            letterSpacing: 0.3,
-          ),
-        ),
-      );
-
-  Widget _p(BuildContext context, String t) => Text(
-        t,
-        style: TextStyle(
-          fontSize: 12.5,
-          color: BC.getLegalTextColor(context),
-          height: 1.55,
-        ),
-      );
+class LegalContent extends StatelessWidget {
+  const LegalContent({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'CONTRATTO DI LICENZA E TERMINI LEGALI',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            fontSize: 14,
-            color: BC.getText(context),
-            letterSpacing: 0.5,
-          ),
-        ),
+        const Text('CONTRATTO DI LICENZA E TERMINI LEGALI', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
         const SizedBox(height: 4),
-        _p(context, 'Revisione Legale: 14 Aprile 2026 - v0.3.5'),
-        _p(context, 'Fornitore del Servizio: Davide Longo (Autore)'),
+        _p('Revisione Legale: 15 Aprile 2026 - v0.4.4', context),
         const Divider(),
-        _h(context, '1. OGGETTO E NATURA DEL SERVIZIO'),
-        _p(context, 'BioChef AI è uno strumento sperimentale di supporto culinario basato su Intelligenza Artificiale. L\'uso è inteso esclusivamente per scopi di intrattenimento e organizzazione domestica.'),
-        
-        _h(context, '2. LIMITAZIONE DI RESPONSABILITÀ (ART. 1229 C.C.)'),
-        _p(context, 'Ai sensi dell\'art. 1229 c.c., l\'Autore è esonerato da ogni responsabilità per danni a persone o cose derivanti dall\'uso dell\'App, salvo il caso di dolo o colpa grave. L\'Autore non garantisce l\'accuratezza delle ricette né l\'assenza di errori tecnici.'),
-        
-        _h(context, '3. AVVERTENZE TECNICHE AI E ALLUCINAZIONI'),
-        _p(context, 'L\'utente prende atto che i modelli di linguaggio (LLM) sono statisticamente suscettibili a "allucinazioni", ovvero alla generazione di informazioni false, illogiche o pericolose. È onere esclusivo dell\'utente verificare ogni istruzione fornita dall\'AI.'),
-        
-        _h(context, '4. CLAUSOLA DI MANLEVA E DIVIETO USO MEDICO'),
-        Container(
-          margin: const EdgeInsets.only(top: 8, bottom: 8),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: BC.isDark(context) ? Colors.red.withAlpha(30) : const Color(0xFFFFEBEE),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.red.withAlpha(50)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _p(context, 'È TASSATIVAMENTE VIETATO l\'uso di BioChef AI per la gestione di allergie gravi, patologie cliniche o decisioni mediche. L\'utente dichiara di manlevare l\'Autore da ogni pretesa derivante da intossicazioni o reazioni avverse.'),
-            ],
-          ),
-        ),
-        
-        _h(context, '5. PROTEZIONE DATI (GDPR)'),
-        _p(context, 'Modello LOCAL-FIRST: Nessun dato personale identificativo viene trasmesso a server esterni. I dati risiedono nella memoria cifrata del dispositivo locale.'),
-        
-        _h(context, '6. GIURISDIZIONE E FORO (ART. 1341 C.C.)'),
-        _p(context, 'Il presente contratto è regolato dalla Legge Italiana. Per ogni controversia è stabilita la competenza esclusiva ed inderogabile del Foro di residenza del Sviluppatore/Autore.'),
+        _h('1. NATURA DEL SERVIZIO', context),
+        _p('BioChef AI è un sistema esperto di supporto culinario. Tutte le istruzioni sono fornite a scopo informativo e non sostituiscono il giudizio umano.', context),
+        _h('2. ESCLUSIONE RESPONSABILITÀ (ART. 1229 C.C.)', context),
+        _p('Lo sviluppatore declina ogni responsabilità per danni derivanti dall\'uso dell\'App, fatta eccezione per dolo o colpa grave.', context),
+        _h('3. ALLUCINAZIONI AI', context),
+        _p('I modelli LLM possono generare errori fattuali ("allucinazioni"). È obbligo dell\'utente verificare ogni ingrediente suggerito.', context),
+        _h('4. MANLEVA E SICUREZZA', context),
+        _buildWarningBox('È VIETATO l\'uso medico per allergie gravi. L\'utente manleva lo sviluppatore da ogni reazione avversa.', context),
+        _h('5. PRIVACY LOCAL-FIRST', context),
+        _p('I dati personali non lasciano mai il dispositivo. Il modello operativo rispetta nativamente il GDPR.', context),
       ],
     );
   }
+
+  Widget _h(String text, BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 16, bottom: 4),
+    child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: BC.primary)),
+  );
+
+  Widget _p(String text, BuildContext context) => Text(text, style: TextStyle(fontSize: 12, color: BC.getTextSub(context), height: 1.5));
+
+  Widget _buildWarningBox(String text, BuildContext context) => Container(
+    margin: const EdgeInsets.symmetric(vertical: 8),
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(color: Colors.red.withAlpha(20), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.red.withAlpha(50))),
+    child: Text(text, style: const TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.bold)),
+  );
 }
 
-/// FeatureDiscoveryScreen mostra una serie di slide informative ai nuovi utenti.
+// ──────────────────────────────────────────────────────────────────────────────
+// FEATURE DISCOVERY: GUIDA ALL'USO (v0.3.5)
+// ──────────────────────────────────────────────────────────────────────────────
+
 class FeatureDiscoveryScreen extends StatefulWidget {
   const FeatureDiscoveryScreen({super.key});
-
   @override
   State<FeatureDiscoveryScreen> createState() => _FeatureDiscoveryScreenState();
 }
 
 class _FeatureDiscoveryScreenState extends State<FeatureDiscoveryScreen> {
   final PageController _pageController = PageController();
-  int _currentPage = 0;
+  int _currentIndex = 0;
 
-  final List<Map<String, String>> _slides = [
-    {
-      'icon': '🎓',
-      'title': 'Tutor Culinario d\'Élite',
-      'desc': 'Più di un ricettario: BioChef è il tuo mentore digitale. Progettato per imparare dalle tue abitudini e proteggere la tua famiglia.',
-    },
-    {
-      'icon': '🔬',
-      'title': 'Supporto alla Ricerca',
-      'desc': 'Il protocollo v0.3.2 analizza i termini forniti per segnalare potenziali elementi non edibili. Nota: la verifica finale spetta sempre a te.',
-    },
-    {
-      'icon': '🌳',
-      'title': 'Supporto Allergie',
-      'desc': 'Ausilio per le allergie: se vieti una categoria (es. Frutta), lo Chef tenterà di bloccare ogni ingrediente correlato in modo gerarchico.',
-    },
-    {
-      'icon': '🛡️',
-      'title': 'Privacy Local-First',
-      'desc': 'La tua vita privata resta privata. Tutte le preferenze e i profili risiedono solo sul tuo dispositivo. Nessun dato lascia il telefono.',
-    },
-    {
-      'icon': '🧬',
-      'title': 'Precisione Groq',
-      'desc': 'Alimentato dai modelli Llama 3.3 70B di Groq. Inserisci la tua API Key nelle impostazioni per sbloccare la Super-Intelligenza culinaria.',
-    },
-    {
-      'icon': '💎',
-      'title': 'Lifestyle Premium',
-      'desc': 'Configura regimi Vegani, Keto o Paleo con selettori iconografici. BioChef adatta la sua conoscenza al tuo stile di vita unico.',
-    },
-    {
-      'icon': '📦',
-      'title': 'Backup Corazzato',
-      'desc': 'Esporta i tuoi dati in file cifrati. Porta il tuo nucleo familiare e il tuo ricettario su qualsiasi nuovo dispositivo in un istante.',
-    },
+  final List<Map<String, dynamic>> _slides = [
+    {'icon': Icons.school_rounded, 'title': 'Tutor Culinario', 'desc': 'Un mentore digitale che impara dai tuoi gusti e protegge la tua famiglia.'},
+    {'icon': Icons.security_rounded, 'title': 'Privacy Totale', 'desc': 'I tuoi dati risiedono solo sul tuo telefono. Nessun cloud, nessuna profilazione esterna.'},
+    {'icon': Icons.bolt_rounded, 'title': 'Potenza AI', 'desc': 'Alimentato dai motori Groq di ultima generazione per ricette in meno di 2 secondi.'},
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: BC.getBackground(context),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
-                onPageChanged: (v) => setState(() => _currentPage = v),
+                onPageChanged: (i) => setState(() => _currentIndex = i),
                 itemCount: _slides.length,
-                itemBuilder: (context, i) => _buildSlide(i),
+                itemBuilder: (ctx, i) => _buildSlide(i),
               ),
             ),
-            _buildBottomBar(),
+            _buildPaginationBar(),
           ],
         ),
       ),
@@ -362,81 +246,33 @@ class _FeatureDiscoveryScreenState extends State<FeatureDiscoveryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(30),
-            decoration: BoxDecoration(
-              color: BC.getPrimary(context).withAlpha(15),
-              shape: BoxShape.circle,
-            ),
-            child: Text(_slides[i]['icon']!, style: const TextStyle(fontSize: 80)),
-          ),
-          const SizedBox(height: 48),
-          Text(
-            _slides[i]['title']!,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              color: BC.getPrimary(context),
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: 18),
-          Text(
-            _slides[i]['desc']!,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 15,
-              color: BC.getTextSub(context),
-              height: 1.6,
-            ),
-          ),
+          CircleAvatar(radius: 50, backgroundColor: BC.primary.withAlpha(20), child: Icon(_slides[i]['icon'], size: 50, color: BC.primary)),
+          const SizedBox(height: 32),
+          Text(_slides[i]['title'], style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          Text(_slides[i]['desc'], textAlign: TextAlign.center, style: TextStyle(color: BC.getTextSub(context), fontSize: 14)),
         ],
       ),
     );
   }
 
-  Widget _buildBottomBar() {
+  Widget _buildPaginationBar() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(30, 0, 30, 40),
+      padding: const EdgeInsets.all(30),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: List.generate(
-              _slides.length,
-              (i) => Container(
-                margin: const EdgeInsets.only(right: 8),
-                width: _currentPage == i ? 24 : 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: _currentPage == i ? BC.getPrimary(context) : BC.getPrimary(context).withAlpha(50),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ),
-          ),
+          Row(children: List.generate(_slides.length, (i) => Container(margin: const EdgeInsets.only(right: 6), width: _currentIndex == i ? 20 : 8, height: 8, decoration: BoxDecoration(color: BC.primary.withAlpha(_currentIndex == i ? 255 : 50), borderRadius: BorderRadius.circular(4))))),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            ),
             onPressed: () {
-              if (_currentPage < _slides.length - 1) {
-                _pageController.nextPage(duration: const Duration(milliseconds: 400), curve: Curves.easeInOut);
+              if (_currentIndex < _slides.length - 1) {
+                _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
               } else {
-                // Finalizza l'accesso impostando lo stato di login
-                final box = Hive.box('adminBox');
-                box.put('isLoggedIn', true);
-                box.flush();
-
-                Navigator.pushReplacement(
-                  context, 
-                  MaterialPageRoute(builder: (_) => const FamilyScreen())
-                );
+                Hive.box('adminBox').put('isLoggedIn', true);
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const FamilyScreen()));
               }
             },
-            child: Text(_currentPage == _slides.length - 1 ? 'COMINCIAMO' : 'AVANTI'),
+            child: Text(_currentIndex == _slides.length - 1 ? 'INIZIA' : 'AVANTI'),
           ),
         ],
       ),
@@ -444,96 +280,17 @@ class _FeatureDiscoveryScreenState extends State<FeatureDiscoveryScreen> {
   }
 }
 
-/// LegalScreen è una versione consultabile dei termini legali, accessibile dalle impostazioni.
-class LegalScreen extends StatefulWidget {
+// ──────────────────────────────────────────────────────────────────────────────
+// CONSULTAZIONE LEGALE (Accessibile dalle Impostazioni)
+// ──────────────────────────────────────────────────────────────────────────────
+
+class LegalScreen extends StatelessWidget {
   const LegalScreen({super.key});
-  @override
-  State<LegalScreen> createState() => _LegalScreenState();
-}
-
-class _LegalScreenState extends State<LegalScreen> {
-  bool _accettoTermini = false;
-  bool _accettoSpecificamente = false;
-
-  @override
-  void initState() {
-    super.initState();
-    final box = Hive.box('adminBox');
-    _accettoTermini = box.get('legalAccepted', defaultValue: false);
-    _accettoSpecificamente = box.get('vessatorieAccepted', defaultValue: false);
-  }
-
-  void _salvaConsenso() async {
-    final box = Hive.box('adminBox');
-    await box.put('legalAccepted', _accettoTermini);
-    await box.put('vessatorieAccepted', _accettoSpecificamente);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Informativa Legale'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-          onPressed: () {
-            _salvaConsenso();
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            const LegalText(),
-            const SizedBox(height: 30),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: BC.getPrimary(context).withAlpha(10),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: BC.getPrimary(context).withAlpha(30)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.fact_check_rounded, color: BC.getPrimary(context), size: 18),
-                      const SizedBox(width: 8),
-                      Text('RIEPILOGO CONSENSI', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: BC.getPrimary(context))),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  CheckboxListTile(
-                    value: _accettoTermini,
-                    onChanged: _accettoTermini ? null : (v) {
-                      setState(() => _accettoTermini = v ?? false);
-                      _salvaConsenso();
-                    },
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    activeColor: BC.primary,
-                    title: const Text('Termini di Servizio Accettati', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                  ),
-                  CheckboxListTile(
-                    value: _accettoSpecificamente,
-                    onChanged: _accettoSpecificamente ? null : (v) {
-                      setState(() => _accettoSpecificamente = v ?? false);
-                      _salvaConsenso();
-                    },
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    activeColor: Colors.orange,
-                    title: const Text('Clausole Vessatorie Accettate', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+      appBar: AppBar(title: const Text('Note Legali')),
+      body: const SingleChildScrollView(padding: EdgeInsets.all(20), child: LegalContent()),
     );
   }
 }

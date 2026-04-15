@@ -146,7 +146,7 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [BC.primary, BC.mid, const Color(0xFF40916C)],
+            colors: [BC.primary, BC.forestMid, const Color(0xFF40916C)],
           ),
         ),
         child: SafeArea(
@@ -179,7 +179,7 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white.withAlpha(60), width: 2),
           ),
-          child: Text('🍃', style: TextStyle(fontSize: Res.fs(context, 48))),
+          child: Icon(Icons.eco_rounded, size: 48, color: Colors.white.withAlpha(200)),
         ),
         const SizedBox(height: 16),
         Text(
@@ -213,7 +213,7 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            _isAlreadyRegistered ? 'Bentornato Chef 👨‍🍳' : 'Crea il tuo profilo',
+            _isAlreadyRegistered ? 'Bentornato Chef' : 'Crea il tuo profilo',
             style: TextStyle(fontSize: Res.fs(context, 20), fontWeight: FontWeight.w700, color: BC.getText(context)),
           ),
           const SizedBox(height: 4),
@@ -227,7 +227,7 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
             decoration: InputDecoration(
               labelText: 'Nome Chef',
               hintText: 'es. Davide',
-              prefixIcon: Icon(Icons.person_outline_rounded, color: BC.getPrimary(context)),
+              prefixIcon: Icon(Icons.person_rounded, color: BC.getPrimary(context)),
             ),
           ),
           const SizedBox(height: 14),
@@ -238,7 +238,7 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
             decoration: InputDecoration(
               labelText: 'Password',
               hintText: 'Inserisci la tua password',
-              prefixIcon: Icon(Icons.lock_outline_rounded, color: BC.getPrimary(context)),
+              prefixIcon: Icon(Icons.lock_rounded, color: BC.getPrimary(context)),
             ),
           ),
           if (!_isAlreadyRegistered && _passController.text.isNotEmpty) ...[
@@ -272,9 +272,10 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
   Widget _buildFooter() {
     return Column(
       children: [
-        TextButton(
+        TextButton.icon(
           onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LegalScreen())),
-          child: const Text('📜 Termini di Servizio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          icon: const Icon(Icons.gavel_rounded, color: Colors.white, size: 16),
+          label: const Text('Termini di Servizio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
         const Text('© 2026 Davide Longo — Tutti i diritti riservati', style: TextStyle(color: Colors.white70, fontSize: 10)),
       ],

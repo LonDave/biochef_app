@@ -7,6 +7,7 @@ import 'onboarding.dart';
 import 'guide_view.dart';
 import 'backup_logic.dart';
 import 'update_manager.dart';
+import 'admin.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
 // ─────────────────────────────────────────────
@@ -213,18 +214,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
+          String msg = '';
           if (useSystem) {
-            // Da Auto a Dark
             box.put('useSystemTheme', false);
             box.put('isDarkModeManual', true);
+            msg = '🌙 Tema Scuro attivato';
           } else if (isDark) {
-            // Da Dark a Light
             box.put('useSystemTheme', false);
             box.put('isDarkModeManual', false);
+            msg = '☀️ Tema Chiaro attivato';
           } else {
-            // Da Light a Auto
             box.put('useSystemTheme', true);
+            msg = '⚙️ Segui impostazioni sistema';
           }
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(msg),
+              duration: const Duration(seconds: 1),
+              behavior: SnackBarBehavior.floating,
+              width: 220,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          );
         },
         borderRadius: BorderRadius.circular(12),
         child: Container(
@@ -341,12 +353,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (v) => BCSecurity.saveGroqKey(v.trim()),
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.info_outline_rounded, size: 12, color: Colors.grey),
-              const SizedBox(width: 8),
-              Expanded(child: Text('Indispensabile per la Super-Intelligenza Llama 3.3', style: TextStyle(fontSize: 10, color: BC.getTextSub(context)))),
-            ],
+          InkWell(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AIModelInfoScreen())),
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline_rounded, size: 12, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Indispensabile per la Super-Intelligenza ${BCSecurity.groqModel}', 
+                      style: TextStyle(
+                        fontSize: 10, 
+                        color: BC.getTextSub(context),
+                        decoration: TextDecoration.underline,
+                        decorationColor: BC.getTextSub(context).withAlpha(80),
+                      )
+                    )
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -357,9 +386,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Column(
       children: [
         OutlinedButton.icon(
-          onPressed: () {
-            Hive.box('adminBox').put('isLoggedIn', false);
-            Navigator.of(context).popUntil((route) => route.isFirst);
+          onPressed: () async {
+            await Hive.box('adminBox').put('isLoggedIn', false);
+            if (context.mounted) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const AdminRegistrationScreen()),
+                (route) => false,
+              );
+            }
           },
           icon: const Icon(Icons.logout_rounded, size: 18),
           label: const Text('Disconnetti Sessione Chef'),
@@ -391,12 +425,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('ANNULLA')),
           ElevatedButton(
             onPressed: () async {
+              // Wipe totale strutturato per Android
               await Hive.box('adminBox').clear();
               await Hive.box('familyBox').clear();
               await Hive.box('savedRecipesBox').clear();
               await Hive.box('customRecipesBox').clear();
               await Hive.box('historyBox').clear();
-              if (context.mounted) Navigator.of(context).popUntil((route) => route.isFirst);
+              
+              // Reset stati critici
+              await Hive.box('adminBox').put('isLoggedIn', false);
+              await Hive.box('adminBox').put('legalAccepted', false);
+              
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Account e dati eliminati correttamente.'))
+                );
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const OnboardingLegalScreen()),
+                  (route) => false,
+                );
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
             child: const Text('ELIMINA TUTTO'),
@@ -503,6 +551,168 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: const Text('PROSEGUI'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// COMPONENTI ESTERNI DI SUPPORTO
+// ─────────────────────────────────────────────
+
+/// Schermata informativa sul Modello AI e sui limiti di utilizzo.
+class AIModelInfoScreen extends StatelessWidget {
+  const AIModelInfoScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Info Motore AI'),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(context),
+            const SizedBox(height: 32),
+            _buildSection(
+              context, 
+              'Identità del Modello', 
+              'BioChef v0.4.2 utilizza "${BCSecurity.groqModel}", un modello allo stato dell\'arte basato su architettura Mixture-of-Experts (MoE) di OpenAI, ottimizzato per velocità e precisione su infrastruttura Groq.'
+            ),
+            const SizedBox(height: 20),
+            _buildSection(
+              context, 
+              'Capacità e Token', 
+              'Il modello dispone di una context window di 128.000 token, permettendo di analizzare ricette complessi e intere cronologie familiari senza perdita di memoria a breve termine.'
+            ),
+            const SizedBox(height: 24),
+            const Divider(),
+            const SizedBox(height: 24),
+            _buildLimitiSection(context),
+            const SizedBox(height: 40),
+            _buildNoteFinale(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Center(
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: BC.getPrimary(context).withAlpha(20),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.bolt_rounded, size: 48, color: BC.getPrimary(context)),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Prestazione d\'Élite',
+            style: TextStyle(
+              fontSize: 22, 
+              fontWeight: FontWeight.bold,
+              color: BC.getText(context),
+            ),
+          ),
+          Text(
+            'Ottimizzato per BioChef AI',
+            style: TextStyle(fontSize: 14, color: BC.getTextSub(context)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection(BuildContext context, String title, String text) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title.toUpperCase(),
+          style: TextStyle(
+            fontSize: 12, 
+            fontWeight: FontWeight.w900, 
+            color: BC.getPrimary(context),
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          text,
+          style: TextStyle(fontSize: 14, color: BC.getText(context), height: 1.6),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLimitiSection(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.orange.withAlpha(15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.orange.withAlpha(40)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20),
+              const SizedBox(width: 12),
+              Text(
+                'LIMITAZIONI PIANO GRATUITO',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900, 
+                  fontSize: 11, 
+                  color: Colors.orange.shade800,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _limiteItem(context, 'RPM', 'Massimo 3-5 richieste al minuto.'),
+          _limiteItem(context, 'TPM', 'Circa 20.000 token processabili al minuto.'),
+          _limiteItem(context, 'RPD', 'Quota giornaliera limitata a 100.000 token.'),
+          const SizedBox(height: 12),
+          Text(
+            '* Se ricevi errori "Chef Occupato", attendi 30-60 secondi prima di riprovare. È una limitazione della piattaforma gratuita che ospita l\'AI.',
+            style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: Colors.orange.shade900),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _limiteItem(BuildContext context, String code, String desc) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('$code:', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+          const SizedBox(width: 8),
+          Expanded(child: Text(desc, style: const TextStyle(fontSize: 13))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoteFinale(BuildContext context) {
+    return Center(
+      child: Text(
+        'BioChef AI non salva le tue API Key su server esterni.\nLa chiave vive solo nel tuo dispositivo.',
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 11, color: BC.getTextSub(context), height: 1.5),
       ),
     );
   }
