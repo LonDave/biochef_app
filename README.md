@@ -1,5 +1,3 @@
-![BioChef AI Banner](biochef_github_banner_1776260158339.png)
-
 # BioChef AI — v0.4.5 "Excellence Refined"
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-blue.svg?style=flat-square&logo=flutter)](https://flutter.dev)
