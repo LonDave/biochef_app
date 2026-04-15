@@ -9,7 +9,7 @@
 
 ---
 
-## 🌎 [English](#english) | [Italiano](#italiano) | [Security](#security) | [License] (LICENSE) | [Install](#install)
+## 🌎 [English](#english) | [Italiano](#italiano) | [Security](#security) | [License](LICENSE) | [Install](#install)
 
 ---
 
