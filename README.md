@@ -9,7 +9,7 @@
 
 ---
 
-## 🌎 [English](#english) | [Italiano](#italiano) | [Security](#security) | [License](https://github.com/LonDave/biochef_app/blob/main/LICENSE) | [Install](#install)
+## 🌎 [English](#english) | [Italiano](#italiano) | [Security](#security) | [License](LICENSE) | [Install](#install)
 
 ---
 
